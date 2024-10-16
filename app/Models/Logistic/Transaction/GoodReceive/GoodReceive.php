@@ -13,6 +13,7 @@ use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProduct;
 use App\Models\Purchasing\Master\Supplier\Supplier;
 use App\Repositories\Core\Setting\SettingRepository;
+use App\Repositories\Logistic\Transaction\GoodReceive\GoodReceiveProductRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -109,15 +110,16 @@ class GoodReceive extends Model
     {
         $setting = SettingRepository::findBy(whereClause: [['name', SettingLogistic::NAME]]);
         $settings = json_decode($setting->setting, true);
-        $isPriceIntegerValue = $settings[SettingLogistic::PRICE_INTEGER_VALUE];
         $isStockValueIncludeTaxPpn = $settings[SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE];
 
+        // Process : Integer Value
+        $isPriceIntegerValue = $settings[SettingLogistic::PRICE_INTEGER_VALUE];
         if ($isPriceIntegerValue) {
             $this->processStockIntegerRule($isStockValueIncludeTaxPpn);
             return;
         }
 
-        // Standard Process
+        // Process : Standard
         foreach ($this->goodReceiveProducts as $grProduct) {
             if ($grProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
@@ -151,15 +153,29 @@ class GoodReceive extends Model
     {
         $setting = SettingRepository::findBy(whereClause: [['name', SettingLogistic::NAME]]);
         $settings = json_decode($setting->setting, true);
-        $isPriceIntegerValue = $settings[SettingLogistic::PRICE_INTEGER_VALUE];
         $isStockValueIncludeTaxPpn = $settings[SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE];
 
+        // Deleted Good Receive Product
+        $deletedGrProducts = $this->goodReceiveProducts()->onlyTrashed()->get();
+        foreach ($deletedGrProducts as $deletedGrProduct) {
+            if ($deletedGrProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
+                continue;
+            }
+
+            StockHelper::cancelStock(
+                remarksId: $deletedGrProduct->id,
+                remarksType: get_class($deletedGrProduct),
+            );
+        }
+
+        // Process : Integer Value
+        $isPriceIntegerValue = $settings[SettingLogistic::PRICE_INTEGER_VALUE];
         if ($isPriceIntegerValue) {
             $this->updateStockIntegerRule($isStockValueIncludeTaxPpn);
             return;
         }
 
-        // Standard Process
+        // Process : Standard
         foreach ($this->goodReceiveProducts as $grProduct) {
             if ($grProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
@@ -391,11 +407,11 @@ class GoodReceive extends Model
     |
     | o Case 2 Stock Type => 1 Stock Type
     | Solusi : 
-    | 1.   Jika stock '1 Unit' masih ada maka:
+    | 1.   Jika stock '1 Unit' belum berubah maka:
     | 1.1. Hapus stock '1 Unit'
     | 1.2. Perubahan jumlah dan informasi serta remarks_note dari 'N Unit' berubah menjadi '-'
     |
-    | 2. Jika stock '1 Unit' tidak ada maka:
+    | 2. Jika stock '1 Unit' sudah berubah maka:
     | 2.1. Perubahan jumlah dan informasi 'N Unit'
     | 2.2. Perubahan jumlah dan informasi '1 Unit' dengan nilai yang sama dengan 'N Unit'
     */
@@ -491,8 +507,7 @@ class GoodReceive extends Model
             else if (count($histories) == 2 && count($groupProduct) == 1) {
                 $grProduct = $groupProduct[0];
 
-                // Check History (Note: 1 Unit)
-                $stock = StockHelper::getStockByRemarks(
+                $isStockMoved = StockHelper::isStockMovedByRemarks(
                     remarksId: $grProduct['remarksId'],
                     remarksType: $grProduct['remarksType'],
                     remarksNote: '1 Unit',
@@ -500,8 +515,8 @@ class GoodReceive extends Model
                     isGrouped: true,
                 );
 
-                if ($stock == 1) {
-                    StockHelper::deleteStock(
+                if (!$isStockMoved) {
+                    StockHelper::cancelStock(
                         remarksId: $grProduct['remarksId'],
                         remarksType: $grProduct['remarksType'],
                         remarksNote: '1 Unit'

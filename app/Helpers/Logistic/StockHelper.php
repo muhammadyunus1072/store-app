@@ -67,7 +67,7 @@ class StockHelper
         // Check Every Affected Product Details
         $data = [];
         foreach ($histories as $history) {
-            if (!isset($history->product_detail_id)) {
+            if (!isset($data[$history->product_detail_id])) {
                 $data[$history->product_detail_id] = [
                     'product_detail_id' => $history->product_detail_id,
                     'is_stock_moved' => ProductDetailHistoryRepository::getNewerHistories($history)->count() > 0,
@@ -172,6 +172,7 @@ class StockHelper
         $unitDetailId,
         $remarksId = null,
         $remarksType = null,
+        $remarksNote = null,
     ) {
         $product = ProductRepository::find($productId);
 
@@ -197,15 +198,18 @@ class StockHelper
             substractStockMethod: $substractStockMethod
         );
 
+        $createdHistories = [];
+
         foreach ($productDetails as $productDetail) {
             $usedQty = min($productDetail->productStockDetail->quantity, $substractQty) * -1;
 
-            ProductDetailHistoryRepository::create([
+            $createdHistories[] = ProductDetailHistoryRepository::create([
                 'product_detail_id' => $productDetail->id,
                 'transaction_date' => Carbon::now(),
                 'quantity' => $usedQty,
                 'remarks_id' => $remarksId,
                 'remarks_type' => $remarksType,
+                'remarks_note' => $remarksNote,
             ]);
 
             $substractQty += $usedQty;
@@ -218,7 +222,22 @@ class StockHelper
         if ($substractQty) {
             throw new \Exception(ErrorMessageHelper::stockNotAvailable($product->name, $resultConvert['unit_detail_name'], $stock->quantity, $quantity));
         }
+
+        return $createdHistories;
     }
+
+    public static function mutationStock(
+        $productId,
+        $sourceCompanyId,
+        $sourceWarehouseId,
+        $targetCompanyId,
+        $targetWarehouseId,
+        $quantity,
+        $unitDetailId,
+        $remarksId = null,
+        $remarksType = null,
+        $remarksNote = null,
+    ) {}
 
     /*
     | ALTERING TRANSACTION STOCK
@@ -296,37 +315,18 @@ class StockHelper
         // Delete Histories
         $affectedProductDetails = [];
         foreach ($histories as $history) {
-            $affectedProductDetails[] = [
-                'id' => $history->product_detail_id,
-                'product_name' => $history->product->name,
-            ];
-
+            $affectedProductDetails[] = $history->productDetail;
             $history->delete();
         }
 
-        // Check Current Stock
+        // Check Histories & Current Stock
         foreach ($affectedProductDetails as $productDetail) {
-            if (self::getStockDetail($productDetail['id']) < 0) {
+            if ($productDetail->histories()->count() == 0) {
+                $productDetail->delete();
+            } else if (self::getStockDetail($productDetail['id']) < 0) {
                 throw new \Exception(ErrorMessageHelper::stockNotAvailable($productDetail['product_name']));
             }
         }
-    }
-
-    public static function deleteStock(
-        $remarksId,
-        $remarksType,
-        $remarksNote = null,
-    ) {
-        $whereClause =  [
-            ['remarks_id', $remarksId],
-            ['remarks_type', $remarksType],
-        ];
-
-        if ($remarksNote != null) {
-            $whereClause[] = ['remarks_note', $remarksNote];
-        }
-
-        ProductDetailRepository::deleteBy($whereClause);
     }
 
     public static function getStockHistories(
