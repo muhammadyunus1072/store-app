@@ -1,22 +1,5 @@
 <form wire:submit="store">
     <div class='row'>
-        <div class="col-md-12 mb-3 d-none unhide-123">
-            <label>Pembelian</label>
-            <div class="col-md-12 mb-4">
-                <div class='d-flex' wire:ignore>
-                    <select id="select2-purchase_order" class="form-select">
-                        @if ($objId)
-                            <option value="{{ $purchase_order_id }}">{{ $purchase_order_text }}</option>
-                        @endif
-                    </select>
-                    <button type='button' class='btn btn-danger btn-icon'
-                        onclick="$('#select2-purchase_order').val('').trigger('change')">
-                        <i class='ki-solid ki-abstract-11'></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div class="col-md-4 mb-3">
             <label>Supplier</label>
             <div class="col-md-12 mb-4">
@@ -24,19 +7,6 @@
                     <select id="select2-supplier" class="form-select">
                         @if ($supplier_id)
                             <option value="{{ $supplier_id }}">{{ $supplier_text }}</option>
-                        @endif
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-3 d-none unhide-123">
-            <label>Perusahaan</label>
-            <div class="col-md-12 mb-4">
-                <div class="w-100" wire:ignore>
-                    <select id="select2-company" class="form-select">
-                        @if ($company_id)
-                            <option value="{{ $company_id }}">{{ $company_text }}</option>
                         @endif
                     </select>
                 </div>
@@ -357,37 +327,6 @@
 @push('js')
     <script>
         $(() => {
-            // Select2 Purchase Order
-            $('#select2-purchase_order').select2({
-                placeholder: "Pilih Pembelian",
-                ajax: {
-                    url: "{{ route('good_receive.get.purchase_order') }}",
-                    dataType: "json",
-                    type: "GET",
-                    data: function(params) {
-                        return {
-                            search: params.term,
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    "id": item.id,
-                                    "text": item.text,
-                                }
-                            })
-                        };
-                    },
-                },
-                cache: true
-            });
-
-            $('#select2-purchase_order').on('change', function(e) {
-                let data = $('#select2-purchase_order').val();
-                @this.call('setPurchaseOrder', data);
-            });
-
             // Select2 Supplier
             $('#select2-supplier').select2({
                 placeholder: "Pilih Supplier",
@@ -450,41 +389,6 @@
                 let data = $('#select2-warehouse').val();
                 @this.set('warehouse_id', data);
             });
-
-            // Select2 Company
-            $('#select2-company').select2({
-                placeholder: "Pilih Perusahaan",
-                ajax: {
-                    url: "{{ route('good_receive.get.company') }}",
-                    dataType: "json",
-                    type: "GET",
-                    data: function(params) {
-                        return {
-                            access: 1,
-                            search: params.term,
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    "id": item.id,
-                                    "text": item.text,
-                                }
-                            })
-                        };
-                    },
-                },
-                cache: true
-            });
-
-            $('#select2-company').on('change', async function(e) {
-                let data = $('#select2-company').val();
-                @this.set('company_id', data);
-
-                $('#select2-warehouse').val("").trigger('change');
-            });
-
 
             // Select2 Product
             $('#select2-product').select2({

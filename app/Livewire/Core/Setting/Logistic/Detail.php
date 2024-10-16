@@ -12,18 +12,22 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Core\Setting\SettingRepository;
 use App\Repositories\Finance\Master\Tax\TaxRepository;
+use App\Settings\SettingLogistic;
 
 class Detail extends Component
 {
     public $objId;
 
     public $name;
+    public $setting = [];
+
     public $product_code;
     public $product_batch;
     public $product_substract_stock_method;
     public $product_substract_stock_method_choice = StockHelper::SUBSTRACT_STOCK_METHOD_CHOICE;
     public $product_expired_date;
     public $product_attachment;
+    public $approval_key_good_receive;
     public $approval_key_stock_request;
     public $approval_key_stock_expense;
     public $tax_ppn_good_receive_id;
@@ -31,26 +35,27 @@ class Detail extends Component
 
     public function mount()
     {
-        $this->name = Setting::NAME_LOGISTIC;
-        $this->product_substract_stock_method = StockHelper::SUBSTRACT_STOCK_METHOD_FIFO;
+        $this->name = SettingLogistic::NAME;
 
-        if ($this->objId) {
-            $setting = SettingRepository::find(Crypt::decrypt($this->objId));
-            $this->name = $setting->name;
+        // Init
+        foreach (SettingLogistic::ALL as $key => $value) {
+            $this->setting[$key] = $value;
+        }
 
+        // Set Variables
+        $setting = SettingRepository::findBy(whereClause: [['name' => $this->name]]);
+        if ($setting) {
             $settings = json_decode($setting->setting);
-            $this->product_code = $settings->product_code;
-            $this->product_batch = $settings->product_batch;
-            $this->product_substract_stock_method = $settings->product_substract_stock_method;
-            $this->product_expired_date = $settings->product_expired_date;
-            $this->product_attachment = $settings->product_attachment;
-            $this->approval_key_stock_request = (isset($settings->approval_key_stock_request)) ? $settings->approval_key_stock_request : null;
-            $this->approval_key_stock_expense = (isset($settings->approval_key_stock_expense)) ? $settings->approval_key_stock_expense : null;
 
-            if ($settings->tax_ppn_good_receive_id) {
-                $tax = TaxRepository::find($settings->tax_ppn_good_receive_id);
-                $this->tax_ppn_good_receive_id = Crypt::encrypt($tax->id);
-                $this->tax_ppn_good_receive_text = $tax->getText();
+            foreach (SettingLogistic::ALL as $key => $value) {
+                $this->setting[$key] = (isset($settings->{$key})) ? $settings->{$key} : "";
+            }
+
+            // Handle : Tax ID
+            if ($this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]) {
+                $tax = TaxRepository::find($this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]);
+                $this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID] = Crypt::encrypt($tax->id);
+                $this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID . "_text"] = $tax->getText();
             }
         }
     }
@@ -69,30 +74,25 @@ class Detail extends Component
 
     public function store()
     {
-        $validatedData = [
-            'name' => $this->name,
-            'setting' => json_encode(
-                [
-                    'product_code' => $this->product_code,
-                    'product_batch' => $this->product_batch,
-                    'product_substract_stock_method' => $this->product_substract_stock_method,
-                    'product_expired_date' => $this->product_expired_date,
-                    'product_attachment' => $this->product_attachment,
-                    'approval_key_stock_request' => $this->approval_key_stock_request,
-                    'approval_key_stock_expense' => $this->approval_key_stock_expense,
-                    'tax_ppn_good_receive_id' => $this->tax_ppn_good_receive_id ? Crypt::decrypt($this->tax_ppn_good_receive_id) : "",
-                ]
-            ),
-        ];
+        $formattedSetting = $this->setting;
+
+        // Handle : Tax ID
+        if ($formattedSetting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]) {
+            $formattedSetting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID] = Crypt::decrypt($formattedSetting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]);
+        }
 
         try {
             DB::beginTransaction();
             if ($this->objId) {
-                $objId = Crypt::decrypt($this->objId);
-                SettingRepository::update($objId, $validatedData);
+                SettingRepository::update(Crypt::decrypt($this->objId), [
+                    'name' => $this->name,
+                    'setting' => json_encode($this->setting),
+                ]);
             } else {
-                $obj = SettingRepository::create($validatedData);
-                $objId = $obj->id;
+                SettingRepository::create([
+                    'name' => $this->name,
+                    'setting' => json_encode($this->setting),
+                ]);
             }
 
             DB::commit();

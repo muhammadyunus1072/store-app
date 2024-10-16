@@ -16,11 +16,18 @@ class ApprovalConfigUser extends Model
     protected $fillable = [
         'approval_config_id',
         'user_id',
+        'status_approval_id',
+
         'position',
+        'is_trigger_done',
+        'is_can_cancel',
     ];
 
     protected $guarded = ['id'];
 
+    /*
+    | RELATIONSHIP
+    */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

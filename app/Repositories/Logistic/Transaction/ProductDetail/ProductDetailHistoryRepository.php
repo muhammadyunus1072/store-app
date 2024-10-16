@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Logistic\Transaction\ProductDetailHistory;
+namespace App\Repositories\Logistic\Transaction\ProductDetail;
 
-use App\Models\Logistic\Transaction\ProductDetailHistory;
+use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\MasterDataRepository;
 

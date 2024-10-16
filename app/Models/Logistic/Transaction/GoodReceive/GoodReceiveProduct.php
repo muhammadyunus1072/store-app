@@ -62,7 +62,7 @@ class GoodReceiveProduct extends Model
 
     public function isDeletable()
     {
-        return true;
+        return !$this->isStockMoved();
     }
 
     public function isEditable()

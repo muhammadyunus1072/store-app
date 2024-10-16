@@ -37,6 +37,7 @@ return new class extends Migration
             $table->index('transaction_date', 'pdh_transaction_date_idx');
             $table->index('remarks_id', 'pdh_remarks_id_idx');
             $table->index('remarks_type', 'pdh_remarks_type_idx');
+            $table->index('remarks_note', 'pdh_remarks_note_idx');
         }
 
         $table->bigInteger("product_detail_id")->unsigned()->comment('ProductDetail ID');
@@ -45,6 +46,7 @@ return new class extends Migration
         $table->text('note')->nullable()->comment('Catatan');
         $table->bigInteger('remarks_id')->nullable()->unsigned()->comment('FK Polimorfik Penyebab Keluar / Masuk');
         $table->string('remarks_type')->nullable()->comment('Jenis Polimorfik Penyebab Keluar / Masuk');
+        $table->string('remarks_note')->nullable()->comment('Catatan Polimorfik Penyebab Keluar / Masuk');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

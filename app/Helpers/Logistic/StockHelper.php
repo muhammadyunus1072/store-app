@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Logistic;
 
+use App\Helpers\ErrorMessageHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Core\Setting\Setting;
@@ -11,18 +12,18 @@ use App\Repositories\Core\Setting\SettingRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
-use App\Repositories\Logistic\Transaction\ProductStock\ProductStockRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
-use App\Repositories\Logistic\Transaction\ProductStockDetail\ProductStockDetailRepository;
-use App\Repositories\Logistic\Transaction\ProductDetailHistory\ProductDetailHistoryRepository;
-use App\Repositories\Logistic\Transaction\ProductStockWarehouse\ProductStockWarehouseRepository;
-use App\Repositories\Logistic\Transaction\ProductStockCompany\ProductStockCompanyRepository;
-use App\Repositories\Logistic\Transaction\ProductStockCompanyWarehouse\ProductStockCompanyWarehouseRepository;
+use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
+use App\Repositories\Logistic\Transaction\ProductStock\ProductStockRepository;
+use App\Repositories\Logistic\Transaction\ProductStock\ProductStockDetailRepository;
+use App\Repositories\Logistic\Transaction\ProductStock\ProductStockWarehouseRepository;
+use App\Repositories\Logistic\Transaction\ProductStock\ProductStockCompanyRepository;
+use App\Repositories\Logistic\Transaction\ProductStock\ProductStockCompanyWarehouseRepository;
+use App\Settings\SettingLogistic;
 use Laravel\Prompts\Output\ConsoleOutput;
 
 class StockHelper
 {
-
     const SUBSTRACT_STOCK_METHOD_FIFO = 'FIFO';
     const SUBSTRACT_STOCK_METHOD_LIFO = 'LIFO';
     const SUBSTRACT_STOCK_METHOD_FEFO = 'FEFO';
@@ -36,8 +37,7 @@ class StockHelper
     public static function convertUnitPrice(
         $quantity,
         $price,
-        $fromUnitDetailId,
-        $targetUnitDetailId = null,
+        $fromUnitDetailId
     ) {
         $fromUnitDetail = UnitDetailRepository::find($fromUnitDetailId);
 
@@ -50,7 +50,74 @@ class StockHelper
         return [
             'quantity' => $quantity * $fromUnitDetail->value / $targetUnitDetail->value,
             'price' => $price * $targetUnitDetail->value / $fromUnitDetail->value,
+            'unit_detail_id' => $targetUnitDetail->id,
+            'unit_detail_name' => $targetUnitDetail->name,
         ];
+    }
+
+    public static function isStockMovedByRemarks(
+        $remarksId,
+        $remarksType,
+        $remarksNote,
+        $transactionSign = null,
+        $isGrouped = false,
+    ) {
+        $histories = self::getStockHistories($remarksId, $remarksType, $remarksNote, $transactionSign);
+
+        // Check Every Affected Product Details
+        $data = [];
+        foreach ($histories as $history) {
+            if (!isset($history->product_detail_id)) {
+                $data[$history->product_detail_id] = [
+                    'product_detail_id' => $history->product_detail_id,
+                    'is_stock_moved' => ProductDetailHistoryRepository::getNewerHistories($history)->count() > 0,
+                ];
+            }
+        }
+
+        // Return Value
+        if ($isGrouped) {
+            foreach ($data as $item) {
+                if ($item['is_stock_moved']) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return $data;
+        }
+    }
+
+    public static function getStockByRemarks(
+        $remarksId,
+        $remarksType,
+        $remarksNote,
+        $transactionSign = null,
+        $isGrouped = false,
+    ) {
+        $histories = self::getStockHistories($remarksId, $remarksType, $remarksNote, $transactionSign);
+
+        // Check Every Affected Product Details
+        $data = [];
+        foreach ($histories as $history) {
+            if (!isset($history->product_detail_id)) {
+                $data[$history->product_detail_id] = [
+                    'product_detail_id' => $history->product_detail_id,
+                    'stock' => self::getStockDetail($history->product_detail_id),
+                ];
+            }
+        }
+
+        // Return Value
+        if ($isGrouped) {
+            $total = 0;
+            foreach ($data as $item) {
+                $total += $item['stock'];
+            }
+            return $total;
+        } else {
+            return $data;
+        }
     }
 
     /*
@@ -69,6 +136,7 @@ class StockHelper
         $expiredDate = null,
         $remarksId = null,
         $remarksType = null,
+        $remarksNote = null,
     ) {
         $resultConvert = self::convertUnitPrice($quantity, $price, $unitDetailId);
 
@@ -80,7 +148,10 @@ class StockHelper
             price: $resultConvert['price'],
             code: $code,
             batch: $batch,
-            expiredDate: $expiredDate
+            expiredDate: $expiredDate,
+            remarksId: $remarksId,
+            remarksType: $remarksType,
+            remarksNote: $remarksNote
         );
 
         ProductDetailHistoryRepository::create([
@@ -89,43 +160,8 @@ class StockHelper
             'quantity' => $resultConvert['quantity'],
             'remarks_id' => $remarksId,
             'remarks_type' => $remarksType,
+            'remarks_note' => $remarksNote,
         ]);
-    }
-
-    public static function updateAddStock(
-        $remarksId,
-        $remarksType,
-        $productId,
-        $companyId,
-        $warehouseId,
-        $quantity,
-        $unitDetailId,
-        $transactionDate,
-        $price,
-        $code = null,
-        $batch = null,
-        $expiredDate = null,
-    ) {
-        ProductDetailHistoryRepository::deleteBy(
-            whereClause: [
-                ['remarks_id', $remarksId],
-                ['remarks_type', $remarksType],
-            ]
-        );
-
-        // Re Adding Stock
-        self::addStock(
-            $productId,
-            $companyId,
-            $warehouseId,
-            $quantity,
-            $unitDetailId,
-            $transactionDate,
-            $price,
-            $code,
-            $batch,
-            $expiredDate,
-        );
     }
 
     public static function substractStock(
@@ -137,105 +173,182 @@ class StockHelper
         $remarksId = null,
         $remarksType = null,
     ) {
-        try {
-            DB::beginTransaction();
+        $product = ProductRepository::find($productId);
 
-            $stock = self::getStockCompanyWarehouse($productId, $companyId, $warehouseId);
-            $resultConvert = self::convertUnitPrice($quantity, 0, $unitDetailId);
-            $substractQty = $resultConvert['quantity'];
+        $stock = self::getStockCompanyWarehouse($productId, $companyId, $warehouseId);
+        $resultConvert = self::convertUnitPrice($quantity, 0, $unitDetailId);
+        $substractQty = $resultConvert['quantity'];
 
-            // Check Availability Stock
-            if (empty($stock) || $substractQty > $stock->quantity) {
-                throw new \Exception('Stock Tidak Mencukupi');
+        // Check Availability Stock
+        if (empty($stock) || $substractQty > $stock->quantity) {
+            throw new \Exception(ErrorMessageHelper::stockNotAvailable($product->name, $resultConvert['unit_detail_name'], $stock->quantity, $quantity));
+        }
+
+        // Get Substract Stock Method
+        $setting = SettingRepository::findBy(whereClause: [['name', SettingLogistic::NAME]]);
+        $settings = json_decode($setting->setting, true);
+        $substractStockMethod = $settings[SettingLogistic::SUBSTRACT_STOCK_METHOD];
+
+        // Substract Stock Process
+        $productDetails = ProductDetailRepository::getBySubstractMethod(
+            productId: $productId,
+            companyId: $companyId,
+            warehouseId: $warehouseId,
+            substractStockMethod: $substractStockMethod
+        );
+
+        foreach ($productDetails as $productDetail) {
+            $usedQty = min($productDetail->productStockDetail->quantity, $substractQty) * -1;
+
+            ProductDetailHistoryRepository::create([
+                'product_detail_id' => $productDetail->id,
+                'transaction_date' => Carbon::now(),
+                'quantity' => $usedQty,
+                'remarks_id' => $remarksId,
+                'remarks_type' => $remarksType,
+            ]);
+
+            $substractQty += $usedQty;
+
+            if ($substractQty == 0) {
+                break;
             }
+        }
 
-            // Get Substract Stock Method
-            $setting = SettingRepository::findByName(Setting::NAME_LOGISTIC);
-            $settings = json_decode($setting->setting);
-            $substractStockMethod = $settings->product_substract_stock_method;
-
-            // Substract Stock Process
-            $productDetails = ProductDetailRepository::getBySubstractMethod(
-                productId: $productId,
-                companyId: $companyId,
-                warehouseId: $warehouseId,
-                substractStockMethod: $substractStockMethod
-            );
-
-            foreach ($productDetails as $productDetail) {
-                $usedQty = min($productDetail->productStockDetail->quantity, $substractQty) * -1;
-
-                ProductDetailHistoryRepository::create([
-                    'product_detail_id' => $productDetail->id,
-                    'transaction_date' => Carbon::now(),
-                    'quantity' => $usedQty,
-                    'remarks_id' => $remarksId,
-                    'remarks_type' => $remarksType,
-                ]);
-
-                $substractQty += $usedQty;
-
-                if ($substractQty == 0) {
-                    break;
-                }
-            }
-
-            if ($substractQty) {
-                DB::rollBack();
-                throw new \Exception('Stock Tidak Mencukupi');
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+        if ($substractQty) {
+            throw new \Exception(ErrorMessageHelper::stockNotAvailable($product->name, $resultConvert['unit_detail_name'], $stock->quantity, $quantity));
         }
     }
 
-    public static function updateSubstractStock(
+    /*
+    | ALTERING TRANSACTION STOCK
+    */
+    public static function updateStockInformation(
         $remarksId,
         $remarksType,
-        $productId,
-        $companyId,
-        $warehouseId,
-        $quantity,
-        $unitDetailId
-    ) {
-        ProductDetailHistoryRepository::deleteBy(
-            whereClause: [
-                ['remarks_id', $remarksId],
-                ['remarks_type', $remarksType],
-            ]
-        );
+        $remarksNote,
+        $transactionSign,
 
-        self::substractStock(
-            $productId,
-            $companyId,
-            $warehouseId,
-            $quantity,
-            $unitDetailId
-        );
-    }
-
-    public static function isTransactionStockUpdatable(
-        $remarksId,
-        $remarksType
+        $unitDetailId,
+        $entryDate,
+        $price,
+        $newRemarksNote,
+        $code = null,
+        $batch = null,
+        $expiredDate = null,
     ) {
-        $histories = ProductDetailHistoryRepository::getBy(
-            whereClause: [
-                ['remarks_id', $remarksId],
-                ['remarks_type', $remarksType],
-            ]
-        );
+        $resultConvert = self::convertUnitPrice(0, $price, $unitDetailId);
+        $histories = self::getStockHistories($remarksId, $remarksType, $remarksNote, $transactionSign);
 
         foreach ($histories as $history) {
-            $countNewerHistories = ProductDetailHistoryRepository::getNewerHistories($history)->count();
-            if ($countNewerHistories > 0) {
-                return false;
+            ProductDetailRepository::update($history->product_detail_id, [
+                'entry_date' => $entryDate,
+                'expired_date' => $expiredDate,
+                'batch' => $batch,
+                'price' => $resultConvert['price'],
+                'code' => $code,
+                'remarks_note' => $newRemarksNote,
+            ]);
+        }
+    }
+
+    public static function updateStockHistory(
+        $remarksId,
+        $remarksType,
+        $remarksNote,
+        $transactionSign,
+
+        $unitDetailId,
+        $quantity,
+        $transactionDate,
+        $newRemarksNote,
+    ) {
+        $resultConvert = self::convertUnitPrice($quantity, 0, $unitDetailId);
+        $histories = self::getStockHistories($remarksId, $remarksType, $remarksNote, $transactionSign);
+
+        foreach ($histories as $history) {
+            ProductDetailHistoryRepository::update($history->id, [
+                'transaction_date' => $transactionDate,
+                'quantity' => $resultConvert['quantity'],
+                'remarks_note' => $newRemarksNote,
+            ]);
+
+            // Confirm Stock
+            if (self::getStockDetail($history->product_detail_id) < 0) {
+                throw new \Exception(ErrorMessageHelper::stockNotAvailable($history->product->name));
             }
         }
+    }
 
-        return true;
+    public static function cancelStock(
+        $remarksId,
+        $remarksType,
+        $remarksNote = null,
+        $transactionSign = null,
+    ) {
+        $histories = self::getStockHistories(
+            $remarksId,
+            $remarksType,
+            $remarksNote,
+            $transactionSign,
+        );
+
+        // Delete Histories
+        $affectedProductDetails = [];
+        foreach ($histories as $history) {
+            $affectedProductDetails[] = [
+                'id' => $history->product_detail_id,
+                'product_name' => $history->product->name,
+            ];
+
+            $history->delete();
+        }
+
+        // Check Current Stock
+        foreach ($affectedProductDetails as $productDetail) {
+            if (self::getStockDetail($productDetail['id']) < 0) {
+                throw new \Exception(ErrorMessageHelper::stockNotAvailable($productDetail['product_name']));
+            }
+        }
+    }
+
+    public static function deleteStock(
+        $remarksId,
+        $remarksType,
+        $remarksNote = null,
+    ) {
+        $whereClause =  [
+            ['remarks_id', $remarksId],
+            ['remarks_type', $remarksType],
+        ];
+
+        if ($remarksNote != null) {
+            $whereClause[] = ['remarks_note', $remarksNote];
+        }
+
+        ProductDetailRepository::deleteBy($whereClause);
+    }
+
+    public static function getStockHistories(
+        $remarksId,
+        $remarksType,
+        $remarksNote = null,
+        $transactionSign = null,
+    ) {
+        $whereClause =  [
+            ['remarks_id', $remarksId],
+            ['remarks_type', $remarksType],
+        ];
+
+        if ($remarksNote != null) {
+            $whereClause[] = ['remarks_note', $remarksNote];
+        }
+
+        if ($transactionSign != null) {
+            $whereClause[] = ['quantity', ($transactionSign ? '>' : '<'), 0];
+        }
+
+        return ProductDetailHistoryRepository::getBy($whereClause);
     }
 
     /*

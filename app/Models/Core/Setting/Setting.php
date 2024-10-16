@@ -18,8 +18,6 @@ class Setting extends Model
 
     protected $guarded = ['id'];
 
-    const NAME_LOGISTIC = 'logistic';
-
     public function isDeletable()
     {
         return true;

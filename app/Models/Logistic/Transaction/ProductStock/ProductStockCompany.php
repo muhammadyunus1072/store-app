@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models\Logistic\Transaction;
+namespace App\Models\Logistic\Transaction\ProductStock;
 
 use App\Models\Core\Company\Company;
+use App\Models\Logistic\Master\Product\Product;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Logistic\Master\Product\Product;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductStockCompany extends Model

@@ -7,7 +7,7 @@ use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
 use App\Repositories\Core\User\PermissionRepository;
 use App\Repositories\Core\User\UserRepository;
-use App\Traits\WithDatatable;
+use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
 

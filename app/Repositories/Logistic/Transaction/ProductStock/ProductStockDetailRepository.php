@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repositories\Logistic\Transaction\ProductStockDetail;
+namespace App\Repositories\Logistic\Transaction\ProductStock;
 
 use App\Repositories\MasterDataRepository;
-use App\Models\Logistic\Transaction\ProductStockDetail;
+use App\Models\Logistic\Transaction\ProductStock\ProductStockDetail;
 
 class ProductStockDetailRepository extends MasterDataRepository
 {

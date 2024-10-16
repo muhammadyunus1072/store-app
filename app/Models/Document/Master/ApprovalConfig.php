@@ -3,11 +3,14 @@
 namespace App\Models\Document\Master;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Master\ApprovalConfigUser;
+use App\Models\Document\Transaction\Approval;
+use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigRepository;
+use App\Repositories\Document\Transaction\ApprovalRepository;
+use App\Repositories\Document\Transaction\ApprovalUserRepository;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ApprovalConfig extends Model
@@ -55,29 +58,61 @@ class ApprovalConfig extends Model
 
     protected $guarded = ['id'];
 
-    public static function isMatch($object, $config)
+    public static function createApprovalIfMatch($key, $object): Approval
     {
-        $result = null; 
-    
+        $approvalConfigs = ApprovalConfigRepository::getByKey($key);
+
+        foreach ($approvalConfigs as $approvalConfig) {
+            if (self::isMatch(json_decode($approvalConfig->config, true), $object)) {
+                $approval = ApprovalRepository::create([
+                    'is_sequentially' => $approvalConfig->is_sequentially,
+                    'remarks_id' => $object->id,
+                    'remarks_type' => get_class($object),
+
+                    'approval_config_id' => $approvalConfig->id,
+                ]);
+
+                foreach ($approvalConfig->approvalConfigUsers as $approvalConfigUser) {
+                    ApprovalUserRepository::create([
+                        'approval_id' => $approval->id,
+                        'user_id' => $approvalConfigUser->user_id,
+                        'status_approval_id' => $approvalConfigUser->status_approval_id,
+                        'position' => $approvalConfigUser->position,
+                        'is_trigger_done' => $approvalConfigUser->is_trigger_done,
+                        'is_can_cancel' => $approvalConfigUser->is_can_cancel,
+
+                        'approval_config_user_id' => $approvalConfigUser->id,
+                    ]);
+                }
+
+                return $approval;
+            }
+        }
+
+        return false;
+    }
+
+    public static function isMatch($config, $object)
+    {
+        $result = null;
+
         foreach ($config as $item) {
-            $currentResult = false; 
-    
+            $currentResult = false;
+
             if ($item['type'] === 'grouper') {
-                
                 if (isset($item['group']) && is_array($item['group'])) {
-                    $currentResult = self::isMatch($object, $item['group']);
+                    $currentResult = self::isMatch($item['group'], $object);
                 }
             } else {
-                
                 $column = $item['column'];
                 $operator = $item['operator'];
                 $value = $item['value'];
-    
+
                 if (!isset($object->$column)) {
-                    $currentResult = false; 
+                    $currentResult = false;
                 } else {
                     $objectValue = $object->$column;
-    
+
                     switch ($operator) {
                         case self::OPERATOR_ASSIGNMENT:
                             $currentResult = ($objectValue == $value);
@@ -108,39 +143,32 @@ class ApprovalConfig extends Model
                     }
                 }
             }
-            
+
             $logic = $item['logic'];
-            
-            if(!$logic)
-            {
+
+            if (!$logic) {
                 $result = $currentResult;
-            }
-            elseif ($logic === 'AND') {
-                
+            } elseif ($logic === 'AND') {
+
                 if ($result === null) {
-                    $result = true; 
+                    $result = true;
                 }
-                $result = $result && $currentResult; 
+                $result = $result && $currentResult;
             } elseif ($logic === 'OR') {
-                
+
                 if ($result === null) {
-                    $result = false; 
+                    $result = false;
                 }
-                $result = $result || $currentResult; 
+                $result = $result || $currentResult;
             }
-            Log::info("Logic ".($logic ? $logic : "NOTHING"));
-            Log::info("Result is ".($result ? $result : "NOTHING"));
-    
+
             if ($logic === 'AND' && !$result) {
-                break; 
+                break;
             }
         }
 
-        return $result ?? false; 
+        return $result ?? false;
     }
-    
-    
-
 
     public function isDeletable()
     {
@@ -152,6 +180,9 @@ class ApprovalConfig extends Model
         return true;
     }
 
+    /*
+    | RELATIONSHIP
+    */
     public function approvalConfigUsers()
     {
         return $this->hasMany(ApprovalConfigUser::class, 'approval_config_id', 'id');

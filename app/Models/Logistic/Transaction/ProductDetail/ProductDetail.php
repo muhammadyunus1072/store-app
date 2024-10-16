@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Models\Logistic\Transaction;
+namespace App\Models\Logistic\Transaction\ProductDetail;
 
-use App\Models\Core\Company\Company;
-use Illuminate\Support\Facades\Crypt;
 use Sis\TrackHistory\HasTrackHistory;
+use App\Models\Core\Company\Company;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Logistic\Transaction\ProductStockDetail;
-use App\Models\Logistic\Transaction\ProductStockWarehouse;
+use App\Models\Logistic\Transaction\ProductStock\ProductStockDetail;
+use App\Models\Logistic\Transaction\ProductStock\ProductStockWarehouse;
 
 class ProductDetail extends Model
 {
@@ -26,7 +25,23 @@ class ProductDetail extends Model
         'batch',
         'price',
         'code',
+        'remarks_id',
+        'remarks_type',
+        'remarks_note',
     ];
+
+    protected static function onBoot()
+    {
+        self::deleted(function ($model) {
+            foreach ($model->histories as $item) {
+                $item->delete();
+            }
+        });
+    }
+
+    /*
+    | RELATIONSHIP
+    */
 
     public function product()
     {

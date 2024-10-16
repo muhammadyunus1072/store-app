@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use App\Helpers\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Traits\WithDatatable;
+use App\Traits\Livewire\WithDatatable;
 use App\Helpers\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -127,10 +127,6 @@ class Datatable extends Component
                 'key' => 'supplier_name',
                 'name' => 'Supplier',
             ],
-            // [
-            //     'key' => 'company_name', unhide-123
-            //     'name' => 'Perusahaan',
-            // ],
             [
                 'key' => 'warehouse_name',
                 'name' => 'Gudang',

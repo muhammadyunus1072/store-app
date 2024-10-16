@@ -14,15 +14,15 @@ class GoodReceiveRepository extends MasterDataRepository
 
     public static function findWithDetails($id)
     {
-        return GoodReceive::with([
-            'purchaseOrder',    
-            'supplier',    
-            'warehouse',    
-            'goodReceiveProducts',    
-            'goodReceiveProducts.ppn',
-            'goodReceiveProducts.pph',
-            'goodReceiveProducts.goodReceiveProductAttachments',
-        ]
+        return GoodReceive::with(
+            [
+                'supplier',
+                'warehouse',
+                'goodReceiveProducts',
+                'goodReceiveProducts.ppn',
+                'goodReceiveProducts.pph',
+                'goodReceiveProducts.goodReceiveProductAttachments',
+            ]
         )->where('id', $id)->first();
     }
 

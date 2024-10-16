@@ -3,7 +3,7 @@
 namespace App\Models\Logistic\Transaction\StockRequest;
 
 use Carbon\Carbon;
-use App\Traits\HasApproval;
+use App\Traits\Document\HasApproval;
 use App\Helpers\NumberGenerator;
 use App\Models\Core\Setting\Setting;
 use Illuminate\Support\Facades\Crypt;

@@ -5,7 +5,7 @@ namespace App\Livewire\Document\Transaction\Approval;
 use App\Helpers\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Traits\WithDatatable;
+use App\Traits\Livewire\WithDatatable;
 use App\Helpers\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -116,7 +116,7 @@ class Datatable extends Component
                 'name' => 'Nomor',
                 'render' => function($item)
                 {
-                    return $item->remarks_table->number;
+                    return $item->remarks->number;
                 }
             ],
             [
@@ -125,7 +125,7 @@ class Datatable extends Component
                 'name' => 'Keterangan',
                 'render' => function($item)
                 {
-                    return $item->remarks_table->note;
+                    return $item->remarks->note;
                 }
             ],
             [
@@ -135,10 +135,10 @@ class Datatable extends Component
                 'render' => function($item)
                 {
                     $html = "";
-                    if($item->remarks_table->approved_date)
+                    if($item->remarks->approved_date)
                     {
                         $html = "<p class='badge text-white bg-success'>Disetujui</p>";
-                    }elseif($item->remarks_table->cancel_date)
+                    }elseif($item->remarks->cancel_date)
                     {
                         $html = "<p class='badge text-white bg-warning'>Cancel</p>";
                     }else{

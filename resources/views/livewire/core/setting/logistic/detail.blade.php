@@ -75,8 +75,12 @@
             <hr>
         </div>
         <div class="col-md-4 mb-4">
-            <label>Kunci Persetujuan Permintaan </label>
+            <label>Kunci Persetujuan Permintaan</label>
             <input type="text" class="form-control" wire:model="approval_key_stock_request" />
+        </div>
+        <div class="col-md-4 mb-4">
+            <label>Kunci Persetujuan Penerimaan</label>
+            <input type="text" class="form-control" wire:model="approval_key_good_recieve" />
         </div>
         <div class="col-md-4 mb-4">
             <label>Kunci Persetujuan Pengeluaran </label>

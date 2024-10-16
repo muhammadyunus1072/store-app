@@ -36,7 +36,7 @@ return new class extends Migration
             $table->index('name', 'status_approvals_name_idx');
         }
 
-        $table->text('name')->nullable()->comment('Catatan');
+        $table->string('name')->nullable();
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

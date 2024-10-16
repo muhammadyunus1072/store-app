@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Traits\Livewire;
 
 use Livewire\WithPagination;
 use Livewire\Attributes\On;

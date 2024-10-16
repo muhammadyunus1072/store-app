@@ -3,7 +3,7 @@
 namespace App\Repositories\Logistic\Transaction\ProductStock;
 
 use App\Repositories\MasterDataRepository;
-use App\Models\Logistic\Transaction\ProductStock;
+use App\Models\Logistic\Transaction\ProductStock\ProductStock;
 
 class ProductStockRepository extends MasterDataRepository
 {

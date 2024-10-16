@@ -34,13 +34,11 @@ return new class extends Migration
             $table->bigInteger('obj_id')->unsigned();
         } else {
             $table->index('good_receive_id', 'grp_good_receive_id_idx');
-            $table->index('purchase_order_product_id', 'grp_purchase_order_product_id_idx');
             $table->index('product_id', 'grp_product_id_idx');
             $table->index('unit_detail_id', 'grp_unit_detail_id_idx');
         }
 
         $table->bigInteger("good_receive_id")->unsigned()->comment('GoodReceive ID');
-        $table->bigInteger("purchase_order_product_id")->unsigned()->nullable()->comment('PurchaseOrderProduct ID');
 
         // Product Information
         $table->bigInteger("product_id")->unsigned()->comment('Product ID');

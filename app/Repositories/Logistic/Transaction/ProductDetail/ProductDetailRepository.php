@@ -4,7 +4,7 @@ namespace App\Repositories\Logistic\Transaction\ProductDetail;
 
 use App\Helpers\Logistic\StockHelper;
 use App\Repositories\MasterDataRepository;
-use App\Models\Logistic\Transaction\ProductDetail;
+use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
 
 class ProductDetailRepository extends MasterDataRepository
 {
@@ -21,7 +21,10 @@ class ProductDetailRepository extends MasterDataRepository
         $price,
         $code,
         $batch,
-        $expiredDate
+        $expiredDate,
+        $remarksId = null,
+        $remarksType = null,
+        $remarksNote = null,
     ) {
         $productDetail = ProductDetail::where('product_id', $productId)
             ->where('company_id', $companyId)
@@ -43,6 +46,9 @@ class ProductDetailRepository extends MasterDataRepository
                 'code' => $code,
                 'batch' => $batch,
                 'expired_date' => $expiredDate,
+                'remarks_id' => $remarksId,
+                'remarks_type' => $remarksType,
+                'remarks_note' => $remarksNote,
             ]);
         }
 

@@ -21,7 +21,7 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <livewire:core.setting.logistic.detail :objId="$objId">
+            <livewire:core.setting.logistic.detail>
         </div>
     </div>
 @stop

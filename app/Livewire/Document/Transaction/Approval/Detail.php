@@ -48,7 +48,7 @@ class Detail extends Component
         $approval = ApprovalRepository::findWithDetails($id);
         
         $this->created_at = $approval->created_at;
-        $this->number = $approval->remarks_table->number;
+        $this->number = $approval->remarks->number;
         $this->creator_name = $approval->creator->name;
         $this->note = $approval->note;
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\Logistic\Transaction;
+namespace App\Models\Logistic\Transaction\ProductDetail;
 
-use App\Helpers\Logistic\StockHelper;
-use Illuminate\Support\Facades\Crypt;
 use Sis\TrackHistory\HasTrackHistory;
+use App\Helpers\Logistic\StockHelper;
+use App\Models\Logistic\Master\Product\Product;
+use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Logistic\Transaction\ProductDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductDetailHistory extends Model
@@ -21,6 +21,7 @@ class ProductDetailHistory extends Model
         'note',
         'remarks_id',
         'remarks_type',
+        'remarks_note',
     ];
 
     protected static function onBoot()
@@ -53,6 +54,11 @@ class ProductDetailHistory extends Model
     /*
     | RELATIONSHIP
     */
+    public function product()
+    {
+        return $this->belongsToMany(Product::class, 'product_details', 'product_detail_id', 'product_id');
+    }
+
     public function productDetail()
     {
         return $this->belongsTo(ProductDetail::class, 'product_detail_id', 'id');

@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use App\Helpers\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Traits\WithDatatable;
+use App\Traits\Livewire\WithDatatable;
 use App\Helpers\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;

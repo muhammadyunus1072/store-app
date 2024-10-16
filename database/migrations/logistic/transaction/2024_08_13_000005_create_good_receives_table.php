@@ -33,7 +33,6 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('purchase_order_id', 'good_receives_purchase_order_id_idx');
             $table->index('supplier_id', 'good_receives_supplier_id_idx');
             $table->index('company_id', 'good_receives_company_id_idx');
             $table->index('warehouse_id', 'good_receives_warehouse_id_idx');
@@ -47,9 +46,6 @@ return new class extends Migration
         $table->dateTime('receive_date')->comment('Tanggal Penerimaan');
         $table->text('note')->nullable()->comment('Catatan');
         $table->string('supplier_invoice_number')->nullable()->comment('Nomor Invoice Dari Supplier');
-
-        // Purchase Order
-        $table->unsignedBigInteger("purchase_order_id")->nullable()->comment('PurchaseOrder ID');
 
         // Supplier Info
         $table->unsignedBigInteger("supplier_id")->comment('Supplier ID');

@@ -102,80 +102,45 @@ return [
         | ============= FINANCE =============
         | ======================================
         */
-        // [
-        //     // 'id' => 'menu_admin'
-        //     'header' => 'Keuangan',
-        // ],
-        // [
-        //     // 'id' => 'menu_admin'
-        //     'text' => 'Pengaturan',
-        //     'icon' => 'ki-duotone ki-setting-2',
-        //     'submenu' => [
-        //         [
-        //             'text' => 'Pajak',
-        //             'route' => 'tax.index',
-        //         ],
-        //     ],
-        // ],
+        [
+            // 'id' => 'menu_admin'
+            'header' => 'Keuangan',
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Pengaturan',
+            'icon' => 'ki-duotone ki-setting-2',
+            'submenu' => [
+                [
+                    'text' => 'Pajak',
+                    'route' => 'tax.index',
+                ],
+            ],
+        ],
         /*
         | ======================================
         | ============= PURCHASING =============
         | ======================================
         */
-        // [
-        //     // 'id' => 'menu_admin'
-        //     'header' => 'Pembelian',
-        // ],
-        // [
-        //     'text' => 'Permintaan',
-        //     'route' => 'purchase_request.index',
-        //     'icon' => 'ki-duotone ki-arrow-right',
-        // ],
-        // [
-        //     'text' => 'Pembelian',
-        //     'route' => 'purchase_order.index',
-        //     'icon' => 'ki-duotone ki-arrow-right',
-        // ],
-        // [
-        //     // 'id' => 'menu_admin'
-        //     'text' => 'Pengaturan',
-        //     'icon' => 'ki-duotone ki-setting-2',
-        //     'submenu' => [
-        //         [
-        //             'text' => 'Supplier',
-        //             'route' => 'supplier.index',
-        //         ],
-        //         [
-        //             'text' => 'Kategori Supplier',
-        //             'route' => 'category_supplier.index',
-        //         ],
-        //     ],
-        // ],
-
-        /*
-        | ======================================
-        | ================ SALES ===============
-        | ======================================
-        */
-        // [
-        //     // 'id' => 'menu_admin'
-        //     'header' => 'Penjualan',
-        // ],
-        // [
-        //     // 'id' => 'menu_admin'
-        //     'text' => 'Pengaturan',
-        //     'icon' => 'ki-duotone ki-setting-2',
-        //     'submenu' => [
-        //         [
-        //             'text' => 'Customer',
-        //             'route' => 'customer.index',
-        //         ],
-        //         [
-        //             'text' => 'Kategori Customer',
-        //             'route' => 'category_customer.index',
-        //         ],
-        //     ],
-        // ],
+        [
+            // 'id' => 'menu_admin'
+            'header' => 'Pembelian',
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Pengaturan',
+            'icon' => 'ki-duotone ki-setting-2',
+            'submenu' => [
+                [
+                    'text' => 'Supplier',
+                    'route' => 'supplier.index',
+                ],
+                [
+                    'text' => 'Kategori Supplier',
+                    'route' => 'category_supplier.index',
+                ],
+            ],
+        ],
 
         /*
         | ======================================

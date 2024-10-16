@@ -1,25 +1,24 @@
 <?php
 
-namespace App\Models\Logistic\Transaction;
+namespace App\Models\Logistic\Transaction\ProductStock;
 
-use Illuminate\Support\Facades\Crypt;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Logistic\Master\Product\Product;
+use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ProductStock extends Model
+class ProductStockDetail extends Model
 {
     use HasFactory, SoftDeletes, HasTrackHistory;
 
     protected $fillable = [
-        'product_id',
+        'product_detail_id',
         'quantity',
     ];
 
-    public function product()
+    public function productDetail()
     {
-        return $this->belongsTo(Product::class, 'product_id', 'id');
+        return $this->belongsTo(ProductDetail::class, 'product_detail_id', 'id');
     }
 }

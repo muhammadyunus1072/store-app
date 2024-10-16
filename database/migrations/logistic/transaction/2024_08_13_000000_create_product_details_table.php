@@ -41,6 +41,9 @@ return new class extends Migration
             $table->index('batch', 'product_details_batch_idx');
             $table->index('price', 'product_details_price_idx');
             $table->index('code', 'product_details_code_idx');
+            $table->index('remarks_id', 'product_details_remarks_id_idx');
+            $table->index('remarks_type', 'product_details_remarks_type_idx');
+            $table->index('remarks_note', 'product_details_remarks_note_idx');
         }
 
         $table->bigInteger("product_id")->unsigned()->comment('Product ID');
@@ -51,6 +54,10 @@ return new class extends Migration
         $table->string('batch')->nullable()->comment('Batch Produk');
         $table->double('price')->nullable()->comment('Harga Modal');
         $table->string('code')->nullable()->comment('Kode Produk');
+        
+        $table->bigInteger('remarks_id')->unsigned()->nullable()->comment('FK Polimorfik Penyebab Terbentuk Pertama Kali');
+        $table->string('remarks_type')->nullable()->comment('Jenis Polimorfik Penyebab Terbentuk Pertama Kali');
+        $table->string('remarks_note')->nullable()->comment('Catatan Polimorfik Penyebab Terbentuk Pertama Kali');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

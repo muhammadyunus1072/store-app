@@ -7,7 +7,7 @@ use App\Helpers\RomanConverter;
 
 class NumberGenerator
 {
-    const COMPANY_CODE = "PB";
+    const COMPANY_CODE = "RSMH";
     const RESET_TYPE_YEARLY = 1;
     const RESET_TYPE_MONTHLY = 2;
     const SEPARATOR = "/";

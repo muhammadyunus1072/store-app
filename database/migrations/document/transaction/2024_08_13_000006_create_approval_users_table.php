@@ -34,12 +34,22 @@ return new class extends Migration
             $table->bigInteger('obj_id')->unsigned();
         } else {
             $table->index('approval_id', 'approval_users_approval_id_idx');
+            $table->index('status_approval_id', 'approval_users_status_approval_id_idx');
             $table->index('user_id', 'approval_users_user_id_idx');
+            
+            $table->index('approval_config_user_id', 'approval_users_approval_config_user_id_idx');
         }
 
-        $table->bigInteger("approval_id")->unsigned()->comment('Approval ID');
-        $table->bigInteger("user_id")->unsigned()->comment('User ID');
+        $table->unsignedBigInteger("approval_id")->comment('Approval ID');
+        $table->unsignedBigInteger("user_id")->comment('User ID');
+        $table->unsignedBigInteger("status_approval_id")->comment('Status Approval ID');
+
         $table->double('position')->comment('Urutan Persetujuan');
+        $table->boolean('is_trigger_done')->comment('Penanda Selesai Persetujuan');
+        $table->boolean('is_can_cancel')->comment('Dapat Membatalkan');
+        
+        // Auto Create By Config
+        $table->unsignedBigInteger("approval_config_user_id")->nullable()->comment('FK Approval Config User');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

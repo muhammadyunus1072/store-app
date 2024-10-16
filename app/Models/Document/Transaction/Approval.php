@@ -2,105 +2,128 @@
 
 namespace App\Models\Document\Transaction;
 
-use App\Models\Core\User\User;
-use Illuminate\Support\Facades\Auth;
+use App\Helpers\NumberGenerator;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Transaction\ApprovalUser;
-use App\Models\Document\Transaction\ApprovalHistory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Repositories\Document\Transaction\ApprovalRepository;
-use App\Repositories\Document\Transaction\ApprovalUserRepository;
-use App\Repositories\Document\Transaction\ApprovalHistoryRepository;
-use App\Repositories\Document\Master\StatusApproval\StatusApprovalRepository;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Approval extends Model
 {
     use HasFactory, SoftDeletes, HasTrackHistory;
 
     protected $fillable = [
+        'number',
         'note',
+        'done_at',
+        'done_by',
+        'cancel_at',
+        'cancel_by',
         'is_sequentially',
         'remarks_id',
         'remarks_type',
-        'config',
+
+        'approval_config_id',
     ];
 
     protected $guarded = ['id'];
 
+    protected static function onBoot()
+    {
+        self::creating(function ($model) {
+            $model->number = NumberGenerator::generate(get_class($model), 'APP');
+        });
+
+        self::updating(function ($model) {
+            if (!empty($model->remarks_id) && !empty($model->remarks_type) && !empty($model->remarks)) {
+                if ($model->done_at != $model->getOriginal('done_at')) {
+                    if (empty($model->done_at)) {
+                        $model->remarks->onApprovalRevertDone();
+                    } else {
+                        $model->remarks->onApprovalDone();
+                    }
+                }
+
+                if ($model->cancel_at != $model->getOriginal('cancel_at')) {
+                    if (empty($model->cancel_at)) {
+                        $model->remarks->onApprovalRevertCancel();
+                    } else {
+                        $model->remarks->onApprovalCanceled();
+                    }
+                }
+            }
+        });
+
+        self::deleted(function ($model) {
+            foreach ($model->approvalUsers as $item) {
+                $item->delete();
+            }
+        });
+    }
+
+    public function onApprovalUserHistoryCreated($approvalUserHistory)
+    {
+        if ($approvalUserHistory->approvalUser->is_trigger_done || $this->isAllApproved()) {
+            ApprovalRepository::update($this->id, [
+                'done_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'done_by' => $approvalUserHistory->approvalUser->user_id,
+            ]);
+        }
+    }
+
+    public function onApprovalUserHistoryDeleted($approvalUserHistory)
+    {
+        if ($approvalUserHistory->approvalUser->is_trigger_done || !$this->isAllApproved()) {
+            ApprovalRepository::update($this->id, [
+                'done_at' => null,
+                'done_by' => null,
+            ]);
+        }
+    }
+
     public function isDeletable()
     {
-        return true;
+        return count($this->approvalUserHistories) == 0;
     }
 
     public function isEditable()
     {
-        return true;
+        return count($this->approvalUserHistories) == 0;
     }
 
-    protected static function onBoot()
+    public function isDone()
     {
-        self::deleted(function ($model) {
-            $model->approvalUsers()->delete();
-            $model->approvalHistories()->delete();
-        });
+        return !empty($this->done_at);
     }
 
-    public function is_approved()
+    public function isCanceled()
     {
-        return ApprovalHistory::where('approval_id', $this->id)
-        ->where('user_id', Auth::id())
-        ->first();
+        return !empty($this->cancel_at);
     }
 
-    public function is_sequentially()
+    public function isAllApproved()
     {
-        if($this->is_sequentially)
-        {
-            $user = ApprovalUserRepository::findByUser($this->id, Auth::id());
-            $previous_users = collect($this->approvalUsers)->where('position', '<', $user->position);
-            
-            foreach($previous_users as $previous_user)
-            {
-                $status_approved = StatusApprovalRepository::findByName('Setuju');
-                return ApprovalHistoryRepository::findByUser($this->id, $previous_user['user_id'], $status_approved->id) ? true : false;
-            }
-            
-            return true;
-        }
-        
-        return true;
-        
+        return $this->approvalUsers()->count() == $this->approvalUserHistories()->count();
     }
 
-    public function is_enabled()
-    {
-        return (!$this->is_approved() && $this->is_sequentially());
-    }
-
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by', 'id');
-    }
-
-    public function remarks_table()
-    {
-        return $this->belongsTo($this->remarks_type, 'remarks_id', 'id');
-    }
-    
+    /*
+    | RELATIONSHIP
+    */
     public function approvalUsers()
     {
         return $this->hasMany(ApprovalUser::class, 'approval_id', 'id');
     }
 
-    public function approvalUser()
+    public function approvalUserHistories()
     {
-        return $this->belongsTo(ApprovalUser::class, 'id', 'approval_id')->where('user_id', Auth::id());
+        return $this->belongsToMany(ApprovalUserHistory::class, 'approval_users', 'approval_id', 'approval_user_id')->whereNull('approval_users.deleted_at');
     }
 
-    public function approvalHistories()
+    public function remarks()
     {
-        return $this->hasMany(ApprovalHistory::class, 'approval_id', 'id');
+        return $this->belongsTo($this->remarks_type, 'remarks_id', 'id');
     }
 }

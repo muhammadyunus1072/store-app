@@ -24,7 +24,6 @@ use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
 use App\Repositories\Logistic\Transaction\GoodReceive\GoodReceiveRepository;
-use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
 use App\Repositories\Logistic\Transaction\GoodReceive\GoodReceiveProductRepository;
 use App\Repositories\Logistic\Transaction\GoodReceive\GoodReceiveProductTaxRepository;
 use App\Repositories\Logistic\Transaction\GoodReceive\GoodReceiveProductAttachmentRepository;
@@ -40,9 +39,6 @@ class Detail extends Component
     public $receive_date;
     public $supplier_invoice_number;
     public $note;
-
-    public $purchase_order_id;
-    public $purchase_order_text;
 
     public $company_id;
     public $company_text;
@@ -101,10 +97,6 @@ class Detail extends Component
 
         if ($this->objId) {
             $goodReceive = GoodReceiveRepository::findWithDetails(Crypt::decrypt($this->objId));
-            if ($goodReceive->purchase_order_id) {
-                $this->purchase_order_id = Crypt::encrypt($goodReceive->purchase_order_id);
-                $this->purchase_order_text = $goodReceive->purchaseOrder->number;
-            }
 
             $this->supplier_id = Crypt::encrypt($goodReceive->supplier_id);
             $this->supplier_text = $goodReceive->supplier_name;
@@ -147,9 +139,6 @@ class Detail extends Component
                     "unit_detail_choice" => $unit_detail_choice,
                     "quantity" => NumberFormatter::valueToImask($goodReceiveProduct->quantity),
                     "price" => NumberFormatter::valueToImask($goodReceiveProduct->price),
-
-                    // Purchase Order Information
-                    'purchase_order_product_id' => $goodReceiveProduct->purchase_order_product_id ? Crypt::encrypt($goodReceiveProduct->purchase_order_product_id) : null,
 
                     // Tax Information
                     'tax_id' => $goodReceiveProduct->ppn ? Crypt::encrypt($goodReceiveProduct->ppn->tax_id) : null,
@@ -200,7 +189,6 @@ class Detail extends Component
         $this->validate();
 
         $validatedData = [
-            'purchase_order_id' => $this->purchase_order_id ? Crypt::decrypt($this->purchase_order_id) : null,
             'supplier_id' => Crypt::decrypt($this->supplier_id),
             'company_id' => Crypt::decrypt($this->company_id),
             'warehouse_id' => Crypt::decrypt($this->warehouse_id),
@@ -212,12 +200,14 @@ class Detail extends Component
         try {
             DB::beginTransaction();
             if ($this->objId) {
-                $objId = Crypt::decrypt($this->objId);
-                GoodReceiveRepository::update($objId, $validatedData);
+                $decId = Crypt::decrypt($this->objId);
+                GoodReceiveRepository::update($decId, $validatedData);
+                $goodReceive = GoodReceiveRepository::find($decId);
             } else {
-                $obj = GoodReceiveRepository::create($validatedData);
-                $objId = $obj->id;
+                $goodReceive = GoodReceiveRepository::create($validatedData);
             }
+
+            $objId = $goodReceive->id;
 
             // ===============================
             // ===== GOOD RECEIVE PRODUCT ====
@@ -229,7 +219,6 @@ class Detail extends Component
             foreach ($this->goodReceiveProducts as $item) {
                 $validatedData = [
                     'good_receive_id' => $objId,
-                    'purchase_order_product_id' => $item['purchase_order_product_id'] ? Crypt::decrypt($item['purchase_order_product_id']) : null,
                     'product_id' => Crypt::decrypt($item['product_id']),
                     'unit_detail_id' => Crypt::decrypt($item['unit_detail_id']),
                     'quantity' => NumberFormatter::imaskToValue($item['quantity']),
@@ -291,6 +280,12 @@ class Detail extends Component
                 }
             }
 
+            if ($this->objId) {
+                $goodReceive->onUpdated();
+            } else {
+                $goodReceive->onCreated();
+            }
+
             DB::commit();
 
             Alert::confirmation(
@@ -323,55 +318,6 @@ class Detail extends Component
     public function onDialogCancel()
     {
         $this->redirectRoute('good_receive.index');
-    }
-
-    /*
-    | HANDLER : PURCHASE ORDER 
-    */
-    public function setPurchaseOrder($purchase_order_id)
-    {
-        $this->purchase_order_id = $purchase_order_id;
-        $this->goodReceiveProducts = [];
-
-        if ($this->purchase_order_id) {
-            $purchaseOrder = PurchaseOrderRepository::findWithDetails(Crypt::decrypt($purchase_order_id));
-
-            foreach ($purchaseOrder->purchaseOrderProducts as $purchaseOrderProduct) {
-                $unit_detail_choice = UnitDetailRepository::getOptions($purchaseOrderProduct->unit_detail_unit_id);
-                $unit_detail_id = collect($unit_detail_choice)->filter(function ($obj) use ($purchaseOrderProduct) {
-                    return Crypt::decrypt($obj['id']) == $purchaseOrderProduct->unit_detail_id;
-                })->first()['id'];
-
-                $this->goodReceiveProducts[] = [
-                    'id' => null,
-
-                    // Core Information
-                    'product_id' => Crypt::encrypt($purchaseOrderProduct->product_id),
-                    'product_text' => $purchaseOrderProduct->product_name . " ( " . Product::translateType($purchaseOrderProduct->product_type) . ")",
-                    "unit_detail_id" => $unit_detail_id,
-                    "unit_detail_choice" => $unit_detail_choice,
-                    "quantity" => 0,
-                    "price" => NumberFormatter::valueToImask($purchaseOrderProduct->price),
-
-                    // Tax Information
-                    'tax_id' => $purchaseOrderProduct->ppn ? Crypt::encrypt($purchaseOrderProduct->ppn->tax_id) : null,
-                    "is_ppn" => $purchaseOrderProduct->ppn ? true : false,
-
-                    // Purchase Order Information
-                    'purchase_order_product_id' => Crypt::encrypt($purchaseOrderProduct->id),
-
-                    // Additional Information
-                    "code" => null,
-                    "batch" => null,
-                    "expired_date" => null,
-
-                    // Files
-                    'files' => [],
-                    'uploadedFiles' => [],
-                    'uploadedFileRemoves' => [],
-                ];
-            }
-        }
     }
 
     /*
@@ -424,9 +370,6 @@ class Detail extends Component
             "quantity" => 0,
             "price" => 0,
 
-            // Purchase Order Information
-            'purchase_order_product_id' => null,
-
             // Tax Information
             'tax_id' => null,
             "is_ppn" => false,
@@ -466,9 +409,6 @@ class Detail extends Component
             "unit_detail_choice" => $copy['unit_detail_choice'],
             "quantity" => $copy['quantity'],
             "price" => $copy['price'],
-
-            // Purchase Order Information
-            'purchase_order_product_id' => $copy['purchase_order_product_id'],
 
             // Tax Information
             'tax_id' => $copy['tax_id'],

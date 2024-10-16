@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('approvals', function (Blueprint $table) {
+        Schema::create('approval_user_histories', function (Blueprint $table) {
             $this->scheme($table, false);
         });
 
-        Schema::create('_history_approvals', function (Blueprint $table) {
+        Schema::create('_history_approval_user_histories', function (Blueprint $table) {
             $this->scheme($table, true);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('approvals');
-        Schema::dropIfExists('_history_approvals');
+        Schema::dropIfExists('approval_user_histories');
+        Schema::dropIfExists('_history_approval_user_histories');
     }
 
     private function scheme(Blueprint $table, $is_history = false)
@@ -33,15 +33,11 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('remarks_id', 'approvals_remarks_id_idx');
-            $table->index('remarks_type', 'approvals_remarks_type_idx');
+            $table->index('approval_user_id', 'approval_user_histories_approval_user_id_idx');
         }
 
+        $table->unsignedBigInteger("approval_user_id")->comment('Approval User ID');
         $table->text('note')->nullable()->comment('Catatan');
-        $table->boolean('is_sequentially')->default(false)->comment('Penentu harus berurutan');
-        $table->bigInteger("remarks_id")->unsigned()->nullable()->comment('FK Polimorfik');
-        $table->string('remarks_type')->nullable()->comment('Jenis Polimorfik');
-        $table->json('config')->comment('Konfigurasi Aturan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

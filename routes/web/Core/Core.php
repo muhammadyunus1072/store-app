@@ -69,7 +69,7 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
     });
 
     Route::group(["controller" => SettingController::class, "prefix" => "setting_logistic", "as" => "setting_logistic."], function () {
-        Route::get('/', 'setting_logistic')->name('index');
+        Route::get('/', 'logistic')->name('index');
 
         Route::get('/tax/get', [TaxController::class, 'search'])->name('get.tax');
     });
