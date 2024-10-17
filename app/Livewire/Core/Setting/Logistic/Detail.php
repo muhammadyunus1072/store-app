@@ -5,7 +5,7 @@ namespace App\Livewire\Core\Setting\Logistic;
 use Exception;
 use App\Models\Core\Setting\Setting;
 use App\Helpers\Alert;
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Crypt;
@@ -24,7 +24,7 @@ class Detail extends Component
     public $product_code;
     public $product_batch;
     public $product_substract_stock_method;
-    public $product_substract_stock_method_choice = StockHelper::SUBSTRACT_STOCK_METHOD_CHOICE;
+    public $product_substract_stock_method_choice = StockHandler::SUBSTRACT_STOCK_METHOD_CHOICE;
     public $product_expired_date;
     public $product_attachment;
     public $approval_key_good_receive;

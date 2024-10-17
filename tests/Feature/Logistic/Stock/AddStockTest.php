@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Logistic\Stock;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Helpers\NumberFormatter;
 use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
@@ -44,7 +44,7 @@ class AddStockTest extends TestCase
             $code = 'XU64283X';
             $batch = 'GJDAO231';
 
-            StockHelper::addStock(
+            StockHandler::addStock(
                 productId: $product->id,
                 companyId: $company->id,
                 warehouseId: $warehouse->id,
@@ -57,7 +57,7 @@ class AddStockTest extends TestCase
                 expiredDate: $expiredDate,
             );
 
-            $resultConvert = StockHelper::convertUnitPrice($quantity, $price, $unitDetail->id);
+            $resultConvert = StockHandler::convertUnitPrice($quantity, $price, $unitDetail->id);
             $convertedQuantity = $resultConvert['quantity'];
             $convertedPrice = $resultConvert['price'];
 

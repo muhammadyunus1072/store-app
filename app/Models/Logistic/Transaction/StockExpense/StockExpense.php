@@ -2,7 +2,7 @@
 
 namespace App\Models\Logistic\Transaction\StockExpense;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Helpers\NumberGenerator;
 use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
@@ -11,9 +11,11 @@ use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
+use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Repositories\Core\Setting\SettingRepository;
+use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
 use App\Settings\SettingLogistic;
 use App\Traits\HasApproval;
 
@@ -92,72 +94,103 @@ class StockExpense extends Model
     */
     public function processStock()
     {
+        $data = [];
         foreach ($this->stockExpenseProducts as $stockExpenseProduct) {
             if ($stockExpenseProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
-            StockHelper::substractStock(
-                productId: $stockExpenseProduct->product_id,
-                companyId: $this->company_id,
-                warehouseId: $this->warehouse_id,
-                quantity: $stockExpenseProduct->quantity,
-                unitDetailId: $stockExpenseProduct->unit_detail_id,
-                remarksId: $stockExpenseProduct->id,
-                remarksType: get_class($stockExpenseProduct),
-                remarksNote: '-',
-            );
+            $data[] = [
+                'id' => $stockExpenseProduct->id,
+                'product_id' => $stockExpenseProduct->product_id,
+                'product_name' => $stockExpenseProduct->product_name,
+                'company_id' => $this->company_id,
+                'warehouse_id' => $this->warehouse_id,
+                'quantity' => $stockExpenseProduct->quantity,
+                'unit_detail_id' => $stockExpenseProduct->unit_detail_id,
+                'transaction_date' => $this->expense_date,
+                'remarks_id' => $stockExpenseProduct->id,
+                'remarks_type' => get_class($stockExpenseProduct)
+            ];
         }
+
+        StockHandler::substract($data);
     }
 
     public function updateStock()
     {
+        $substractData = [];
+        $updateData = [];
+        $cancelData = [];
+
+        // Prepare Stock Cancel
+        $deletedStockExpenseProducts = $this->stockExpenseProducts()->onlyTrashed()->get();
+        foreach ($deletedStockExpenseProducts as $deletedStockExpenseProduct) {
+            if ($deletedStockExpenseProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
+                continue;
+            }
+
+            $cancelData[] = [
+                'remarks_id' => $deletedStockExpenseProduct->id,
+                'remarks_type' => get_class($deletedStockExpenseProduct)
+            ];
+        }
+
+        // Prepare Stock Add & Update
         foreach ($this->stockExpenseProducts as $stockExpenseProduct) {
             if ($stockExpenseProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
             if ($stockExpenseProduct->created_at == $stockExpenseProduct->updated_at) {
-                // Create
-                StockHelper::substractStock(
-                    productId: $stockExpenseProduct->product_id,
-                    companyId: $this->company_id,
-                    warehouseId: $this->warehouse_id,
-                    quantity: $stockExpenseProduct->quantity,
-                    unitDetailId: $stockExpenseProduct->unit_detail_id,
-                    remarksId: $stockExpenseProduct->id,
-                    remarksType: get_class($stockExpenseProduct),
-                    remarksNote: '-',
-                );
+                $substractData[] = [
+                    'id' => $stockExpenseProduct->id,
+                    'product_id' => $stockExpenseProduct->product_id,
+                    'product_name' => $stockExpenseProduct->product_name,
+                    'company_id' => $this->company_id,
+                    'warehouse_id' => $this->warehouse_id,
+                    'quantity' => $stockExpenseProduct->quantity,
+                    'unit_detail_id' => $stockExpenseProduct->unit_detail_id,
+                    'transaction_date' => $this->expense_date,
+                    'remarks_id' => $stockExpenseProduct->id,
+                    'remarks_type' => get_class($stockExpenseProduct)
+                ];
             } else {
-                // Update
-                StockHelper::updateStockHistory(
-                    remarksId: $stockExpenseProduct->id,
-                    remarksType: get_class($stockExpenseProduct),
-                    remarksNote: '-',
-                    transactionSign: -1,
-
-                    unitDetailId: $stockExpenseProduct->unit_detail_id,
-                    quantity: $stockExpenseProduct->quantity,
-                    transactionDate: $this->expense_date,
-                    newRemarksNote: '-',
-                );
+                $updateData[] = [
+                    'id' => $stockExpenseProduct->id,
+                    'product_id' => $stockExpenseProduct->product_id,
+                    'product_name' => $stockExpenseProduct->product_name,
+                    'company_id' => $this->company_id,
+                    'warehouse_id' => $this->warehouse_id,
+                    'quantity' => $stockExpenseProduct->quantity,
+                    'unit_detail_id' => $stockExpenseProduct->unit_detail_id,
+                    'transaction_date' => $this->expense_date,
+                    'remarks_id' => $stockExpenseProduct->id,
+                    'remarks_type' => get_class($stockExpenseProduct)
+                ];
             }
         }
+
+        StockHandler::cancel($cancelData);
+        StockHandler::substract($substractData);
+        StockHandler::updateSubstract($updateData);
     }
 
     public function cancelStock()
     {
+        $data = [];
         foreach ($this->stockExpenseProducts as $stockExpenseProduct) {
             if ($stockExpenseProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
-            StockHelper::cancelStock(
-                remarksId: $stockExpenseProduct->id,
-                remarksType: get_class($stockExpenseProduct),
-            );
+            $data[] = [
+                'remarks_id' => $stockExpenseProduct->id,
+                'remarks_type' => get_class($stockExpenseProduct)
+            ];
         }
+
+        StockHandler::cancel($data);
     }
 
     /*

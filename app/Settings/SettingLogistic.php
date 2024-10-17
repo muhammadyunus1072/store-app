@@ -2,7 +2,7 @@
 
 namespace App\Settings;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 
 class SettingLogistic
 {
@@ -25,7 +25,7 @@ class SettingLogistic
         self::INPUT_PRODUCT_BATCH  => false,
         self::INPUT_PRODUCT_EXPIRED_DATE => false,
         self::INPUT_PRODUCT_ATTACHMENT => false,
-        self::SUBSTRACT_STOCK_METHOD => StockHelper::SUBSTRACT_STOCK_METHOD_FIFO,
+        self::SUBSTRACT_STOCK_METHOD => StockHandler::SUBSTRACT_STOCK_METHOD_FIFO,
         self::PRICE_INTEGER_VALUE => true,
         self::APPROVAL_KEY_GOOD_RECEIVE => "",
         self::APPROVAL_KEY_STOCK_REQUEST => "",

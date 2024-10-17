@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Logistic;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use Illuminate\Console\Command;
 
 class CalculateProductStockDetail extends Command
@@ -26,6 +26,6 @@ class CalculateProductStockDetail extends Command
      */
     public function handle()
     {
-        StockHelper::calculateStockDetail($this->option('productDetailId'));
+        StockHandler::calculateStockDetail($this->option('productDetailId'));
     }
 }

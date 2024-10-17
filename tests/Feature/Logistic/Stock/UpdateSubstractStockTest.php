@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Logistic\Stock;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Helpers\NumberFormatter;
 use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
@@ -47,7 +47,7 @@ class UpdateSubstractStockTest extends TestCase
             $code = 'XU64283X';
             $batch = 'GJDAO231';
 
-            StockHelper::addStock(
+            StockHandler::addStock(
                 productId: $product->id,
                 companyId: $company->id,
                 warehouseId: $warehouse->id,
@@ -60,7 +60,7 @@ class UpdateSubstractStockTest extends TestCase
                 expiredDate: $expiredDate,
             );
 
-            $resultConvert = StockHelper::convertUnitPrice($quantity, $price, $unitDetail->id);
+            $resultConvert = StockHandler::convertUnitPrice($quantity, $price, $unitDetail->id);
             $convertedQuantity = $resultConvert['quantity'];
             $convertedPrice = $resultConvert['price'];
 
@@ -82,7 +82,7 @@ class UpdateSubstractStockTest extends TestCase
             $remarksId = 0;
             $remarksType = 'Test';
 
-            StockHelper::substractStock(
+            StockHandler::substractStock(
                 productId: $product->id,
                 companyId: $company->id,
                 warehouseId: $warehouse->id,
@@ -92,7 +92,7 @@ class UpdateSubstractStockTest extends TestCase
                 remarksType: $remarksType,
             );
 
-            $resultConvert = StockHelper::convertUnitPrice($substractQuantity, $price, $unitDetail->id);
+            $resultConvert = StockHandler::convertUnitPrice($substractQuantity, $price, $unitDetail->id);
             $convertedSubstractQuantity = $resultConvert['quantity'];
 
             $this->assertDatabaseHas('product_stocks', [
@@ -130,7 +130,7 @@ class UpdateSubstractStockTest extends TestCase
             */
             $newSubstractQuantity = 10;
 
-            StockHelper::updateSubstractStock(
+            StockHandler::updateSubstractStock(
                 remarksId: $remarksId,
                 remarksType: $remarksType,
                 productId: $product->id,
@@ -140,7 +140,7 @@ class UpdateSubstractStockTest extends TestCase
                 unitDetailId: $unitDetail->id,
             );
 
-            $resultConvert = StockHelper::convertUnitPrice($newSubstractQuantity, $price, $unitDetail->id);
+            $resultConvert = StockHandler::convertUnitPrice($newSubstractQuantity, $price, $unitDetail->id);
             $convertedSubstractQuantity = $resultConvert['quantity'];
 
             $this->assertDatabaseHas('product_stocks', [

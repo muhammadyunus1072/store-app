@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Logistic\Transaction\ProductDetail;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Repositories\MasterDataRepository;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
 
@@ -68,13 +68,13 @@ class ProductDetailRepository extends MasterDataRepository
             ->whereHas('productStockDetail', function ($query) {
                 $query->where('quantity', '>', 0);
             })
-            ->when($substractStockMethod == StockHelper::SUBSTRACT_STOCK_METHOD_FIFO, function ($query) {
+            ->when($substractStockMethod == StockHandler::SUBSTRACT_STOCK_METHOD_FIFO, function ($query) {
                 $query->orderBy('entry_date', 'ASC')->orderBy('id', 'ASC');
             })
-            ->when($substractStockMethod == StockHelper::SUBSTRACT_STOCK_METHOD_LIFO, function ($query) {
+            ->when($substractStockMethod == StockHandler::SUBSTRACT_STOCK_METHOD_LIFO, function ($query) {
                 $query->orderBy('entry_date', 'DESC')->orderBy('id', 'DESC');
             })
-            ->when($substractStockMethod == StockHelper::SUBSTRACT_STOCK_METHOD_FEFO, function ($query) {
+            ->when($substractStockMethod == StockHandler::SUBSTRACT_STOCK_METHOD_FEFO, function ($query) {
                 $query->orderBy('expired_date', 'ASC')->orderBy('id', 'ASC');
             })
             ->get();

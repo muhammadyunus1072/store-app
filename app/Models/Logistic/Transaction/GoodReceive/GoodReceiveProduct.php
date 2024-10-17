@@ -3,18 +3,16 @@
 namespace App\Models\Logistic\Transaction\GoodReceive;
 
 use App\Models\Finance\Master\Tax;
-use App\Helpers\Logistic\StockHelper;
-use Sis\TrackHistory\HasTrackHistory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\GoodReceive\GoodReceive;
 use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProductTax;
 use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProductAttachment;
-use App\Repositories\Logistic\Transaction\ProductDetailHistory\ProductDetailHistoryRepository;
+use Sis\TrackHistory\HasTrackHistory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class GoodReceiveProduct extends Model
 {

@@ -3,7 +3,7 @@
 namespace App\Models\Logistic\Transaction\ProductDetail;
 
 use Sis\TrackHistory\HasTrackHistory;
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Model;
@@ -27,27 +27,27 @@ class ProductDetailHistory extends Model
     protected static function onBoot()
     {
         self::created(function ($model) {
-            StockHelper::calculateStock($model->productDetail->product_id);
-            StockHelper::calculateStockDetail($model->product_detail_id);
-            StockHelper::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
-            StockHelper::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
-            StockHelper::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
+            StockHandler::calculateStock($model->productDetail->product_id);
+            StockHandler::calculateStockDetail($model->product_detail_id);
+            StockHandler::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
+            StockHandler::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
+            StockHandler::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
         });
 
         self::updated(function ($model) {
-            StockHelper::calculateStock($model->productDetail->product_id);
-            StockHelper::calculateStockDetail($model->product_detail_id);
-            StockHelper::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
-            StockHelper::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
-            StockHelper::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
+            StockHandler::calculateStock($model->productDetail->product_id);
+            StockHandler::calculateStockDetail($model->product_detail_id);
+            StockHandler::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
+            StockHandler::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
+            StockHandler::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
         });
 
         self::deleted(function ($model) {
-            StockHelper::calculateStock($model->productDetail->product_id);
-            StockHelper::calculateStockDetail($model->product_detail_id);
-            StockHelper::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
-            StockHelper::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
-            StockHelper::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
+            StockHandler::calculateStock($model->productDetail->product_id);
+            StockHandler::calculateStockDetail($model->product_detail_id);
+            StockHandler::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
+            StockHandler::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
+            StockHandler::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
         });
     }
 

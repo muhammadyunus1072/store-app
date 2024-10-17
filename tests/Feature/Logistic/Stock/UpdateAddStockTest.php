@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Logistic\Stock;
 
-use App\Helpers\Logistic\StockHelper;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
@@ -48,7 +48,7 @@ class UpdateAddStockTest extends TestCase
             $remarksId = 0;
             $remarksType = "Test";
 
-            StockHelper::addStock(
+            StockHandler::addStock(
                 productId: $product->id,
                 companyId: $company->id,
                 warehouseId: $warehouse->id,
@@ -73,7 +73,7 @@ class UpdateAddStockTest extends TestCase
             $newCode = 'AAAAAA';
             $newBatch = 'XXXXXX';
 
-            StockHelper::updateAddStock(
+            StockHandler::updateAddStock(
                 remarksId: $remarksId,
                 remarksType: $remarksType,
 
@@ -92,7 +92,7 @@ class UpdateAddStockTest extends TestCase
             /* 
             | ASSERT NEW STOCK
             */
-            $newResultConvert = StockHelper::convertUnitPrice($newQuantity, $newPrice, $newUnitDetail->id);
+            $newResultConvert = StockHandler::convertUnitPrice($newQuantity, $newPrice, $newUnitDetail->id);
             $newConvertedQuantity = $newResultConvert['quantity'];
             $newConvertedPrice = $newResultConvert['price'];
 
@@ -150,7 +150,7 @@ class UpdateAddStockTest extends TestCase
             /* 
             | ASSERT OLD STOCK
             */
-            $resultConvert = StockHelper::convertUnitPrice($quantity, $price, $unitDetail->id);
+            $resultConvert = StockHandler::convertUnitPrice($quantity, $price, $unitDetail->id);
             $convertedPrice = $resultConvert['price'];
 
             $this->assertDatabaseHas('product_details', [
