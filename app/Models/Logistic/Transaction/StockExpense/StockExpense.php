@@ -7,17 +7,15 @@ use App\Helpers\NumberGenerator;
 use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
-use Sis\TrackHistory\HasTrackHistory;
+use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
+use App\Models\Logistic\Master\Warehouse\Warehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Logistic\Master\Warehouse\Warehouse;
-use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Repositories\Core\Setting\SettingRepository;
-use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
 use App\Settings\SettingLogistic;
 use App\Traits\HasApproval;
+use Sis\TrackHistory\HasTrackHistory;
 
 class StockExpense extends Model
 {

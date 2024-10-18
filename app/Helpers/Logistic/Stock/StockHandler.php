@@ -5,6 +5,7 @@ namespace App\Helpers\Logistic\Stock;
 use App\Helpers\ErrorMessageHelper;
 use Carbon\Carbon;
 use App\Models\Logistic\Master\Product\Product;
+use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Core\Setting\SettingRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
@@ -124,37 +125,6 @@ class StockHandler
         }
     }
 
-    public static function cancel($data)
-    {
-        foreach ($data as $item) {
-            $whereClause = [
-                ['remarks_id', $item['remarks_id']],
-                ['remarks_type', $item['remarks_type']]
-            ];
-
-            if (isset($item['remarks_note'])) {
-                $whereClause[] = ['remarks_note', $item['remarks_note']];
-            }
-
-            // Delete Histories
-            $histories = ProductDetailHistoryRepository::getBy($whereClause);
-            $affectedProductDetails = [];
-            foreach ($histories as $history) {
-                $affectedProductDetails[] = $history->productDetail;
-                $history->delete();
-            }
-
-            // Check Histories & Current Stock
-            foreach ($affectedProductDetails as $productDetail) {
-                if ($productDetail->histories()->count() == 0) {
-                    $productDetail->delete();
-                } else if (StockHandler::getStockDetail($productDetail['id']) < 0) {
-                    throw new \Exception(ErrorMessageHelper::stockNotAvailable($productDetail->product->name));
-                }
-            }
-        }
-    }
-
     public static function substract($data)
     {
         $createdHistories = [];
@@ -185,7 +155,7 @@ class StockHandler
             foreach ($productDetails as $productDetail) {
                 $usedQty = min($productDetail->productStockDetail->quantity, $substractQty) * -1;
 
-                $createdHistories[$item['id']] = ProductDetailHistoryRepository::create([
+                $createdHistories[$item['id']][] = ProductDetailHistoryRepository::create([
                     'product_detail_id' => $productDetail->id,
                     'transaction_date' => Carbon::now(),
                     'quantity' => $usedQty,
@@ -231,12 +201,12 @@ class StockHandler
                 self::substract([$item]);
             } else if ($quantityDiff < 0) {
                 foreach ($histories as $history) {
-                    if ($quantityDiff > abs($history->quantity)) {
+                    if ($quantityDiff < $history->quantity) {
                         ProductDetailRepository::delete($history->id);
-                        $quantityDiff += $history->quantity;
+                        $quantityDiff -= $history->quantity;
                     } else {
                         ProductDetailHistoryRepository::update($history->id, [
-                            'quantity' => $history->quantity + $quantityDiff,
+                            'quantity' => $history->quantity - $quantityDiff,
                         ]);
                         $quantityDiff = 0;
                     }
@@ -244,6 +214,148 @@ class StockHandler
                     if ($quantityDiff == 0) {
                         break;
                     }
+                }
+
+                if ($quantityDiff != 0) {
+                    throw new \Exception(ErrorMessageHelper::stockNotAvailable($item['product_name']));
+                }
+            }
+        }
+    }
+
+    public static function transfer($data)
+    {
+        foreach ($data as $item) {
+            $item['company_id'] = $item['company_requested_id'];
+            $item['warehouse_id'] = $item['warehouse_requested_id'];
+        }
+
+        $createdHistories = self::substract($data);
+
+        foreach ($data as $item) {
+            foreach ($createdHistories[$item['id']] as $history) {
+                self::createStock(
+                    productId: $item['product_id'],
+                    companyId: $item['company_requester_id'],
+                    warehouseId: $item['warehouse_requester_id'],
+                    transactionDate: $item['transaction_date'],
+                    quantity: abs($history->quantity),
+                    price: $history->productDetail->price,
+                    code: $history->productDetail->code,
+                    batch: $history->productDetail->batch,
+                    expiredDate: $history->productDetail->expired_date,
+                    remarksId: $item['remarks_id'],
+                    remarksType: $item['remarks_type'],
+                    remarksNote: $history->id,
+                );
+            }
+        }
+    }
+
+    public static function updateTransfer($data)
+    {
+        foreach ($data as $item) {
+            $resultConvert = self::convertUnitPrice($item['quantity'], 0, $item['unit_detail_id']);
+            $substractHistories = ProductDetailHistoryRepository::getBy(
+                whereClause: [
+                    ['remarks_id', $item['remarks_id']],
+                    ['remarks_type', $item['remarks_type']],
+                    ['quantity', '<', 0],
+                ],
+                orderByClause: [
+                    ['id', 'DESC']
+                ]
+            );
+
+            $quantityBefore = abs($substractHistories->sum('quantity'));
+            $quantityAfter = $resultConvert['quantity'];
+            $quantityDiff = $quantityAfter - $quantityBefore;
+
+            if ($quantityDiff > 0) {
+                $item['quantity'] = $quantityDiff;
+                self::transfer([$item]);
+            } else if ($quantityDiff < 0) {
+                foreach ($substractHistories as $substractHistory) {
+                    // Get Add History in Warehouse Requester
+                    $addHistories = ProductDetailHistoryRepository::getBy(
+                        whereClause: [
+                            ['remarks_id', $item['remarks_id']],
+                            ['remarks_type', $item['remarks_type']],
+                            ['remarks_note', $substractHistory->id],
+                            ['quantity', '>', 0],
+                        ]
+                    );
+
+                    foreach ($addHistories as $addHistory) {
+                        // Check Available Stock
+                        $availableStock = $addHistory->productDetail->productStockDetail->quantity;
+                        if ($availableStock <= 0) {
+                            continue;
+                        }
+
+                        if (abs($quantityDiff) > $availableStock) {
+                            if ($availableStock == $addHistory->quantity) {
+                                ProductDetailHistoryRepository::delete($addHistory->id);
+                                ProductDetailHistoryRepository::delete($substractHistory->id);
+                            } else {
+                                ProductDetailHistoryRepository::update($addHistory->id, [
+                                    'quantity' => $addHistory->quantity - $availableStock,
+                                ]);
+                                ProductDetailHistoryRepository::update($substractHistory->id, [
+                                    'quantity' => $substractHistory->quantity + $availableStock,
+                                ]);
+                            }
+
+                            $quantityDiff += $availableStock;
+                        } else {
+                            ProductDetailHistoryRepository::update($addHistory->id, [
+                                'quantity' => $addHistory->quantity - $availableStock,
+                            ]);
+                            ProductDetailHistoryRepository::update($substractHistory->id, [
+                                'quantity' => $substractHistory->quantity + $availableStock,
+                            ]);
+                            $quantityDiff = 0;
+                        }
+                    }
+
+                    if ($quantityDiff == 0) {
+                        break;
+                    }
+                }
+
+                if ($quantityDiff != 0) {
+                    throw new \Exception(ErrorMessageHelper::stockNotAvailable($item['product_name']));
+                }
+            }
+        }
+    }
+
+    public static function cancel($data)
+    {
+        foreach ($data as $item) {
+            $whereClause = [
+                ['remarks_id', $item['remarks_id']],
+                ['remarks_type', $item['remarks_type']]
+            ];
+
+            if (isset($item['remarks_note'])) {
+                $whereClause[] = ['remarks_note', $item['remarks_note']];
+            }
+
+            // Delete Histories
+            $histories = ProductDetailHistoryRepository::getBy($whereClause);
+            $affectedProductDetails = [];
+            foreach ($histories as $history) {
+                $affectedProductDetails[] = $history->productDetail;
+                $history->delete();
+            }
+
+            // Check Histories & Current Stock
+            foreach ($affectedProductDetails as $productDetail) {
+                if ($productDetail->histories()->count() == 0) {
+                    $productDetail->delete();
+                } else if (StockHandler::getStockDetail($productDetail['id']) < 0) {
+                    throw new \Exception(ErrorMessageHelper::stockNotAvailable($productDetail->product->name));
                 }
             }
         }

@@ -30,6 +30,15 @@ class StockExpenseProduct extends Model
             $model = $model->product->saveInfo($model);
             $model = $model->unitDetail->saveInfo($model);
         });
+
+        self::updating(function ($model) {
+            if ($model->product_id != $model->getOriginal('product_id')) {
+                $model = $model->product->saveInfo($model);
+            }
+            if ($model->unit_detail_id != $model->getOriginal('unit_detail_id')) {
+                $model = $model->unitDetail->saveInfo($model);
+            }
+        });
     }
 
     public function isDeletable()
@@ -41,6 +50,10 @@ class StockExpenseProduct extends Model
     {
         return true;
     }
+
+    /*
+    | RELATIONSHIP
+    */
 
     public function product()
     {
