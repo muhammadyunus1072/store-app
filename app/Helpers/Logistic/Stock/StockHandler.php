@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Logistic\Stock;
 
-use App\Helpers\ErrorMessageHelper;
+use App\Helpers\General\ErrorMessageHelper;
 use Carbon\Carbon;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;

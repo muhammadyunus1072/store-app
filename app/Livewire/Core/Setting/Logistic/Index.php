@@ -4,7 +4,7 @@ namespace App\Livewire\Core\Setting\Logistic;
 
 use Exception;
 use App\Models\Core\Setting\Setting;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Helpers\Logistic\Stock\StockHandler;
 use Livewire\Component;
 use Livewire\Attributes\On;

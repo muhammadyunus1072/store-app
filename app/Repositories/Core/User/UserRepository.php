@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Core\User;
 
-use App\Helpers\MenuHelper;
+use App\Helpers\General\MenuHelper;
 use App\Models\Core\User\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;

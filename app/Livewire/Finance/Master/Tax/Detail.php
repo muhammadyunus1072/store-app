@@ -3,11 +3,11 @@
 namespace App\Livewire\Finance\Master\Tax;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
-use App\Helpers\NumberFormatter;
+use App\Helpers\General\NumberFormatter;
 use Livewire\Attributes\Validate;
 use App\Models\Finance\Master\Tax;
 use Illuminate\Support\Facades\DB;

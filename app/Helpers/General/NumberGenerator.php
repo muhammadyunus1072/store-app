@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Helpers\General;
 
 use Carbon\Carbon;
-use App\Helpers\RomanConverter;
 
 class NumberGenerator
 {

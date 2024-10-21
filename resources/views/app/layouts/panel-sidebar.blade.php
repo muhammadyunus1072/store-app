@@ -9,7 +9,7 @@
             <!--begin::Menu-->
             <div class="menu menu-column menu-rounded menu-sub-indention fw-semibold fs-6" id="#kt_app_sidebar_menu"
                 data-kt-menu="true" data-kt-menu-expand="false">
-                @foreach (App\Helpers\MenuHelper::menu() as $menu)
+                @foreach (App\Helpers\General\MenuHelper::menu() as $menu)
                     @if (isset($menu['header']))
                         <div class="menu-item pt-5">
                             <div class="menu-content">

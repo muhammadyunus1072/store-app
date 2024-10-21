@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Logistic\Master\Unit;
 
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
-use App\Helpers\NumberFormatter;
+use App\Helpers\General\NumberFormatter;
 use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;

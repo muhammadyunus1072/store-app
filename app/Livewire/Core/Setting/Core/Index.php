@@ -3,7 +3,7 @@
 namespace App\Livewire\Core\Setting\Core;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Repositories\Core\Company\CompanyRepository;
 use Livewire\Component;
 use Livewire\Attributes\On;

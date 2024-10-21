@@ -3,11 +3,11 @@
 namespace App\Livewire\Logistic\Master\Warehouse;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
-use App\Helpers\NumberFormatter;
+use App\Helpers\General\NumberFormatter;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;

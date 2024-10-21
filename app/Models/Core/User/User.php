@@ -3,12 +3,10 @@
 namespace App\Models\Core\User;
 
 use App\Models\Core\Company\Company;
-use Laravel\Sanctum\HasApiTokens;
-use App\Models\Core\User\UserCompany;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
-use App\Models\UserWarehouse;
 use Sis\TrackHistory\HasTrackHistory;
 use Spatie\Permission\Traits\HasRoles;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;

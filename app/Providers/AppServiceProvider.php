@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('currency', function ($expression) {
-            return "<?php echo App\Helpers\NumberFormatter::format($expression); ?>";
+            return "<?php echo App\Helpers\General\NumberFormatter::format($expression); ?>";
         });
 
         $this->app->singleton(UserStateHandler::class, function (Application $app) {

@@ -3,7 +3,7 @@
 namespace App\Livewire\Core\Auth;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Repositories\Core\User\UserRepository;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;

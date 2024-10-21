@@ -3,7 +3,7 @@
 namespace App\Models\Logistic\Transaction\StockExpense;
 
 use App\Helpers\Logistic\Stock\StockHandler;
-use App\Helpers\NumberGenerator;
+use App\Helpers\General\NumberGenerator;
 use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;

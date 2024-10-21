@@ -46,7 +46,7 @@ class UserStateHandler
                 'user_id' => Auth::id(),
                 'state' => json_encode([
                     'company_id' => $this->state['company_id'] ? Crypt::decrypt($this->state['company_id']) : null,
-                    'warehouse' => $this->state['warehouse_id'] ? Crypt::decrypt($this->state['warehouse_id']) : null,
+                    'warehouse_id' => $this->state['warehouse_id'] ? Crypt::decrypt($this->state['warehouse_id']) : null,
                 ]),
             ]);
         } else {
@@ -82,7 +82,7 @@ class UserStateHandler
             UserStateRepository::update($userState->id, [
                 'state' => json_encode([
                     'company_id' => $this->state['company_id'] ? Crypt::decrypt($this->state['company_id']) : null,
-                    'warehouse' => $this->state['warehouse_id'] ? Crypt::decrypt($this->state['warehouse_id']) : null,
+                    'warehouse_id' => $this->state['warehouse_id'] ? Crypt::decrypt($this->state['warehouse_id']) : null,
                 ]),
             ]);
         }

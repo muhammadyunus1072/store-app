@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Logistic\Master\Unit;
 
-use App\Helpers\NumberFormatter;
+use App\Helpers\General\NumberFormatter;
 use Illuminate\Support\Facades\Crypt;
 use App\Repositories\MasterDataRepository;
 use App\Models\Logistic\Master\Unit\UnitDetail;

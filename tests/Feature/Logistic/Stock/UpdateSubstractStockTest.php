@@ -3,7 +3,7 @@
 namespace Tests\Feature\Logistic\Stock;
 
 use App\Helpers\Logistic\Stock\StockHandler;
-use App\Helpers\NumberFormatter;
+use App\Helpers\General\NumberFormatter;
 use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;

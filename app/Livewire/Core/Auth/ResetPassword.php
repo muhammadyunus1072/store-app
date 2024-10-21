@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Validate;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Repositories\Core\User\UserRepository;
 
 class ResetPassword extends Component

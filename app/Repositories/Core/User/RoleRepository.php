@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Core\User;
 
-use App\Helpers\MenuHelper;
+use App\Helpers\General\MenuHelper;
 use App\Repositories\MasterDataRepository;
 use Spatie\Permission\Models\Role;
 

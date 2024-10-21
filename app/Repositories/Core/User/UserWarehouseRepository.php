@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Core\User;
 
-use App\Models\Core\User\UserCompany;
 use App\Models\Core\User\UserWarehouse;
 use App\Repositories\MasterDataRepository;
 
@@ -26,10 +25,10 @@ class UserWarehouseRepository extends MasterDataRepository
         self::create($data);
     }
 
-    public static function deleteExcept($userId, $companyIds)
+    public static function deleteExcept($userId, $ids)
     {
-        $deletedData = UserCompany::where('user_id', $userId)
-            ->whereNotIn('warehouse_id', $companyIds)
+        $deletedData = UserWarehouse::where('user_id', $userId)
+            ->whereNotIn('warehouse_id', $ids)
             ->get();
 
         foreach ($deletedData as $item) {

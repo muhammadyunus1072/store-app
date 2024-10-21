@@ -2,7 +2,7 @@
 
 namespace App\Models\Logistic\Transaction\GoodReceive;
 
-use App\Helpers\ImageLocationHelper;
+use App\Helpers\General\ImageLocationHelper;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;

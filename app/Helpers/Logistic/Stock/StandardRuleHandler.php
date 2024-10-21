@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Logistic\Stock;
 
-use App\Helpers\ErrorMessageHelper;
+use App\Helpers\General\ErrorMessageHelper;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 

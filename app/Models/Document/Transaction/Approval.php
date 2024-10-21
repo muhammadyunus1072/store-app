@@ -2,7 +2,7 @@
 
 namespace App\Models\Document\Transaction;
 
-use App\Helpers\NumberGenerator;
+use App\Helpers\General\NumberGenerator;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

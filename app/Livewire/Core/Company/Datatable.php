@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Core\Company;
 
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Permissions\AccessCore;
 use Livewire\Component;
 use Livewire\Attributes\On;

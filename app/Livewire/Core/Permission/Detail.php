@@ -3,7 +3,7 @@
 namespace App\Livewire\Core\Permission;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Permissions\PermissionHelper;
 use App\Repositories\Core\User\PermissionRepository;
 use Livewire\Component;

@@ -4,7 +4,7 @@ namespace App\Models\Logistic\Transaction\GoodReceive;
 
 use App\Settings\SettingLogistic;
 use App\Traits\HasApproval;
-use App\Helpers\NumberGenerator;
+use App\Helpers\General\NumberGenerator;
 use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;

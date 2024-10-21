@@ -5,7 +5,7 @@ namespace App\Models\Logistic\Transaction\StockRequest;
 use App\Helpers\Logistic\Stock\StockHandler;
 use Carbon\Carbon;
 use App\Traits\HasApproval;
-use App\Helpers\NumberGenerator;
+use App\Helpers\General\NumberGenerator;
 use App\Models\Core\Setting\Setting;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;

@@ -3,10 +3,10 @@
 namespace App\Livewire\Logistic\Transaction\GoodReceive;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use Livewire\Component;
 use Illuminate\Support\Str;
-use App\Helpers\NumberFormatter;
+use App\Helpers\General\NumberFormatter;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;

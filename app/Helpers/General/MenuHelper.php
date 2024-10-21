@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Helpers\General;
 
-use App\Helpers\CacheHelper;
 use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;

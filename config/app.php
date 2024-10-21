@@ -186,7 +186,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         'Captcha' => Mews\Captcha\Facades\Captcha::class,
         'PermissionHelper' => App\Permissions\PermissionHelper::class,
-        'Alert' => App\Helpers\Alert::class,
+        'Alert' => App\Helpers\General\Alert::class,
         ...App\Permissions\PermissionHelper::ACCESS_ALIASES,
     ])->toArray(),
 

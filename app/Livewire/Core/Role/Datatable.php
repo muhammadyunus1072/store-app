@@ -3,7 +3,7 @@
 namespace App\Livewire\Core\Role;
 
 use App\Traits\Livewire\WithDatatable;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Permissions\AccessCore;
 use App\Permissions\PermissionHelper;
 use App\Repositories\Core\User\RoleRepository;

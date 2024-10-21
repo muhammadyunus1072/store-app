@@ -64,18 +64,27 @@
             @enderror
         </div>
 
-        <div class="col-md-12 mb-4 {{ $isMultipleCompany ? '' : 'd-none' }}">
+        <div class="col-md-12 mb-4">
             <div class="w-100" wire:ignore>
-                <label>Pengguna Perusahaan</label>
-
-                <select id="select2-userCompanies" class="form-select" multiple>
-                    @foreach ($userCompanies as $item)
+                <label>Hak Akses Gudang</label>
+                <select id="select2-user-warehouse" class="form-select" multiple>
+                    @foreach ($userWarehouses as $item)
                         <option value="{{ $item['id'] }}" selected>{{ $item['text'] }}</option>
                     @endforeach
                 </select>
             </div>
         </div>
 
+        <div class="col-md-12 mb-4 {{ $isMultipleCompany ? '' : 'd-none' }}">
+            <div class="w-100" wire:ignore>
+                <label>Hak Akses Perusahaan</label>
+                <select id="select2-user-company" class="form-select" multiple>
+                    @foreach ($userCompanies as $item)
+                        <option value="{{ $item['id'] }}" selected>{{ $item['text'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-success mt-3">
@@ -88,7 +97,8 @@
 @push('js')
     <script>
         $(() => {
-            $('#select2-userCompanies').select2({
+            // SELECT 2 COMPANY
+            $('#select2-user-company').select2({
                 placeholder: "Pilih Perusahaan",
                 ajax: {
                     url: "{{ route('user.get.company') }}",
@@ -113,12 +123,46 @@
                 cache: true
             });
 
-            $('#select2-userCompanies').on('select2:select', function(e) {
+            $('#select2-user-company').on('select2:select', function(e) {
                 @this.call('selectCompany', e.params.data)
             });
 
-            $('#select2-userCompanies').on('select2:unselect', function(e) {
+            $('#select2-user-company').on('select2:unselect', function(e) {
                 @this.call('unselectCompany', e.params.data)
+            });
+
+            // SELECT 2 WAREHOUSE
+            $('#select2-user-warehouse').select2({
+                placeholder: "Pilih Gudang",
+                ajax: {
+                    url: "{{ route('user.get.warehouse') }}",
+                    dataType: "json",
+                    type: "GET",
+                    data: function(params) {
+                        return {
+                            search: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    "id": item.id,
+                                    "text": item.text,
+                                }
+                            })
+                        };
+                    },
+                },
+                cache: true
+            });
+
+            $('#select2-user-warehouse').on('select2:select', function(e) {
+                @this.call('selectWarehouse', e.params.data)
+            });
+
+            $('#select2-user-warehouse').on('select2:unselect', function(e) {
+                @this.call('unselectWarehouse', e.params.data)
             });
         })
     </script>

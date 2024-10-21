@@ -4,7 +4,7 @@ namespace App\Livewire\Core\Auth;
 
 use Livewire\Component;
 use Livewire\Attributes\Validate;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Repositories\Core\User\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

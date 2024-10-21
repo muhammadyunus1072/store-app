@@ -3,7 +3,7 @@
 namespace App\Livewire\Core\User;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Repositories\Core\Setting\SettingRepository;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Repositories\Core\User\RoleRepository;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Core\User\UserCompanyRepository;
+use App\Repositories\Core\User\UserWarehouseRepository;
 use App\Settings\SettingCore;
 
 class Detail extends Component
@@ -36,6 +37,7 @@ class Detail extends Component
     public $password;
 
     public $userCompanies = [];
+    public $userWarehouses = [];
 
     // Helpers
     public $isMultipleCompany = false;
@@ -43,8 +45,7 @@ class Detail extends Component
 
     public function mount()
     {
-        $setting = SettingRepository::findBy(whereClause: [['name', SettingCore::NAME]]);
-        $this->isMultipleCompany = $setting->get(SettingCore::MULTIPLE_COMPANY);
+        $this->isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
 
         $this->roles = RoleRepository::getIdAndNames()->pluck('name');
         $this->role = $this->roles[0];
@@ -58,10 +59,17 @@ class Detail extends Component
             $this->email = $user->email;
             $this->role = $user->roles[0]->name;
 
-            foreach ($user->userCompanies as $user_company) {
+            foreach ($user->userCompanies as $item) {
                 $this->userCompanies[] = [
-                    'id' => Crypt::encrypt($user_company->company_id),
-                    'text' => $user_company->company->name,
+                    'id' => Crypt::encrypt($item->company_id),
+                    'text' => $item->company->name,
+                ];
+            }
+
+            foreach ($user->userWarehouses as $item) {
+                $this->userWarehouses[] = [
+                    'id' => Crypt::encrypt($item->warehouse_id),
+                    'text' => $item->warehouse->name,
                 ];
             }
         }
@@ -100,6 +108,22 @@ class Detail extends Component
         $index = array_search($data['id'], array_column($this->userCompanies, 'id'));
         if ($index !== false) {
             unset($this->userCompanies[$index]);
+        }
+    }
+
+    public function selectWarehouse($data)
+    {
+        $this->userWarehouses[] = [
+            'id' => $data['id'],
+            'text' => $data['text'],
+        ];
+    }
+
+    public function unselectWarehouse($data)
+    {
+        $index = array_search($data['id'], array_column($this->userWarehouses, 'id'));
+        if ($index !== false) {
+            unset($this->userWarehouses[$index]);
         }
     }
 
@@ -148,15 +172,27 @@ class Detail extends Component
                 $objId = $user->id;
             }
 
-            foreach ($this->userCompanies as $user_company) {
+            // Handle User Companies
+            foreach ($this->userCompanies as $item) {
                 UserCompanyRepository::createIfNotExist([
                     'user_id' => $objId,
-                    'company_id' => Crypt::decrypt($user_company['id']),
+                    'company_id' => Crypt::decrypt($item['id']),
                 ]);
             }
             UserCompanyRepository::deleteExcept($objId, array_map(function ($item) {
                 return Crypt::decrypt($item['id']);
             }, $this->userCompanies));
+
+            // Handle User Warehouses
+            foreach ($this->userWarehouses as $item) {
+                UserWarehouseRepository::createIfNotExist([
+                    'user_id' => $objId,
+                    'warehouse_id' => Crypt::decrypt($item['id']),
+                ]);
+            }
+            UserWarehouseRepository::deleteExcept($objId, array_map(function ($item) {
+                return Crypt::decrypt($item['id']);
+            }, $this->userWarehouses));
 
             DB::commit();
 

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Document\Master\ApprovalConfig;
 
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;

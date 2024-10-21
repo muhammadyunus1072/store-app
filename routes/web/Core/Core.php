@@ -46,6 +46,7 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
         Route::get('{id}/edit', 'edit')->name('edit');
 
         Route::get('/company/get', [CompanyController::class, 'search'])->name('get.company');
+        Route::get('/warehouse/get', [WarehouseController::class, 'search'])->name('get.warehouse');
     });
 
     Route::group(["controller" => CompanyController::class, "prefix" => "company", "as" => "company."], function () {

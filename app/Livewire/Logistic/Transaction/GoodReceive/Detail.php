@@ -3,10 +3,10 @@
 namespace App\Livewire\Logistic\Transaction\GoodReceive;
 
 use Exception;
-use App\Helpers\Alert;
+use App\Helpers\General\Alert;
 use App\Helpers\Core\UserStateHelper;
-use App\Helpers\NumberFormatter;
-use App\Helpers\ImageLocationHelper;
+use App\Helpers\General\NumberFormatter;
+use App\Helpers\General\ImageLocationHelper;
 use App\Models\Core\Setting\Setting;
 use App\Models\Finance\Master\Tax;
 use App\Models\Logistic\Master\Product\Product;

@@ -25,10 +25,10 @@ class UserCompanyRepository extends MasterDataRepository
         self::create($data);
     }
 
-    public static function deleteExcept($userId, $companyIds)
+    public static function deleteExcept($userId, $ids)
     {
         $deletedData = UserCompany::where('user_id', $userId)
-            ->whereNotIn('company_id', $companyIds)
+            ->whereNotIn('company_id', $ids)
             ->get();
 
         foreach ($deletedData as $item) {
