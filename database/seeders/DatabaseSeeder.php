@@ -31,10 +31,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             UserSeeder::class,
-            UserCompanySeeder::class,
+            // UserCompanySeeder::class,
             UserWarehouseSeeder::class,
-            CompanySeeder::class,
-            CompanyWarehouseSeeder::class,
+            // CompanySeeder::class,
+            // CompanyWarehouseSeeder::class,
             Core\SettingSeeder::class,
         ]);
 

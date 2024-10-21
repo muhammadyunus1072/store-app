@@ -3,7 +3,6 @@
 namespace Database\Seeders\Core;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use App\Models\Core\User\UserCompany;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 

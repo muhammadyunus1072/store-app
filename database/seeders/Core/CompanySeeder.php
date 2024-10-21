@@ -3,9 +3,7 @@
 namespace Database\Seeders\Core;
 
 use App\Models\Core\Company\Company;
-use App\Models\Core\Company\CompanyWarehouse;
 use Illuminate\Database\Seeder;
-use App\Models\Core\User\UserCompany;
 
 class CompanySeeder extends Seeder
 {
