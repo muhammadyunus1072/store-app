@@ -17,7 +17,7 @@ use Database\Seeders\Logistic\WarehouseSeeder;
 use Database\Seeders\Core\RolesAndPermissionsSeeder;
 use Database\Seeders\Core\UserCompanySeeder;
 use Database\Seeders\Core\UserSeeder;
-
+use Database\Seeders\Core\UserWarehouseSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -32,8 +32,10 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             UserSeeder::class,
             UserCompanySeeder::class,
+            UserWarehouseSeeder::class,
             CompanySeeder::class,
             CompanyWarehouseSeeder::class,
+            Core\SettingSeeder::class,
         ]);
 
         // Finance Seeder

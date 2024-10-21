@@ -4,6 +4,7 @@ namespace App\Livewire\Core\User;
 
 use Exception;
 use App\Helpers\Alert;
+use App\Repositories\Core\Setting\SettingRepository;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -13,12 +14,11 @@ use Illuminate\Support\Facades\Crypt;
 use App\Repositories\Core\User\RoleRepository;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Core\User\UserCompanyRepository;
+use App\Settings\SettingCore;
 
 class Detail extends Component
 {
     public $objId;
-
-    public $roles = [];
 
     #[Validate('required', message: 'Nama Harus Diisi', onUpdate: false)]
     public $name;
@@ -37,8 +37,15 @@ class Detail extends Component
 
     public $userCompanies = [];
 
+    // Helpers
+    public $isMultipleCompany = false;
+    public $roles = [];
+
     public function mount()
     {
+        $setting = SettingRepository::findBy(whereClause: [['name', SettingCore::NAME]]);
+        $this->isMultipleCompany = $setting->get(SettingCore::MULTIPLE_COMPANY);
+
         $this->roles = RoleRepository::getIdAndNames()->pluck('name');
         $this->role = $this->roles[0];
 
@@ -98,10 +105,6 @@ class Detail extends Component
 
     public function store()
     {
-        if (count($this->userCompanies) == 0) {
-            Alert::fail($this, "Gagal", "Perusahaan Belum Diinput");
-            return;
-        }
         $this->validate();
 
         if (!$this->objId) {

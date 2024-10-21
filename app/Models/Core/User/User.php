@@ -2,8 +2,11 @@
 
 namespace App\Models\Core\User;
 
+use App\Models\Core\Company\Company;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Core\User\UserCompany;
+use App\Models\Logistic\Master\Warehouse\Warehouse;
+use App\Models\UserWarehouse;
 use Sis\TrackHistory\HasTrackHistory;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -52,6 +55,24 @@ class User extends Authenticatable implements MustVerifyEmail
         self::deleted(function ($model) {
             $model->userCompanies()->delete();
         });
+    }
+
+    /*
+    | RELATIONSHIP
+    */
+    public function warehouses()
+    {
+        return $this->belongsToMany(Warehouse::class, 'user_warehouses', 'user_id', 'warehouse_id')->whereNull('user_warehouses.deleted_at');
+    }
+
+    public function userWarehouses()
+    {
+        return $this->hasMany(UserWarehouse::class, 'user_id', 'id');
+    }
+
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class, 'user_companies', 'user_id', 'company_id')->whereNull('user_companies.deleted_at');
     }
 
     public function userCompanies()

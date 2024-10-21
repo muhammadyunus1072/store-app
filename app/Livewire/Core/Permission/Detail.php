@@ -4,7 +4,7 @@ namespace App\Livewire\Core\Permission;
 
 use Exception;
 use App\Helpers\Alert;
-use App\Helpers\PermissionHelper;
+use App\Permissions\PermissionHelper;
 use App\Repositories\Core\User\PermissionRepository;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;

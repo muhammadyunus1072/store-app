@@ -36,15 +36,17 @@ abstract class MasterDataRepository
             }
         }
 
-        foreach ($orderByClause as $clause) {
-            $column = isset($clause['column']) ? $clause['column'] : $clause[0];
+        if (is_array($orderByClause)) {
+            foreach ($orderByClause as $clause) {
+                $column = isset($clause['column']) ? $clause['column'] : $clause[0];
 
-            $direction = 'ASC';
-            if (isset($clause['direction']) || isset($clause[1])) {
-                $direction = isset($clause['direction']) ? $clause['direction'] : $clause[1];
+                $direction = 'ASC';
+                if (isset($clause['direction']) || isset($clause[1])) {
+                    $direction = isset($clause['direction']) ? $clause['direction'] : $clause[1];
+                }
+
+                $query->orderBy($column, $direction);
             }
-
-            $query->orderBy($column, $direction);
         }
 
         return $query;

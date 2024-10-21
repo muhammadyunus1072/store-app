@@ -14,14 +14,6 @@ class CompanyRepository extends MasterDataRepository
         return Company::class;
     }
 
-    public static function getByUser($userId)
-    {
-        return Company::whereHas("userCompanies", function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-            ->get();
-    }
-
     public static function search($request)
     {
         $data = Company::select('id', 'name as text')            

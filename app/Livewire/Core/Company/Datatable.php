@@ -3,10 +3,11 @@
 namespace App\Livewire\Core\Company;
 
 use App\Helpers\Alert;
+use App\Permissions\AccessCore;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
-use App\Helpers\PermissionHelper;
+use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
@@ -25,8 +26,8 @@ class Datatable extends Component
     public function onMount()
     {
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_CATEGORY_PRODUCT, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_CATEGORY_PRODUCT, PermissionHelper::TYPE_DELETE));
+        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessCore::COMPANY, PermissionHelper::TYPE_UPDATE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessCore::COMPANY, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]

@@ -187,10 +187,14 @@ return [
             'text' => 'Pengaturan',
             'icon' => 'ki-duotone ki-setting-2',
             'submenu' => [
-                // [
-                //     'text' => 'Perusahaan',
-                //     'route' => 'company.index',
-                // ],
+                [
+                    'text' => 'Pengaturan Global',
+                    'route' => 'setting_core.index',
+                ],
+                [
+                    'text' => 'Perusahaan',
+                    'route' => 'company.index',
+                ],
                 [
                     'text' => 'Pengguna',
                     'route' => 'user.index',

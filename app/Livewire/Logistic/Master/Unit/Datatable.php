@@ -7,7 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\NumberFormatter;
-use App\Helpers\PermissionHelper;
+use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;

@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title')</title>
+    <title>@yield('title', env('APP_NAME'))</title>
 
     <!--begin::Fonts(mandatory for all pages)-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
@@ -93,10 +93,6 @@
                             data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true"
                             data-kt-swapper-mode="{default: 'append', lg: 'prepend'}"
                             data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
-
-                            <div class='menu-item d-none unhide-123'>
-                                <livewire:core.user-state :arrangement="'horizontal'">
-                            </div>
                         </div>
                         <!--end::Menu wrapper-->
 
@@ -143,7 +139,7 @@
                                     <!--end::Menu item-->
 
                                     <!--begin::Menu item-->
-                                    <div class="menu-item px-5 d-none unhide-123">
+                                    <div class="menu-item px-5">
                                         <livewire:core.user-state :arrangement="'vertical'">
                                     </div>
                                     <!--end::Menu item-->

@@ -4,7 +4,8 @@ namespace App\Livewire\Core\Role;
 
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\Alert;
-use App\Helpers\PermissionHelper;
+use App\Permissions\AccessCore;
+use App\Permissions\PermissionHelper;
 use App\Repositories\Core\User\RoleRepository;
 use App\Repositories\Core\User\UserRepository;
 use Livewire\Component;
@@ -24,8 +25,8 @@ class Datatable extends Component
     public function onMount()
     {
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_ROLE, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_ROLE, PermissionHelper::TYPE_DELETE));
+        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessCore::ROLE, PermissionHelper::TYPE_UPDATE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessCore::ROLE, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -112,20 +113,6 @@ class Datatable extends Component
             [
                 'key' => 'name',
                 'name' => 'Nama',
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Akses',
-                'render' => function ($item) {
-                    $html = "<ul class='list-group list-group-flush'>";
-                    foreach ($item->permissions as $permission) {
-                        $translatedName = PermissionHelper::translate($permission->name);
-                        $html .= "<li class='list-group-item'>$translatedName</li>";
-                    }
-                    $html .= "</ul>";
-                    return $html;
-                }
             ],
         ];
     }

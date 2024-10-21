@@ -3,11 +3,12 @@
 namespace App\Helpers;
 
 use App\Helpers\CacheHelper;
-use App\Helpers\PermissionHelper;
+use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use App\Repositories\Core\User\UserRepository;
+use App\Settings\SettingCore;
 
 class MenuHelper
 {
@@ -26,6 +27,8 @@ class MenuHelper
         $user = Auth::user();
         $menus = config('template.menu');
 
+        $isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
+
         $validatedMenu = [];
         foreach ($menus as $menu) {
             $menu['is_active'] = 0;
@@ -33,6 +36,11 @@ class MenuHelper
             if (isset($menu['submenu'])) {
                 $validatedSubmenu = [];
                 foreach ($menu['submenu'] as $submenu) {
+                    // Special Case: Multiple Company
+                    if (isset($submenu['route']) && $submenu['route'] == 'company.index' && !$isMultipleCompany) {
+                        continue;
+                    }
+
                     if (!isset($submenu['route']) || PermissionHelper::isRoutePermitted($submenu['route'], $user)) {
                         $validatedSubmenu[] = $submenu;
                     }

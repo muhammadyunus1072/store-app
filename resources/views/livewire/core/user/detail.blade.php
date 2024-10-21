@@ -64,7 +64,7 @@
             @enderror
         </div>
 
-        <div class="col-md-12 mb-4">
+        <div class="col-md-12 mb-4 {{ $isMultipleCompany ? '' : 'd-none' }}">
             <div class="w-100" wire:ignore>
                 <label>Pengguna Perusahaan</label>
 

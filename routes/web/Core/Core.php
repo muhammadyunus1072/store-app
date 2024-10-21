@@ -68,9 +68,12 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
         Route::get('{id}/edit', 'edit')->name('edit');
     });
 
-    Route::group(["controller" => SettingController::class, "prefix" => "setting_logistic", "as" => "setting_logistic."], function () {
-        Route::get('/', 'logistic')->name('index');
+    Route::group(["controller" => SettingController::class], function () {
+        // Core
+        Route::get('/setting_core', 'core')->name('setting_core.index');
 
-        Route::get('/tax/get', [TaxController::class, 'search'])->name('get.tax');
+        // Logistic 
+        Route::get('/setting_logistic', 'logistic')->name('setting_logistic.index');
+        Route::get('/setting_logistic/tax/get', [TaxController::class, 'search'])->name('setting_logistic.get.tax');
     });
 });

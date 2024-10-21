@@ -4,7 +4,7 @@ namespace App\Livewire\Core\Role;
 
 use Exception;
 use App\Helpers\Alert;
-use App\Helpers\PermissionHelper;
+use App\Permissions\PermissionHelper;
 use App\Repositories\Core\User\PermissionRepository;
 use App\Repositories\Core\User\RoleRepository;
 use Livewire\Component;
@@ -18,17 +18,21 @@ class Detail extends Component
 
     #[Validate('required', message: 'Nama Harus Diisi', onUpdate: false)]
     public $name;
-
     public $accesses = [];
+
+    // Helper
+    public $tabs = PermissionHelper::ACCESS_GROUPS;
 
     public function mount()
     {
-        $permissions = PermissionRepository::getIdAndNames();
+        $permissions = PermissionRepository::getBy(whereClause: [], orderByClause: [['name', 'ASC']]);
+
         foreach ($permissions as $permission) {
             $access = PermissionHelper::getAccess($permission->name);
+
             if (!isset($this->accesses[$access])) {
                 $this->accesses[$access] = [
-                    'name' => isset(PermissionHelper::TRANSLATE_ACCESS[$access]) ? PermissionHelper::TRANSLATE_ACCESS[$access] : $access,
+                    'name' => isset(PermissionHelper::ACCESS_TRANSLATE[$access]) ? PermissionHelper::ACCESS_TRANSLATE[$access] : $access,
                     'permissions' => []
                 ];
             }
@@ -70,7 +74,7 @@ class Detail extends Component
             foreach ($this->accesses as $keyAccess => $access) {
                 if ($keyAccess == $key) {
                     foreach ($access['permissions'] as $keyPermission => $permission) {
-                        $this->accesses[$keyAccess]['permissions'][$keyPermission]['is_checked'] = true;
+                        $this->accesses[$keyAccess]['permissions'][$keyPermission]['is_checked'] = $isCheck == 1 ? true : false;
                     }
                     break;
                 }

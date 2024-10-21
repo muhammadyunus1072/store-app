@@ -1,6 +1,6 @@
 <form wire:submit="store">
     <div class='row'>
-        <div class="col-md-4 mb-3 d-none unhide-123">
+        <div class="col-md-4 mb-3">
             <label>Perusahaan</label>
             <div class="col-md-12 mb-4">
                 <div class="w-100" wire:ignore>

@@ -14,7 +14,7 @@ use App\Repositories\Core\Setting\SettingRepository;
 use App\Repositories\Finance\Master\Tax\TaxRepository;
 use App\Settings\SettingLogistic;
 
-class Detail extends Component
+class Index extends Component
 {
     public $objId;
 
@@ -43,11 +43,12 @@ class Detail extends Component
         }
 
         // Set Variables
-        $setting = SettingRepository::findBy(whereClause: [['name' => $this->name]]);
+        $setting = SettingRepository::findBy(whereClause: [['name', $this->name]]);
         if ($setting) {
+            $this->objId = Crypt::encrypt($setting->id);
             $settings = json_decode($setting->setting);
 
-            foreach (SettingLogistic::ALL as $key => $value) {
+            foreach ($this->setting as $key => $value) {
                 $this->setting[$key] = (isset($settings->{$key})) ? $settings->{$key} : "";
             }
 
@@ -115,6 +116,6 @@ class Detail extends Component
 
     public function render()
     {
-        return view('livewire.core.setting.logistic.detail');
+        return view('livewire.core.setting.logistic.index');
     }
 }

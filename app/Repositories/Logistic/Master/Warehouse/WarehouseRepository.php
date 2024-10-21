@@ -13,14 +13,6 @@ class WarehouseRepository extends MasterDataRepository
         return Warehouse::class;
     }
 
-    public static function getByCompany($companyId)
-    {
-        return Warehouse::whereHas("companyWarehouses", function ($query) use ($companyId) {
-            $query->where('company_id', $companyId);
-        })
-            ->get();
-    }
-
     public static function search($request)
     {
         $data = Warehouse::select('id', 'name as text')

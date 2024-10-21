@@ -3,6 +3,7 @@
 namespace App\Settings;
 
 use App\Helpers\Logistic\Stock\StockHandler;
+use App\Repositories\Core\Setting\SettingRepository;
 
 class SettingLogistic
 {
@@ -33,4 +34,23 @@ class SettingLogistic
         self::TAX_PPN_GOOD_RECEIVE_ID => 1,
         self::TAX_PPN_INCLUDE_IN_STOCK_VALUE  => true,
     ];
+
+    public $parsedSetting;
+
+    public function __construct()
+    {
+        $setting = SettingRepository::findBy(whereClause: [['name', self::NAME]]);
+        $this->parsedSetting = json_decode($setting->setting, true);
+    }
+
+    public static function get($key)
+    {
+        $setting = app(self::class);
+
+        if (!isset($setting->parsedSetting[$key])) {
+            return null;
+        }
+
+        return $setting->parsedSetting[$key];
+    }
 }

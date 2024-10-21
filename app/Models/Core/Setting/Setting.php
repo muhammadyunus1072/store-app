@@ -17,14 +17,5 @@ class Setting extends Model
     ];
 
     protected $guarded = ['id'];
-
-    public function isDeletable()
-    {
-        return true;
-    }
-
-    public function isEditable()
-    {
-        return true;
-    }
+    
 }
