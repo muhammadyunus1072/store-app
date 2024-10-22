@@ -28,10 +28,10 @@
 
         <div class="col-md-4 mb-4">
             <label>Tanggal Pengeluaran</label>
-            <input type="date" class="form-control @error('expense_date') is-invalid @enderror"
-                wire:model="expense_date" />
+            <input type="date" class="form-control @error('transaction_date') is-invalid @enderror"
+                wire:model="transaction_date" />
 
-            @error('expense_date')
+            @error('transaction_date')
                 <div class="invalid-feedback">
                     {{ $message }}
                 </div>

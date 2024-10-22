@@ -32,7 +32,7 @@ class Detail extends Component
     public $objId;
 
     #[Validate('required', message: 'Tanggal Penerimaan Harus Diisi', onUpdate: false)]
-    public $receiveDate;
+    public $transactionDate;
     public $supplierInvoiceNumber;
     public $note;
 
@@ -71,7 +71,7 @@ class Detail extends Component
         $this->loadSetting();
         $this->loadUserState();
 
-        $this->receiveDate = Carbon::now()->format("Y-m-d");
+        $this->transactionDate = Carbon::now()->format("Y-m-d");
         $this->supplierInvoiceNumber = "";
         $this->note = "";
 
@@ -87,7 +87,7 @@ class Detail extends Component
             $this->companyId = Crypt::encrypt($purchaseOrder->company_id);
             $this->companyText = $purchaseOrder->company_name;
 
-            $this->receiveDate = Carbon::parse($purchaseOrder->receive_date)->format("Y-m-d");
+            $this->transactionDate = Carbon::parse($purchaseOrder->transaction_date)->format("Y-m-d");
             $this->supplierInvoiceNumber = $purchaseOrder->supplier_invoice_number;
             $this->note = $purchaseOrder->note;
 
@@ -209,7 +209,7 @@ class Detail extends Component
             'supplier_id' => Crypt::decrypt($this->supplierId),
             'company_id' => Crypt::decrypt($this->companyId),
             'warehouse_id' => Crypt::decrypt($this->warehouseId),
-            'receive_date' => $this->receiveDate,
+            'transaction_date' => $this->transactionDate,
             'note' => $this->note,
             'supplier_invoice_number' => $this->supplierInvoiceNumber,
         ];

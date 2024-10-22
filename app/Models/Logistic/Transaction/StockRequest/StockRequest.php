@@ -24,7 +24,7 @@ class StockRequest extends Model
     protected $fillable = [
         'warehouse_requester_id',
         'warehouse_requested_id',
-        'request_date',
+        'transaction_date',
         'approved_date',
         'cancel_date',
         'note',
@@ -107,7 +107,7 @@ class StockRequest extends Model
                 'warehouse_requested_id' => $this->warehouse_requested_id,
                 'quantity' => $stockRequestProduct->quantity,
                 'unit_detail_id' => $stockRequestProduct->unit_detail_id,
-                'transaction_date' => $this->request_date,
+                'transaction_date' => $this->transaction_date,
                 'remarks_id' => $stockRequestProduct->id,
                 'remarks_type' => get_class($stockRequestProduct)
             ];
@@ -152,7 +152,7 @@ class StockRequest extends Model
                     'warehouse_requested_id' => $this->warehouse_requested_id,
                     'quantity' => $stockRequestProduct->quantity,
                     'unit_detail_id' => $stockRequestProduct->unit_detail_id,
-                    'transaction_date' => $this->request_date,
+                    'transaction_date' => $this->transaction_date,
                     'remarks_id' => $stockRequestProduct->id,
                     'remarks_type' => get_class($stockRequestProduct)
                 ];
@@ -167,7 +167,7 @@ class StockRequest extends Model
                     'warehouse_requested_id' => $this->warehouse_requested_id,
                     'quantity' => $stockRequestProduct->quantity,
                     'unit_detail_id' => $stockRequestProduct->unit_detail_id,
-                    'transaction_date' => $this->request_date,
+                    'transaction_date' => $this->transaction_date,
                     'remarks_id' => $stockRequestProduct->id,
                     'remarks_type' => get_class($stockRequestProduct)
                 ];

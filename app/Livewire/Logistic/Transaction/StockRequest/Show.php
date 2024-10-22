@@ -30,7 +30,7 @@ class Show extends Component
     public $warehouse_requested_text;
 
     #[Validate('required', message: 'Tanggal Permintaan Harus Diisi', onUpdate: false)]
-    public $request_date;
+    public $transaction_date;
     public $note;
 
     public $stockRequestProducts = [];
@@ -54,7 +54,7 @@ class Show extends Component
             $this->warehouse_requested_id = Crypt::encrypt($stockRequest->warehouse_requested_id);
             $this->warehouse_requested_text = $stockRequest->warehouse_requested_name;
             
-            $this->request_date = $stockRequest->request_date;
+            $this->transaction_date = $stockRequest->transaction_date;
             $this->note = $stockRequest->note;
             
             foreach($stockRequest->stockRequestProducts as $index => $stockRequestProduct)
@@ -152,7 +152,7 @@ class Show extends Component
         $validatedData = [
             'warehouse_requester_id' => Crypt::decrypt($this->warehouse_requester_id),
             'warehouse_requested_id' => Crypt::decrypt($this->warehouse_requested_id),
-            'request_date' => $this->request_date,
+            'transaction_date' => $this->transaction_date,
             'note' => $this->note,
         ];
 

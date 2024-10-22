@@ -36,7 +36,7 @@ return new class extends Migration
             $table->index('company_id', 'stock_expenses_company_id_idx');
             $table->index('warehouse_id', 'stock_expenses_warehouse_id_idx');
             $table->index('number', 'stock_expenses_number_idx');
-            $table->index('expense_date', 'stock_expenses_expense_date_idx');
+            $table->index('transaction_date', 'stock_expenses_transaction_date_idx');
             $table->index('approved_date', 'stock_expenses_approved_date_idx');
             $table->index('cancel_date', 'stock_expenses_cancel_date_idx');
         }
@@ -50,10 +50,8 @@ return new class extends Migration
         $table->string('warehouse_name')->comment('Nama Warehouse');
 
         $table->string('number')->comment('Nomor');
-        $table->dateTime('expense_date')->comment('Tanggal Pengeluaran');
+        $table->dateTime('transaction_date')->comment('Tanggal Transaksi');
         $table->text('note')->nullable()->comment('Catatan');
-        $table->date('approved_date')->nullable()->comment('Tanggal Disetujui');
-        $table->date('cancel_date')->nullable()->comment('Tanggal Dibatalkan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

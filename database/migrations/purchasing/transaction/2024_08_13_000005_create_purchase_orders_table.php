@@ -38,12 +38,12 @@ return new class extends Migration
             $table->index('warehouse_id', 'purchase_orders_warehouse_id_idx');
             
             $table->index('number', 'purchase_orders_number_idx');
-            $table->index('receive_date', 'purchase_orders_receive_date_idx');
+            $table->index('transaction_date', 'purchase_orders_transaction_date_idx');
             $table->index('supplier_invoice_number', 'purchase_orders_supplier_invoice_number_idx');
         }
 
         $table->string('number')->comment('Nomor');
-        $table->dateTime('receive_date')->comment('Tanggal Penerimaan');
+        $table->dateTime('transaction_date')->comment('Tanggal Transaksi');
         $table->text('note')->nullable()->comment('Catatan');
         $table->string('supplier_invoice_number')->nullable()->comment('Nomor Invoice Dari Supplier');
 

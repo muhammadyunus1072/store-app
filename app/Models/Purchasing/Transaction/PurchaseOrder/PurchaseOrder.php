@@ -27,7 +27,7 @@ class PurchaseOrder extends Model
         'supplier_id',
         'supplier_invoice_number',
         'warehouse_id',
-        'receive_date',
+        'transaction_date',
         'note',
     ];
 
@@ -102,6 +102,10 @@ class PurchaseOrder extends Model
     */
     public function processStock()
     {
+        if (!SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK)) {
+            return;
+        }
+
         $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
 
         $data = [];
@@ -118,7 +122,7 @@ class PurchaseOrder extends Model
                 'warehouse_id' => $this->warehouse_id,
                 'quantity' => $item->quantity,
                 'unit_detail_id' => $item->unit_detail_id,
-                'transaction_date' => $this->receive_date,
+                'transaction_date' => $this->transaction_date,
                 'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                 'code' => $item->code,
                 'batch' => $item->batch,
@@ -133,6 +137,10 @@ class PurchaseOrder extends Model
 
     public function updateStock()
     {
+        if (!SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK)) {
+            return;
+        }
+
         $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
 
         $addData = [];
@@ -167,7 +175,7 @@ class PurchaseOrder extends Model
                     'warehouse_id' => $this->warehouse_id,
                     'quantity' => $item->quantity,
                     'unit_detail_id' => $item->unit_detail_id,
-                    'transaction_date' => $this->receive_date,
+                    'transaction_date' => $this->transaction_date,
                     'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                     'code' => $item->code,
                     'batch' => $item->batch,
@@ -184,7 +192,7 @@ class PurchaseOrder extends Model
                     'warehouse_id' => $this->warehouse_id,
                     'quantity' => $item->quantity,
                     'unit_detail_id' => $item->unit_detail_id,
-                    'transaction_date' => $this->receive_date,
+                    'transaction_date' => $this->transaction_date,
                     'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                     'code' => $item->code,
                     'batch' => $item->batch,
@@ -202,6 +210,10 @@ class PurchaseOrder extends Model
 
     public function cancelStock()
     {
+        if (!SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK)) {
+            return;
+        }
+
         $data = [];
         foreach ($this->purchaseOrderProducts as $item) {
             if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {

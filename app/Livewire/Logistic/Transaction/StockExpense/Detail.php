@@ -26,7 +26,7 @@ class Detail extends Component
     public $objId;
 
     #[Validate('required', message: 'Tanggal Pengeluaran Harus Diisi', onUpdate: false)]
-    public $expense_date;
+    public $transaction_date;
     public $note;
 
     public $company_id;
@@ -45,7 +45,7 @@ class Detail extends Component
 
     public function mount()
     {
-        $this->expense_date = Carbon::now()->format("Y-m-d");
+        $this->transaction_date = Carbon::now()->format("Y-m-d");
 
         $userState = UserStateHelper::get();
         if ($userState['company_id']) {
@@ -69,7 +69,7 @@ class Detail extends Component
             $this->warehouse_id = Crypt::encrypt($stockExpense->warehouse_id);
             $this->warehouse_text = $stockExpense->warehouse_name;
 
-            $this->expense_date = Carbon::parse($stockExpense->expense_date)->format("Y-m-d");
+            $this->transaction_date = Carbon::parse($stockExpense->transaction_date)->format("Y-m-d");
             $this->note = $stockExpense->note;
 
             foreach ($stockExpense->stockExpenseProducts as $stockExpenseProduct) {
@@ -126,7 +126,7 @@ class Detail extends Component
         $validatedData = [
             'company_id' => Crypt::decrypt($this->company_id),
             'warehouse_id' => Crypt::decrypt($this->warehouse_id),
-            'expense_date' => $this->expense_date,
+            'transaction_date' => $this->transaction_date,
             'note' => $this->note,
         ];
 

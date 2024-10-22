@@ -47,10 +47,10 @@
         {{-- RECEIVE DATE --}}
         <div class="col-md-4 mb-3">
             <label>Tanggal Penerimaan</label>
-            <input type="date" class="form-control @error('receiveDate') is-invalid @enderror"
-                wire:model="receiveDate" />
+            <input type="date" class="form-control @error('transactionDate') is-invalid @enderror"
+                wire:model="transactionDate" />
 
-            @error('receiveDate')
+            @error('transactionDate')
                 <div class="invalid-feedback">
                     {{ $message }}
                 </div>

@@ -24,7 +24,7 @@ class StockExpense extends Model
     protected $fillable = [
         'warehouse_id',
         'company_id',
-        'expense_date',
+        'transaction_date',
         'approved_date',
         'cancel_date',
         'note',
@@ -106,7 +106,7 @@ class StockExpense extends Model
                 'warehouse_id' => $this->warehouse_id,
                 'quantity' => $stockExpenseProduct->quantity,
                 'unit_detail_id' => $stockExpenseProduct->unit_detail_id,
-                'transaction_date' => $this->expense_date,
+                'transaction_date' => $this->transaction_date,
                 'remarks_id' => $stockExpenseProduct->id,
                 'remarks_type' => get_class($stockExpenseProduct)
             ];
@@ -149,7 +149,7 @@ class StockExpense extends Model
                     'warehouse_id' => $this->warehouse_id,
                     'quantity' => $stockExpenseProduct->quantity,
                     'unit_detail_id' => $stockExpenseProduct->unit_detail_id,
-                    'transaction_date' => $this->expense_date,
+                    'transaction_date' => $this->transaction_date,
                     'remarks_id' => $stockExpenseProduct->id,
                     'remarks_type' => get_class($stockExpenseProduct)
                 ];
@@ -162,7 +162,7 @@ class StockExpense extends Model
                     'warehouse_id' => $this->warehouse_id,
                     'quantity' => $stockExpenseProduct->quantity,
                     'unit_detail_id' => $stockExpenseProduct->unit_detail_id,
-                    'transaction_date' => $this->expense_date,
+                    'transaction_date' => $this->transaction_date,
                     'remarks_id' => $stockExpenseProduct->id,
                     'remarks_type' => get_class($stockExpenseProduct)
                 ];

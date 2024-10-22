@@ -3,9 +3,9 @@
         <div class='row'>
             <div class="col-md-4 mb-4">
                 <label>Tanggal Permintaan</label>
-                <input type="date" class="form-control @error('request_date') is-invalid @enderror" wire:model="request_date" {{ !$is_enabled ? 'disabled' : ''}}/>
+                <input type="date" class="form-control @error('transaction_date') is-invalid @enderror" wire:model="transaction_date" {{ !$is_enabled ? 'disabled' : ''}}/>
     
-                @error('request_date')
+                @error('transaction_date')
                     <div class="invalid-feedback">
                         {{ $message }}
                     </div>

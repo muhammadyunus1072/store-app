@@ -28,7 +28,7 @@ class Show extends Component
     public $is_enabled;
 
     #[Validate('required', message: 'Tanggal Permintaan Supplier Harus Diisi', onUpdate: false)]
-    public $request_date;
+    public $transaction_date;
     public $note;
 
     // Approval
@@ -49,7 +49,7 @@ class Show extends Component
             $purchase_request = PurchaseRequestRepository::findWithDetails($approval->remarks_id);
             
             $this->objId = Crypt::encrypt($purchase_request->id);
-            $this->request_date = $purchase_request->request_date;
+            $this->transaction_date = $purchase_request->transaction_date;
             $this->note = $purchase_request->note;
 
             foreach($purchase_request->purchaseRequestProducts as $purchase_request_product)
@@ -150,7 +150,7 @@ class Show extends Component
         $this->validate();
 
         $validatedData = [
-            'request_date' => $this->request_date,
+            'transaction_date' => $this->transaction_date,
             'note' => $this->note,
         ];
 

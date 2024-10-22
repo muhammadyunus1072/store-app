@@ -117,11 +117,11 @@ class Datatable extends Component
                 'name' => 'Nomor',
             ],
             [
-                'key' => 'expense_date',
+                'key' => 'transaction_date',
                 'name' => 'Tanggal Pengeluaran',
                 'render' => function($item)
                 {
-                    return Carbon::parse($item->expense_date)->translatedFormat('d F Y');
+                    return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
                 }
             ],
             [
