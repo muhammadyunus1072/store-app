@@ -6,9 +6,9 @@
         </div>
         <div class="col-md-3 mb-4">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" wire:model="setting.multiple_company"
-                    id='setting.multiple_company' {{ $isMultipleCompanyDisabled ? 'disabled' : '' }}>
-                <label class="form-check-label ms-2 mt-1" for='setting.multiple_company'>
+                <input class="form-check-input" type="checkbox" wire:model="setting.{{ SettingCore::MULTIPLE_COMPANY }}"
+                    id='setting.{{ SettingCore::MULTIPLE_COMPANY }}' {{ $isMultipleCompanyDisabled ? 'disabled' : '' }}>
+                <label class="form-check-label ms-2 mt-1" for='setting.{{ SettingCore::MULTIPLE_COMPANY }}'>
                     Banyak Perusahaan
                 </label>
             </div>

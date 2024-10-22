@@ -1,67 +1,87 @@
 <form wire:submit="store">
     <div class='row'>
-        <div class="col-md-4 mb-3">
-            <label>Supplier</label>
-            <div class="col-md-12 mb-4">
-                <div class="w-100" wire:ignore>
-                    <select id="select2-supplier" class="form-select">
-                        @if ($supplier_id)
-                            <option value="{{ $supplier_id }}">{{ $supplier_text }}</option>
-                        @endif
-                    </select>
-                </div>
-            </div>
+        {{-- SELECT COMPANY --}}
+        <div class="col-md-4 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}">
+            <label>Perusahaan</label>
+            <select class="form-select w-100">
+                @php $isFound = false; @endphp
+
+                @foreach ($companies as $company)
+                    @php $isFound = $isFound || $company['id'] == $companyId; @endphp
+                    <option value="{{ $company['id'] }}">{{ $company['name'] }}</option>
+                @endforeach
+
+                @if (!$isFound && !empty($companyId))
+                    <option value="{{ $companyId }}" selected>{{ $companyText }}</option>
+                @endif
+            </select>
         </div>
 
+        {{-- SELECT WAREHOUSE --}}
         <div class="col-md-4 mb-3">
             <label>Gudang</label>
-            <div class="col-md-12 mb-4">
-                <div class="w-100" wire:ignore>
-                    <select id="select2-warehouse" class="form-select">
-                        @if ($warehouse_id)
-                            <option value="{{ $warehouse_id }}">{{ $warehouse_text }}</option>
-                        @endif
-                    </select>
-                </div>
-            </div>
+            <select class="form-select w-100">
+                @php $isFound = false; @endphp
+
+                @foreach ($warehouses as $warehouse)
+                    @php $isFound = $isFound || $warehouse['id'] == $warehouseId; @endphp
+                    <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
+                @endforeach
+
+                @if (!$isFound && !empty($warehouseId))
+                    <option value="{{ $warehouseId }}" selected>{{ $warehouseText }}</option>
+                @endif
+            </select>
         </div>
 
-        <div class="col-md-4 mb-4">
+        {{-- SELECT SUPPLIER --}}
+        <div class="col-md-4 mb-3" wire:ignore>
+            <label>Supplier</label>
+            <select id="select2-supplier" class="form-select w-100">
+                @if ($supplierId)
+                    <option value="{{ $supplierId }}">{{ $supplierText }}</option>
+                @endif
+            </select>
+        </div>
+
+        {{-- RECEIVE DATE --}}
+        <div class="col-md-4 mb-3">
             <label>Tanggal Penerimaan</label>
-            <input type="date" class="form-control @error('receive_date') is-invalid @enderror"
-                wire:model="receive_date" />
+            <input type="date" class="form-control @error('receiveDate') is-invalid @enderror"
+                wire:model="receiveDate" />
 
-            @error('receive_date')
+            @error('receiveDate')
                 <div class="invalid-feedback">
                     {{ $message }}
                 </div>
             @enderror
         </div>
 
-        <div class="col-md-4 mb-4">
+        {{-- SUPPLIER INVOICE NUMBER --}}
+        <div class="col-md-4 mb-3">
             <label>Nomor Nota Supplier</label>
-            <input type="text" class="form-control @error('supplier_invoice_number') is-invalid @enderror"
-                wire:model="supplier_invoice_number" />
+            <input type="text" class="form-control @error('supplierInvoiceNumber') is-invalid @enderror"
+                wire:model="supplierInvoiceNumber" />
 
-            @error('supplier_invoice_number')
+            @error('supplierInvoiceNumber')
                 <div class="invalid-feedback">
                     {{ $message }}
                 </div>
             @enderror
         </div>
 
-        <div class="col-md-12 mb-4">
+        {{-- NOTE --}}
+        <div class="col-md-12 mb-3">
             <label>Catatan</label>
             <textarea class="form-control" cols="30" rows="4" wire:model="note"></textarea>
         </div>
     </div>
 
-    <label>Data Pembelian</label>
-    <div class="col-md-12 mb-4 {{ $purchase_order_id ? 'd-none' : '' }}">
-        <div class="w-100" wire:ignore>
-            <select id="select2-product" class="form-select">
-            </select>
-        </div>
+    {{-- GOOD RECEIVE PRODUCTS --}}
+    <label>Barang-barang yang diterima</label>
+    <div class="col-md-12 mb-4" wire:ignore>
+        <select id="select2-product" class="form-select w-100">
+        </select>
     </div>
 
     <table class='table gy-1 gx-2'>
@@ -76,7 +96,7 @@
                 $price = str_replace(',', '.', str_replace('.', '', $item['price']));
                 $subtotal = $qty * $price;
                 $total += $subtotal;
-                $total_ppn += $item['is_ppn'] ? ($subtotal * $default_ppn_value) / 100 : 0;
+                $total_ppn += $item['is_ppn'] ? ($subtotal * $taxPpnValue) / 100 : 0;
             @endphp
 
             {{-- MAIN ATTIRBUTE --}}
@@ -144,8 +164,7 @@
                     <label class='fw-bold'>Pajak</label>
                     <div class="form-check mt-3">
                         <input class="form-check-input" type="checkbox" value="" id="ppn_{{ $index }}"
-                            wire:model.live="goodReceiveProducts.{{ $index }}.is_ppn"
-                            {{ $purchase_order_id ? 'disabled' : '' }}>
+                            wire:model.live="goodReceiveProducts.{{ $index }}.is_ppn">
                         <label class="form-check-label" for="ppn_{{ $index }}">
                             PPN
                         </label>
@@ -160,12 +179,12 @@
             </tr>
 
             {{-- OPTIONAL ATTIRBUTE --}}
-            @if ($setting_product_code || $setting_product_batch || $setting_product_expired_date)
+            @if ($isInputProductCode || $isInputProductBatch || $isInputProductExpiredDate)
                 <tr>
                     <td></td>
 
                     {{-- CODE --}}
-                    @if ($setting_product_code)
+                    @if ($isInputProductCode)
                         <td>
                             <label class='fw-bold'>Kode Barang</label>
                             <input type="text" class="form-control"
@@ -174,7 +193,7 @@
                     @endif
 
                     {{-- BATCH --}}
-                    @if ($setting_product_batch)
+                    @if ($isInputProductBatch)
                         <td>
                             <label class='fw-bold'>Kode Produksi</label>
                             <input type="text" class="form-control"
@@ -183,7 +202,7 @@
                     @endif
 
                     {{-- EXPIRED DATE --}}
-                    @if ($setting_product_expired_date)
+                    @if ($isInputProductExpiredDate)
                         <td>
                             <label class='fw-bold'>Tanggal Expired</label>
                             <input type="date"
@@ -199,7 +218,7 @@
                 </tr>
             @endif
 
-            @if ($setting_product_attachment)
+            @if ($isInputProductAttachment)
                 <tr>
                     <td></td>
                     <td colspan="5">
@@ -281,7 +300,7 @@
 
             <tr>
                 <td class='fs-4 text-end fw-bold align-middle' colspan="5">
-                    PPN ({{ $default_ppn_value }}%)
+                    PPN ({{ $taxPpnValue }}%)
                 </td>
                 <td>
                     <input class='form-control text-end fw-bold' value="@currency($total_ppn)" disabled>
@@ -355,39 +374,7 @@
 
             $('#select2-supplier').on('change', async function(e) {
                 let data = $('#select2-supplier').val();
-                @this.set('supplier_id', data);
-            });
-
-            // Select2 Warehouse
-            $('#select2-warehouse').select2({
-                placeholder: "Pilih Gudang",
-                ajax: {
-                    url: "{{ route('good_receive.get.warehouse') }}",
-                    dataType: "json",
-                    type: "GET",
-                    data: function(params) {
-                        return {
-                            company_id: $('#select2-company').val(),
-                            search: params.term,
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    "id": item.id,
-                                    "text": item.text,
-                                }
-                            })
-                        };
-                    },
-                },
-                cache: true
-            });
-
-            $('#select2-warehouse').on('change', async function(e) {
-                let data = $('#select2-warehouse').val();
-                @this.set('warehouse_id', data);
+                @this.set('supplierId', data);
             });
 
             // Select2 Product

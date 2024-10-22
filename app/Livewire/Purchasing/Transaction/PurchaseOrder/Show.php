@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Logistic\Transaction\GoodReceive;
+namespace App\Livewire\Purchasing\Transaction\PurchaseOrder;
 
 use Exception;
 use App\Helpers\General\Alert;

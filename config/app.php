@@ -187,6 +187,9 @@ return [
         'Captcha' => Mews\Captcha\Facades\Captcha::class,
         'PermissionHelper' => App\Permissions\PermissionHelper::class,
         'Alert' => App\Helpers\General\Alert::class,
+        'SettingCore' => App\Settings\SettingCore::class,
+        'SettingLogistic' => App\Settings\SettingLogistic::class,
+        'SettingPurchasing' => App\Settings\SettingPurchasing::class,
         ...App\Permissions\PermissionHelper::ACCESS_ALIASES,
     ])->toArray(),
 

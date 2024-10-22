@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Models\Logistic\Transaction\GoodReceive;
+namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
 use App\Models\Finance\Master\Tax;
-use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProduct;
+use Sis\TrackHistory\HasTrackHistory;
 
-class GoodReceiveProductTax extends Model
+class PurchaseOrderProductTax extends Model
 {
     use HasFactory, SoftDeletes, HasTrackHistory;
 
     protected $fillable = [
-        'good_receive_product_id',
+        'purchase_order_product_id',
         'tax_id',
     ];
 
@@ -47,9 +46,9 @@ class GoodReceiveProductTax extends Model
     | RELATIONSHIP
     */
 
-    public function goodReceiveProduct()
+    public function purchaseOrderProduct()
     {
-        return $this->belongsTo(GoodReceiveProduct::class, 'good_receive_product_id', 'id');
+        return $this->belongsTo(PurchaseOrderProduct::class, 'purchase_order_product_id', 'id');
     }
 
     public function tax()

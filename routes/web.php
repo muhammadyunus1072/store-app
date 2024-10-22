@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 
 Route::group([], __DIR__ . '/web/Core/Core.php');
 Route::group([], __DIR__ . '/web/Purchasing/Master.php');
+Route::group([], __DIR__ . '/web/Purchasing/Transaction.php');
 Route::group([], __DIR__ . '/web/Document/Master.php');
 Route::group([], __DIR__ . '/web/Document/Transaction.php');
 Route::group([], __DIR__ . '/web/Logistic/Master.php');

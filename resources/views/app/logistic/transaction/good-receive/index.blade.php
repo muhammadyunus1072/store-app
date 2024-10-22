@@ -16,7 +16,7 @@
         </ul>
         <!--end::Breadcrumb-->
 
-        @can(PermissionHelper::transform(PermissionHelper::ACCESS_GOOD_RECEIVE, PermissionHelper::TYPE_CREATE))
+        @can(PermissionHelper::transform(AccessLogistic::GOOD_RECEIVE, PermissionHelper::TYPE_CREATE))
             <div class='row'>
                 <div class="col-md-auto mt-2">
                     <a class="btn btn-success" href="{{ route('good_receive.create') }}">

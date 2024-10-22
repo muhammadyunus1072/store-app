@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Purchasing\Transaction;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
 
 class PurchaseOrderController extends Controller
 {
@@ -22,10 +21,9 @@ class PurchaseOrderController extends Controller
     {
         return view('app.purchasing.transaction.purchase-order.detail', ["objId" => $request->id]);
     }
-    // Select2
-    // PurchaseOrder
-    public function search(Request $request)
+
+    public function show(Request $request)
     {
-        return PurchaseOrderRepository::search($request->search);
+        return view('app.purchasing.transaction.purchase-order.show', ["objId" => $request->id]);
     }
 }

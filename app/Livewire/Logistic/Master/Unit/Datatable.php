@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
+use App\Permissions\AccessLogistic;
 use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,8 +27,8 @@ class Datatable extends Component
     public function onMount()
     {
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_UNIT, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_UNIT, PermissionHelper::TYPE_DELETE));
+        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::UNIT, PermissionHelper::TYPE_UPDATE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::UNIT, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]

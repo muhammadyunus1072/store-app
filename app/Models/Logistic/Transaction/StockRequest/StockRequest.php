@@ -2,27 +2,19 @@
 
 namespace App\Models\Logistic\Transaction\StockRequest;
 
-use App\Helpers\Logistic\Stock\StockHandler;
-use Carbon\Carbon;
-use App\Traits\HasApproval;
+
+use App\Traits\Document\HasApproval;
+use App\Settings\SettingLogistic;
 use App\Helpers\General\NumberGenerator;
-use App\Models\Core\Setting\Setting;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
-use Illuminate\Support\Facades\Crypt;
+use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
+use App\Repositories\Core\Setting\SettingRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
-use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigRepository;
-use App\Repositories\Document\Master\StatusApproval\StatusApprovalRepository;
-use App\Repositories\Logistic\Transaction\StockRequest\StockRequestRepository;
-use App\Repositories\Core\Setting\SettingRepository;
-use App\Repositories\Document\Transaction\ApprovalRepository;
-use App\Repositories\Document\Transaction\ApprovalUserRepository;
-use App\Repositories\Document\Transaction\ApprovalHistoryRepository;
-use App\Settings\SettingLogistic;
 use Sis\TrackHistory\HasTrackHistory;
 
 class StockRequest extends Model

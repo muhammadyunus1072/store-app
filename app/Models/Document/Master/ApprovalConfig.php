@@ -58,7 +58,7 @@ class ApprovalConfig extends Model
 
     protected $guarded = ['id'];
 
-    public static function createApprovalIfMatch($key, $object): Approval
+    public static function createApprovalIfMatch($key, $object)
     {
         $approvalConfigs = ApprovalConfigRepository::getByKey($key);
 
@@ -89,7 +89,7 @@ class ApprovalConfig extends Model
             }
         }
 
-        return false;
+        return null;
     }
 
     public static function isMatch($config, $object)

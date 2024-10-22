@@ -3,7 +3,6 @@
 namespace App\Livewire\Core\Setting\Logistic;
 
 use Exception;
-use App\Models\Core\Setting\Setting;
 use App\Helpers\General\Alert;
 use App\Helpers\Logistic\Stock\StockHandler;
 use Livewire\Component;
@@ -11,7 +10,6 @@ use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Core\Setting\SettingRepository;
-use App\Repositories\Finance\Master\Tax\TaxRepository;
 use App\Settings\SettingLogistic;
 
 class Index extends Component
@@ -21,17 +19,7 @@ class Index extends Component
     public $name;
     public $setting = [];
 
-    public $product_code;
-    public $product_batch;
-    public $product_substract_stock_method;
     public $product_substract_stock_method_choice = StockHandler::SUBSTRACT_STOCK_METHOD_CHOICE;
-    public $product_expired_date;
-    public $product_attachment;
-    public $approval_key_good_receive;
-    public $approval_key_stock_request;
-    public $approval_key_stock_expense;
-    public $tax_ppn_good_receive_id;
-    public $tax_ppn_good_receive_text;
 
     public function mount()
     {
@@ -51,13 +39,6 @@ class Index extends Component
             foreach ($this->setting as $key => $value) {
                 $this->setting[$key] = (isset($settings->{$key})) ? $settings->{$key} : "";
             }
-
-            // Handle : Tax ID
-            if ($this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]) {
-                $tax = TaxRepository::find($this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]);
-                $this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID] = Crypt::encrypt($tax->id);
-                $this->setting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID . "_text"] = $tax->getText();
-            }
         }
     }
 
@@ -75,13 +56,6 @@ class Index extends Component
 
     public function store()
     {
-        $formattedSetting = $this->setting;
-
-        // Handle : Tax ID
-        if ($formattedSetting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]) {
-            $formattedSetting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID] = Crypt::decrypt($formattedSetting[SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID]);
-        }
-
         try {
             DB::beginTransaction();
             if ($this->objId) {

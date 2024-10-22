@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Traits\Document;
 
 use App\Models\Document\Transaction\Approval;
 

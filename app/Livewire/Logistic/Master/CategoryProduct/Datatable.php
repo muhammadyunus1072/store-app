@@ -3,6 +3,7 @@
 namespace App\Livewire\Logistic\Master\CategoryProduct;
 
 use App\Helpers\General\Alert;
+use App\Permissions\AccessLogistic;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
@@ -25,8 +26,8 @@ class Datatable extends Component
     public function onMount()
     {
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_CATEGORY_PRODUCT, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_CATEGORY_PRODUCT, PermissionHelper::TYPE_DELETE));
+        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::CATEGORY_PRODUCT, PermissionHelper::TYPE_UPDATE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::CATEGORY_PRODUCT, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]

@@ -27,9 +27,9 @@ return [
 
     'menu' => [
         [
-            'text' => 'Dashboard',
+            'text' => 'Home',
             'route'  => 'dashboard.index',
-            'icon' => 'ki-duotone ki-element-11',
+            'icon' => 'ki-duotone ki-home',
         ],
 
         /*
@@ -41,14 +41,9 @@ return [
             // 'id' => 'menu_admin'
             'header' => 'Logistik',
         ],
-        // [
-        //     'text' => 'Permintaan',
-        //     'route' => 'stock_request.index',
-        //     'icon' => 'ki-duotone ki-arrow-right',
-        // ],
         [
-            'text' => 'Penerimaan',
-            'route' => 'good_receive.index',
+            'text' => 'Permintaan',
+            'route' => 'stock_request.index',
             'icon' => 'ki-duotone ki-arrow-right',
         ],
         [
@@ -58,8 +53,8 @@ return [
         ],
         [
             // 'id' => 'menu_admin'
-            'text' => 'Pengaturan',
-            'icon' => 'ki-duotone ki-setting-2',
+            'text' => 'Master Data',
+            'icon' => 'ki-duotone ki-category',
             'submenu' => [
                 [
                     'text' => 'Gudang',
@@ -81,42 +76,14 @@ return [
                     'route'  => 'unit.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
-                [
-                    'text' => 'Supplier',
-                    'route' => 'supplier.index',
-                ],
-                [
-                    'text' => 'Kategori Supplier',
-                    'route' => 'category_supplier.index',
-                ],
-                [
-                    'text' => 'Pengaturan',
-                    'route'  => 'setting_logistic.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
             ],
+        ],
+        [
+            'text' => 'Pengaturan',
+            'route'  => 'setting_logistic.index',
+            'icon' => 'ki-duotone ki-setting-2',
         ],
 
-        /*
-        | ======================================
-        | ============= FINANCE =============
-        | ======================================
-        */
-        [
-            // 'id' => 'menu_admin'
-            'header' => 'Keuangan',
-        ],
-        [
-            // 'id' => 'menu_admin'
-            'text' => 'Pengaturan',
-            'icon' => 'ki-duotone ki-setting-2',
-            'submenu' => [
-                [
-                    'text' => 'Pajak',
-                    'route' => 'tax.index',
-                ],
-            ],
-        ],
         /*
         | ======================================
         | ============= PURCHASING =============
@@ -127,9 +94,14 @@ return [
             'header' => 'Pembelian',
         ],
         [
+            'text' => 'Pembelian',
+            'route' => 'purchase_order.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
             // 'id' => 'menu_admin'
-            'text' => 'Pengaturan',
-            'icon' => 'ki-duotone ki-setting-2',
+            'text' => 'Master Data',
+            'icon' => 'ki-duotone ki-category',
             'submenu' => [
                 [
                     'text' => 'Supplier',
@@ -140,6 +112,11 @@ return [
                     'route' => 'category_supplier.index',
                 ],
             ],
+        ],
+        [
+            'text' => 'Pengaturan',
+            'route'  => 'setting_purchasing.index',
+            'icon' => 'ki-duotone ki-setting-2',
         ],
 
         /*
@@ -168,6 +145,27 @@ return [
                 [
                     'text' => 'Status Persetujuan',
                     'route' => 'status_approval.index',
+                ],
+            ],
+        ],
+
+        /*
+        | ======================================
+        | ============= FINANCE =============
+        | ======================================
+        */
+        [
+            // 'id' => 'menu_admin'
+            'header' => 'Keuangan',
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Master Data',
+            'icon' => 'ki-duotone ki-category',
+            'submenu' => [
+                [
+                    'text' => 'Pajak',
+                    'route' => 'tax.index',
                 ],
             ],
         ],

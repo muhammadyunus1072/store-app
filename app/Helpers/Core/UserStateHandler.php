@@ -2,7 +2,9 @@
 
 namespace App\Helpers\Core;
 
+use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Core\User\UserStateRepository;
+use App\Settings\SettingCore;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
@@ -16,9 +18,19 @@ class UserStateHandler
     {
         $user = Auth::user();
 
+        $isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
+
         // Handle Company Options
-        foreach ($user->companies as $index => $company) {
-            $this->companies[$index] = [
+        if ($isMultipleCompany) {
+            foreach ($user->companies as $index => $company) {
+                $this->companies[$index] = [
+                    'id' => Crypt::encrypt($company->id),
+                    'name' => $company->name,
+                ];
+            }
+        } else {
+            $company = CompanyRepository::all()[0];
+            $this->companies[0] = [
                 'id' => Crypt::encrypt($company->id),
                 'name' => $company->name,
             ];
@@ -51,6 +63,10 @@ class UserStateHandler
             ]);
         } else {
             $this->state = json_decode($userState->state, true);
+            $this->state = [
+                'company_id' => $this->state['company_id'] ? Crypt::encrypt($this->state['company_id']) : null,
+                'warehouse_id' => $this->state['warehouse_id'] ? Crypt::encrypt($this->state['warehouse_id']) : null,
+            ];
 
             // Check Validity Old State : Company
             $isFound = false;

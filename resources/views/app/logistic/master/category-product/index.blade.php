@@ -16,7 +16,7 @@
         </ul>
         <!--end::Breadcrumb-->
 
-        @can(PermissionHelper::transform(PermissionHelper::ACCESS_CATEGORY_PRODUCT, PermissionHelper::TYPE_CREATE))
+        @can(PermissionHelper::transform(AccessLogistic::CATEGORY_PRODUCT, PermissionHelper::TYPE_CREATE))
             <div class='row'>
                 <div class="col-md-auto mt-2">
                     <a class="btn btn-success" href="{{ route('category_product.create') }}">

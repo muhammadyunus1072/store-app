@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Livewire\Logistic\Transaction\GoodReceive;
+namespace App\Livewire\Purchasing\Transaction\PurchaseOrder;
 
 use Carbon\Carbon;
+use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\Alert;
+use App\Permissions\AccessPurchasing;
+use App\Permissions\PermissionHelper;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Traits\Livewire\WithDatatable;
-use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
-use App\Repositories\Logistic\Transaction\GoodReceive\GoodReceiveRepository;
+use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
 
 class Datatable extends Component
 {
@@ -26,8 +27,8 @@ class Datatable extends Component
     public function onMount()
     {
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_GOOD_RECEIVE, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_GOOD_RECEIVE, PermissionHelper::TYPE_DELETE));
+        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_UPDATE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -36,8 +37,8 @@ class Datatable extends Component
         if (!$this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
-        
-        GoodReceiveRepository::delete(Crypt::decrypt($this->targetDeleteId));
+
+        PurchaseOrderRepository::delete(Crypt::decrypt($this->targetDeleteId));
         Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
     }
 
@@ -118,8 +119,7 @@ class Datatable extends Component
             [
                 'key' => 'receive_date',
                 'name' => 'Tanggal Penerimaan',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return Carbon::parse($item->receive_date)->translatedFormat('d F Y');
                 }
             ],
@@ -136,11 +136,11 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return GoodReceiveRepository::datatable();
+        return PurchaseOrderRepository::datatable();
     }
 
     public function getView(): string
     {
-        return 'livewire.logistic.transaction.good-receive.datatable';
+        return 'livewire.purchasing.transaction.purchase-order.datatable';
     }
 }

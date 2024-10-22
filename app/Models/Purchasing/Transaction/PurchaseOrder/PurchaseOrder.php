@@ -1,24 +1,22 @@
 <?php
 
-namespace App\Models\Logistic\Transaction\GoodReceive;
+namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
 use App\Settings\SettingLogistic;
-use App\Traits\HasApproval;
+use App\Traits\Document\HasApproval;
 use App\Helpers\General\NumberGenerator;
 use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
-use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProduct;
 use App\Models\Purchasing\Master\Supplier\Supplier;
-use App\Repositories\Core\Setting\SettingRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Sis\TrackHistory\HasTrackHistory;
 
-class GoodReceive extends Model
+class PurchaseOrder extends Model
 {
     use HasFactory, SoftDeletes, HasTrackHistory, HasApproval;
 
@@ -57,7 +55,7 @@ class GoodReceive extends Model
         });
 
         self::deleted(function ($model) {
-            foreach ($model->goodReceiveProducts as $item) {
+            foreach ($model->purchaseOrderProducts as $item) {
                 $item->delete();
             }
         });
@@ -65,7 +63,7 @@ class GoodReceive extends Model
 
     public function isDeletable()
     {
-        foreach ($this->goodReceiveProducts as $item) {
+        foreach ($this->purchaseOrderProducts as $item) {
             if (!$item->isDeletable()) {
                 return false;
             }
@@ -81,14 +79,11 @@ class GoodReceive extends Model
 
     public function onCreated()
     {
-        $setting = SettingRepository::findBy(whereClause: [['name' => SettingLogistic::NAME]]);
-        $settings = json_decode($setting->setting, true);
-
-        if (!isset($settings[SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE]) || empty($settings[SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE])) {
+        if (!empty(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE))) {
             $this->processStock();
         }
 
-        $approval = ApprovalConfig::createApprovalIfMatch($settings[SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE], $this);
+        $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE), $this);
         if (!$approval) {
             $this->processStock();
         }
@@ -107,27 +102,27 @@ class GoodReceive extends Model
     public function processStock()
     {
         $data = [];
-        foreach ($this->goodReceiveProducts as $grProduct) {
-            if ($grProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
+        foreach ($this->purchaseOrderProducts as $item) {
+            if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
             $data[] = [
-                'id' => $grProduct->id,
-                'product_id' => $grProduct->product_id,
-                'product_name' => $grProduct->product_name,
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
                 'company_id' => $this->company_id,
                 'warehouse_id' => $this->warehouse_id,
-                'quantity' => $grProduct->quantity,
-                'unit_detail_id' => $grProduct->unit_detail_id,
+                'quantity' => $item->quantity,
+                'unit_detail_id' => $item->unit_detail_id,
                 'transaction_date' => $this->receive_date,
-                'price' => $grProduct->price,
-                'tax_value' => !empty($grProduct->ppn) ? $grProduct->ppn->tax_value : 0,
-                'code' => $grProduct->code,
-                'batch' => $grProduct->batch,
-                'expired_date' => $grProduct->expired_date,
-                'remarks_id' => $grProduct->id,
-                'remarks_type' => get_class($grProduct)
+                'price' => $item->price,
+                'tax_value' => !empty($item->ppn) ? $item->ppn->tax_value : 0,
+                'code' => $item->code,
+                'batch' => $item->batch,
+                'expired_date' => $item->expired_date,
+                'remarks_id' => $item->id,
+                'remarks_type' => get_class($item)
             ];
         }
 
@@ -141,7 +136,7 @@ class GoodReceive extends Model
         $cancelData = [];
 
         // Prepare Stock Cancel
-        $deletedGrProducts = $this->goodReceiveProducts()->onlyTrashed()->get();
+        $deletedGrProducts = $this->purchaseOrderProducts()->onlyTrashed()->get();
         foreach ($deletedGrProducts as $deletedGrProduct) {
             if ($deletedGrProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
@@ -154,46 +149,46 @@ class GoodReceive extends Model
         }
 
         // Prepare Stock Add & Update
-        foreach ($this->goodReceiveProducts as $grProduct) {
-            if ($grProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
+        foreach ($this->purchaseOrderProducts as $item) {
+            if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
-            if ($grProduct->created_at == $grProduct->updated_at) {
+            if ($item->created_at == $item->updated_at) {
                 $addData[] = [
-                    'id' => $grProduct->id,
-                    'product_id' => $grProduct->product_id,
-                    'product_name' => $grProduct->product_name,
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product_name,
                     'company_id' => $this->company_id,
                     'warehouse_id' => $this->warehouse_id,
-                    'quantity' => $grProduct->quantity,
-                    'unit_detail_id' => $grProduct->unit_detail_id,
+                    'quantity' => $item->quantity,
+                    'unit_detail_id' => $item->unit_detail_id,
                     'transaction_date' => $this->receive_date,
-                    'price' => $grProduct->price,
-                    'tax_value' => !empty($grProduct->ppn) ? $grProduct->ppn->tax_value : 0,
-                    'code' => $grProduct->code,
-                    'batch' => $grProduct->batch,
-                    'expired_date' => $grProduct->expired_date,
-                    'remarks_id' => $grProduct->id,
-                    'remarks_type' => get_class($grProduct)
+                    'price' => $item->price,
+                    'tax_value' => !empty($item->ppn) ? $item->ppn->tax_value : 0,
+                    'code' => $item->code,
+                    'batch' => $item->batch,
+                    'expired_date' => $item->expired_date,
+                    'remarks_id' => $item->id,
+                    'remarks_type' => get_class($item)
                 ];
             } else {
                 $updateData[] = [
-                    'id' => $grProduct->id,
-                    'product_id' => $grProduct->product_id,
-                    'product_name' => $grProduct->product_name,
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product_name,
                     'company_id' => $this->company_id,
                     'warehouse_id' => $this->warehouse_id,
-                    'quantity' => $grProduct->quantity,
-                    'unit_detail_id' => $grProduct->unit_detail_id,
+                    'quantity' => $item->quantity,
+                    'unit_detail_id' => $item->unit_detail_id,
                     'transaction_date' => $this->receive_date,
-                    'price' => $grProduct->price,
-                    'tax_value' => !empty($grProduct->ppn) ? $grProduct->ppn->tax_value : 0,
-                    'code' => $grProduct->code,
-                    'batch' => $grProduct->batch,
-                    'expired_date' => $grProduct->expired_date,
-                    'remarks_id' => $grProduct->id,
-                    'remarks_type' => get_class($grProduct)
+                    'price' => $item->price,
+                    'tax_value' => !empty($item->ppn) ? $item->ppn->tax_value : 0,
+                    'code' => $item->code,
+                    'batch' => $item->batch,
+                    'expired_date' => $item->expired_date,
+                    'remarks_id' => $item->id,
+                    'remarks_type' => get_class($item)
                 ];
             }
         }
@@ -206,14 +201,14 @@ class GoodReceive extends Model
     public function cancelStock()
     {
         $data = [];
-        foreach ($this->goodReceiveProducts as $grProduct) {
-            if ($grProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
+        foreach ($this->purchaseOrderProducts as $item) {
+            if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
             $data[] = [
-                'remarks_id' => $grProduct->id,
-                'remarks_type' => get_class($grProduct)
+                'remarks_id' => $item->id,
+                'remarks_type' => get_class($item)
             ];
         }
 
@@ -253,8 +248,8 @@ class GoodReceive extends Model
         return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
     }
 
-    public function goodReceiveProducts()
+    public function purchaseOrderProducts()
     {
-        return $this->hasMany(GoodReceiveProduct::class, 'good_receive_id', 'id');
+        return $this->hasMany(PurchaseOrderProduct::class, 'purchase_order_id', 'id');
     }
 }

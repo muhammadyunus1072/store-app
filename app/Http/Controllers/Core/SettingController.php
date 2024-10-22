@@ -15,4 +15,9 @@ class SettingController extends Controller
     {
         return view('app.core.setting.logistic.index');
     }
+
+    public function purchasing()
+    {
+        return view('app.core.setting.purchasing.index');
+    }
 }

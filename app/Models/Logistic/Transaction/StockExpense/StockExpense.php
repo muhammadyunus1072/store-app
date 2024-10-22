@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Repositories\Core\Setting\SettingRepository;
 use App\Settings\SettingLogistic;
-use App\Traits\HasApproval;
+use App\Traits\Document\HasApproval;
 use Sis\TrackHistory\HasTrackHistory;
 
 class StockExpense extends Model

@@ -4,7 +4,7 @@ namespace App\Permissions;
 
 class AccessCore
 {
-    const SETTING_CORE = "setting_core";
+    const SETTING = "setting_core";
     const DASHBOARD = "dashboard";
     const USER = "user";
     const PERMISSION = "permission";
@@ -12,7 +12,7 @@ class AccessCore
     const COMPANY = "company";
 
     const ALL = [
-        self::SETTING_CORE,
+        self::SETTING,
         self::DASHBOARD,
         self::USER,
         self::PERMISSION,
@@ -21,7 +21,7 @@ class AccessCore
     ];
 
     const TYPE_ALL = [
-        self::SETTING_CORE => [PermissionHelper::TYPE_READ, PermissionHelper::TYPE_UPDATE],
+        self::SETTING => [PermissionHelper::TYPE_READ, PermissionHelper::TYPE_UPDATE],
         self::DASHBOARD => [PermissionHelper::TYPE_READ],
         self::USER => PermissionHelper::TYPE_ALL,
         self::ROLE => PermissionHelper::TYPE_ALL,
@@ -30,7 +30,7 @@ class AccessCore
     ];
 
     const TRANSLATE = [
-        self::SETTING_CORE => "Pengaturan Utama",
+        self::SETTING => "Pengaturan Utama",
         self::DASHBOARD => "Dashboard",
         self::USER => "Pengguna",
         self::PERMISSION => "Akses",

@@ -99,9 +99,8 @@ class StockHandler
     */
     public static function add($data)
     {
-        $setting = SettingRepository::findBy(whereClause: [['name', SettingLogistic::NAME]]);
-        $isStockValueIncludeTaxPpn = $setting->get(SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE);
-        $isPriceIntegerValue = $setting->get(SettingLogistic::PRICE_INTEGER_VALUE);
+        $isStockValueIncludeTaxPpn = SettingLogistic::get(SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE);
+        $isPriceIntegerValue = SettingLogistic::get(SettingLogistic::PRICE_INTEGER_VALUE);
 
         if ($isPriceIntegerValue) {
             self::integerRuleAdd($data, $isStockValueIncludeTaxPpn);
@@ -112,9 +111,8 @@ class StockHandler
 
     public static function updateAdd($data)
     {
-        $setting = SettingRepository::findBy(whereClause: [['name', SettingLogistic::NAME]]);
-        $isStockValueIncludeTaxPpn = $setting->get(SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE);
-        $isPriceIntegerValue = $setting->get(SettingLogistic::PRICE_INTEGER_VALUE);
+        $isStockValueIncludeTaxPpn = SettingLogistic::get(SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE);
+        $isPriceIntegerValue = SettingLogistic::get(SettingLogistic::PRICE_INTEGER_VALUE);
 
         if ($isPriceIntegerValue) {
             self::integerRuleUpdateAdd($data, $isStockValueIncludeTaxPpn);
@@ -138,8 +136,7 @@ class StockHandler
             }
 
             // Get Substract Stock Method
-            $setting = SettingRepository::findBy(whereClause: [['name', SettingLogistic::NAME]]);
-            $substractStockMethod = $setting->get(SettingLogistic::SUBSTRACT_STOCK_METHOD);
+            $substractStockMethod = SettingLogistic::get(SettingLogistic::SUBSTRACT_STOCK_METHOD);
 
             // Substract Stock Process
             $productDetails = ProductDetailRepository::getBySubstractMethod(

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use Database\Seeders\Core\CompanySeeder;
-use Database\Seeders\Core\CompanyWarehouseSeeder;
 use Database\Seeders\Document\StatusApprovalSeeder;
 use Database\Seeders\Finance\TaxSeeder;
 use Database\Seeders\Logistic\CategoryProductSeeder;
@@ -15,7 +14,6 @@ use Database\Seeders\Logistic\SupplierSeeder;
 use Database\Seeders\Logistic\UnitSeeder;
 use Database\Seeders\Logistic\WarehouseSeeder;
 use Database\Seeders\Core\RolesAndPermissionsSeeder;
-use Database\Seeders\Core\UserCompanySeeder;
 use Database\Seeders\Core\UserSeeder;
 use Database\Seeders\Core\UserWarehouseSeeder;
 use Illuminate\Database\Seeder;
@@ -33,7 +31,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             // UserCompanySeeder::class,
             UserWarehouseSeeder::class,
-            // CompanySeeder::class,
+            CompanySeeder::class,
             // CompanyWarehouseSeeder::class,
             Core\SettingSeeder::class,
         ]);
@@ -57,6 +55,11 @@ class DatabaseSeeder extends Seeder
             UnitSeeder::class,
             ProductSeeder::class,
             Logistic\SettingSeeder::class,
+        ]);
+
+        // Purchasing Seeder
+        $this->call([
+            Purchasing\SettingSeeder::class,
         ]);
     }
 }

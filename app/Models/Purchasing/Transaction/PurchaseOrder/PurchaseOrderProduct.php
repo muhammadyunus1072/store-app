@@ -1,25 +1,22 @@
 <?php
 
-namespace App\Models\Logistic\Transaction\GoodReceive;
+namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
 use App\Models\Finance\Master\Tax;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
-use App\Models\Logistic\Transaction\GoodReceive\GoodReceive;
-use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProductTax;
-use App\Models\Logistic\Transaction\GoodReceive\GoodReceiveProductAttachment;
-use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Sis\TrackHistory\HasTrackHistory;
 
-class GoodReceiveProduct extends Model
+class PurchaseOrderProduct extends Model
 {
     use HasFactory, SoftDeletes, HasTrackHistory;
 
     protected $fillable = [
-        'good_receive_id',
+        'purchase_order_id',
         'purchase_order_product_id',
         'product_id',
         'unit_detail_id',
@@ -49,10 +46,10 @@ class GoodReceiveProduct extends Model
         });
 
         self::deleted(function ($model) {
-            foreach ($model->goodReceiveOrderProductTaxes as $item) {
+            foreach ($model->purchaseOrderProductTaxes as $item) {
                 $item->delete();
             }
-            foreach ($model->goodReceiveProductAttachments as $item) {
+            foreach ($model->purchaseOrderProductAttachments as $item) {
                 $item->delete();
             }
         });
@@ -72,9 +69,9 @@ class GoodReceiveProduct extends Model
     | RELATIONSHIP
     */
 
-    public function goodReceive()
+    public function purchaseOrder()
     {
-        return $this->belongsTo(GoodReceive::class, 'good_receive_id', 'id');
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id', 'id');
     }
 
     public function product()
@@ -94,24 +91,23 @@ class GoodReceiveProduct extends Model
 
     public function ppn(): HasOne
     {
-        return $this->hasOne(GoodReceiveProductTax::class, 'good_receive_product_id')
+        return $this->hasOne(PurchaseOrderProductTax::class, 'purchase_order_product_id')
             ->where('tax_type', Tax::TYPE_PPN);
     }
 
     public function pph(): HasOne
     {
-        return $this->hasOne(GoodReceiveProductTax::class, 'good_receive_product_id')
+        return $this->hasOne(PurchaseOrderProductTax::class, 'purchase_order_product_id')
             ->where('tax_type', Tax::TYPE_PPH);
     }
 
-
-    public function goodReceiveOrderProductTaxes()
+    public function purchaseOrderProductTaxes()
     {
-        return $this->hasMany(GoodReceiveProductTax::class, 'good_receive_product_id', 'id');
+        return $this->hasMany(PurchaseOrderProductTax::class, 'purchase_order_product_id', 'id');
     }
 
-    public function goodReceiveProductAttachments()
+    public function purchaseOrderProductAttachments()
     {
-        return $this->hasMany(GoodReceiveProductAttachment::class, 'good_receive_product_id', 'id');
+        return $this->hasMany(PurchaseOrderProductAttachment::class, 'purchase_order_product_id', 'id');
     }
 }

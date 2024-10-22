@@ -75,6 +75,9 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
 
         // Logistic 
         Route::get('/setting_logistic', 'logistic')->name('setting_logistic.index');
-        Route::get('/setting_logistic/tax/get', [TaxController::class, 'search'])->name('setting_logistic.get.tax');
+
+        // Purchasing 
+        Route::get('/setting_purchasing', 'purchasing')->name('setting_purchasing.index');
+        Route::get('/setting_purchasing/tax/get', [TaxController::class, 'search'])->name('setting_purchasing.get.tax');
     });
 });
