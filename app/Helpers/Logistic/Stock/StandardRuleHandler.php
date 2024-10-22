@@ -8,15 +8,10 @@ use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 
 trait StandardRuleHandler
 {
-    public static function standardRuleAdd($data, $isStockValueIncludeTaxPpn)
+    public static function standardRuleAdd($data)
     {
         foreach ($data as $item) {
-            $price = $item['price'];
-            if ($isStockValueIncludeTaxPpn) {
-                $price *= (100 + $item['tax_value']) / 100.0;
-            }
-
-            $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $price, $item['unit_detail_id']);
+            $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $item['price'], $item['unit_detail_id']);
 
             StockHandler::createStock(
                 productId: $item['product_id'],
@@ -34,15 +29,10 @@ trait StandardRuleHandler
         }
     }
 
-    public static function standardRuleUpdateAdd($data, $isStockValueIncludeTaxPpn)
+    public static function standardRuleUpdateAdd($data)
     {
         foreach ($data as $item) {
-            $price = $item['price'];
-            if ($isStockValueIncludeTaxPpn) {
-                $price *= (100 + $item['tax_value']) / 100.0;
-            }
-
-            $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $price, $item['unit_detail_id']);
+            $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $item['price'], $item['unit_detail_id']);
 
             $history = ProductDetailHistoryRepository::findBy(whereClause: [
                 ['remarks_id', $item['remarks_id']],

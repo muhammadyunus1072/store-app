@@ -5,9 +5,7 @@ namespace App\Helpers\Logistic\Stock;
 use App\Helpers\General\ErrorMessageHelper;
 use Carbon\Carbon;
 use App\Models\Logistic\Master\Product\Product;
-use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use App\Repositories\Core\Company\CompanyRepository;
-use App\Repositories\Core\Setting\SettingRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
@@ -99,25 +97,23 @@ class StockHandler
     */
     public static function add($data)
     {
-        $isStockValueIncludeTaxPpn = SettingLogistic::get(SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE);
         $isPriceIntegerValue = SettingLogistic::get(SettingLogistic::PRICE_INTEGER_VALUE);
 
         if ($isPriceIntegerValue) {
-            self::integerRuleAdd($data, $isStockValueIncludeTaxPpn);
+            self::integerRuleAdd($data);
         } else {
-            self::standardRuleAdd($data, $isStockValueIncludeTaxPpn);
+            self::standardRuleAdd($data);
         }
     }
 
     public static function updateAdd($data)
     {
-        $isStockValueIncludeTaxPpn = SettingLogistic::get(SettingLogistic::TAX_PPN_INCLUDE_IN_STOCK_VALUE);
         $isPriceIntegerValue = SettingLogistic::get(SettingLogistic::PRICE_INTEGER_VALUE);
 
         if ($isPriceIntegerValue) {
-            self::integerRuleUpdateAdd($data, $isStockValueIncludeTaxPpn);
+            self::integerRuleUpdateAdd($data);
         } else {
-            self::standardRuleUpdateAdd($data, $isStockValueIncludeTaxPpn);
+            self::standardRuleUpdateAdd($data);
         }
     }
 

@@ -7,7 +7,6 @@ use App\Helpers\General\Alert;
 use App\Helpers\General\NumberFormatter;
 use App\Helpers\General\ImageLocationHelper;
 use App\Models\Finance\Master\Tax;
-use App\Settings\SettingCore;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -23,7 +22,8 @@ use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepositor
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductTaxRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductAttachmentRepository;
-use App\Settings\SettingLogistic;
+use App\Settings\SettingPurchasing;
+use App\Settings\SettingCore;
 
 class Detail extends Component
 {
@@ -149,12 +149,12 @@ class Detail extends Component
     {
         $this->isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
 
-        $this->isInputProductCode = SettingLogistic::get(SettingLogistic::INPUT_PRODUCT_CODE);
-        $this->isInputProductExpiredDate = SettingLogistic::get(SettingLogistic::INPUT_PRODUCT_EXPIRED_DATE);
-        $this->isInputProductAttachment = SettingLogistic::get(SettingLogistic::INPUT_PRODUCT_ATTACHMENT);
-        $this->isInputProductBatch = SettingLogistic::get(SettingLogistic::INPUT_PRODUCT_BATCH);
+        $this->isInputProductCode = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_CODE);
+        $this->isInputProductExpiredDate = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_EXPIRED_DATE);
+        $this->isInputProductAttachment = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_ATTACHMENT);
+        $this->isInputProductBatch = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_BATCH);
 
-        $taxPpn = TaxRepository::find(SettingLogistic::get(SettingLogistic::TAX_PPN_GOOD_RECEIVE_ID));
+        $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
         $this->taxPpnId = Crypt::encrypt($taxPpn->id);
         $this->taxPpnName = $taxPpn->name;
         $this->taxPpnValue = $taxPpn->value;

@@ -21,19 +21,13 @@ trait IntegerRuleHandler
     | Solusi : 
     | - Save 0.5 and use it at other product
     */
-    public static function convertProductsToIntegerRule($data, $isStockValueIncludeTaxPpn)
+    public static function convertProductsToIntegerRule($data)
     {
         $convertedData = [];
         $savedValue = 0;
 
         foreach ($data as $item) {
-            // Calculate Stock Value
-            $price = $item['price'];
-            if ($isStockValueIncludeTaxPpn) {
-                $price *= (100 + $item['tax_value']) / 100.0;
-            }
-
-            $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $price + ($savedValue / $item['quantity']), $item['unit_detail_id']);
+            $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $item['price'] + ($savedValue / $item['quantity']), $item['unit_detail_id']);
             if (is_float($resultConvert['price'])) {
                 // o Case Product A 10 Pcs @930.2
                 if ($resultConvert['quantity'] > 1) {
@@ -76,7 +70,7 @@ trait IntegerRuleHandler
                 }
                 // o Case Product A 1 Pcs @1000.5
                 else {
-                    $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $price, $item['unit_detail_id']);
+                    $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $item['price'], $item['unit_detail_id']);
                     $convertedData[$item['id']] = [[
                         'product_id' => $item['product_id'],
                         'product_name' => $item['product_name'],
@@ -124,9 +118,9 @@ trait IntegerRuleHandler
         return $convertedData;
     }
 
-    public static function integerRuleAdd($data, $isStockValueIncludeTaxPpn)
+    public static function integerRuleAdd($data)
     {
-        $convertedData = self::convertProductsToIntegerRule($data, $isStockValueIncludeTaxPpn);
+        $convertedData = self::convertProductsToIntegerRule($data);
 
         foreach ($convertedData as $groupProduct) {
             foreach ($groupProduct as $item) {
@@ -169,9 +163,9 @@ trait IntegerRuleHandler
     | 2.1. Perubahan jumlah dan informasi 'N Unit'
     | 2.2. Perubahan jumlah dan informasi '1 Unit' dengan nilai yang sama dengan 'N Unit'
     */
-    public static function integerRuleUpdateAdd($data, $isStockValueIncludeTaxPpn)
+    public static function integerRuleUpdateAdd($data)
     {
-        $convertedData = self::convertProductsToIntegerRule($data, $isStockValueIncludeTaxPpn);
+        $convertedData = self::convertProductsToIntegerRule($data);
 
         foreach ($convertedData as $groupProduct) {
             $histories = ProductDetailHistoryRepository::getBy(whereClause: [

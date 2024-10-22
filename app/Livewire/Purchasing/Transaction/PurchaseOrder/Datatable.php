@@ -76,7 +76,7 @@ class Datatable extends Component
                     $editHtml = "";
                     $id = Crypt::encrypt($item->id);
                     if ($this->isCanUpdate) {
-                        $editUrl = route('good_receive.edit', $id);
+                        $editUrl = route('purchase_order.edit', $id);
                         $editHtml = "<div class='col-auto mb-2'>
                             <a class='btn btn-primary btn-sm' href='$editUrl'>
                                 <i class='ki-duotone ki-notepad-edit fs-1'>

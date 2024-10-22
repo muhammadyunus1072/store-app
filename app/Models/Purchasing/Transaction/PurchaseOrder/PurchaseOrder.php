@@ -11,6 +11,7 @@ use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Models\Purchasing\Master\Supplier\Supplier;
+use App\Settings\SettingPurchasing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -79,11 +80,11 @@ class PurchaseOrder extends Model
 
     public function onCreated()
     {
-        if (!empty(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE))) {
+        if (!empty(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER))) {
             $this->processStock();
         }
 
-        $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_GOOD_RECEIVE), $this);
+        $approval = ApprovalConfig::createApprovalIfMatch(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER), $this);
         if (!$approval) {
             $this->processStock();
         }
@@ -101,6 +102,8 @@ class PurchaseOrder extends Model
     */
     public function processStock()
     {
+        $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
+
         $data = [];
         foreach ($this->purchaseOrderProducts as $item) {
             if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
@@ -116,8 +119,7 @@ class PurchaseOrder extends Model
                 'quantity' => $item->quantity,
                 'unit_detail_id' => $item->unit_detail_id,
                 'transaction_date' => $this->receive_date,
-                'price' => $item->price,
-                'tax_value' => !empty($item->ppn) ? $item->ppn->tax_value : 0,
+                'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                 'code' => $item->code,
                 'batch' => $item->batch,
                 'expired_date' => $item->expired_date,
@@ -131,6 +133,8 @@ class PurchaseOrder extends Model
 
     public function updateStock()
     {
+        $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
+
         $addData = [];
         $updateData = [];
         $cancelData = [];
@@ -164,8 +168,7 @@ class PurchaseOrder extends Model
                     'quantity' => $item->quantity,
                     'unit_detail_id' => $item->unit_detail_id,
                     'transaction_date' => $this->receive_date,
-                    'price' => $item->price,
-                    'tax_value' => !empty($item->ppn) ? $item->ppn->tax_value : 0,
+                    'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                     'code' => $item->code,
                     'batch' => $item->batch,
                     'expired_date' => $item->expired_date,
@@ -182,8 +185,7 @@ class PurchaseOrder extends Model
                     'quantity' => $item->quantity,
                     'unit_detail_id' => $item->unit_detail_id,
                     'transaction_date' => $this->receive_date,
-                    'price' => $item->price,
-                    'tax_value' => !empty($item->ppn) ? $item->ppn->tax_value : 0,
+                    'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                     'code' => $item->code,
                     'batch' => $item->batch,
                     'expired_date' => $item->expired_date,
