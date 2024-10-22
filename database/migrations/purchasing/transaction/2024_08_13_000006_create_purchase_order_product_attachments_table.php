@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('good_receive_product_attachments', function (Blueprint $table) {
+        Schema::create('purchase_order_product_attachments', function (Blueprint $table) {
             $this->scheme($table, false);
         });
 
-        Schema::create('_history_good_receive_product_attachments', function (Blueprint $table) {
+        Schema::create('_history_purchase_order_product_attachments', function (Blueprint $table) {
             $this->scheme($table, true);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('good_receive_product_attachments');
-        Schema::dropIfExists('_history_good_receive_product_attachments');
+        Schema::dropIfExists('purchase_order_product_attachments');
+        Schema::dropIfExists('_history_purchase_order_product_attachments');
     }
 
     private function scheme(Blueprint $table, $is_history = false)
@@ -33,10 +33,10 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('good_receive_product_id', 'grpa_good_receive_product_id_idx');
+            $table->index('purchase_order_product_id', 'popa_purchase_order_product_id_idx');
         }
 
-        $table->bigInteger("good_receive_product_id")->unsigned()->comment('GoodReceiveProduct ID');
+        $table->bigInteger("purchase_order_product_id")->unsigned()->comment('Purchase Order Product ID');
         $table->string('file_name')->comment('Nama File Yang Tersimpan');
         $table->string('original_file_name')->comment('Nama Asli File');
         $table->text('note')->nullable()->comment('Catatan');

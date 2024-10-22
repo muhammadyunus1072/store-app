@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('good_receive_product_taxes', function (Blueprint $table) {
+        Schema::create('purchase_order_product_taxes', function (Blueprint $table) {
             $this->scheme($table, false);
         });
 
-        Schema::create('_history_good_receive_product_taxes', function (Blueprint $table) {
+        Schema::create('_history_purchase_order_product_taxes', function (Blueprint $table) {
             $this->scheme($table, true);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('good_receive_product_taxes');
-        Schema::dropIfExists('_history_good_receive_product_taxes');
+        Schema::dropIfExists('purchase_order_product_taxes');
+        Schema::dropIfExists('_history_purchase_order_product_taxes');
     }
 
     private function scheme(Blueprint $table, $is_history = false)
@@ -33,11 +33,11 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('good_receive_product_id', 'grpt_good_receive_product_id_idx');
-            $table->index('tax_id', 'gropt_tax_id_idx');
+            $table->index('purchase_order_product_id', 'popt_purchase_order_product_id_idx');
+            $table->index('tax_id', 'popt_tax_id_idx');
         }
 
-        $table->bigInteger("good_receive_product_id")->unsigned()->comment('GoodReceiveProduct ID');
+        $table->bigInteger("purchase_order_product_id")->unsigned()->comment('Purchase Order Product ID');
 
         // Tax Information
         $table->bigInteger("tax_id")->unsigned()->comment('Tax ID');

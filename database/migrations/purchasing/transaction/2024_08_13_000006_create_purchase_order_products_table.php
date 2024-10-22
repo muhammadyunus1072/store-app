@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('good_receive_products', function (Blueprint $table) {
+        Schema::create('purchase_order_products', function (Blueprint $table) {
             $this->scheme($table, false);
         });
 
-        Schema::create('_history_good_receive_products', function (Blueprint $table) {
+        Schema::create('_history_purchase_order_products', function (Blueprint $table) {
             $this->scheme($table, true);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('good_receive_products');
-        Schema::dropIfExists('_history_good_receive_products');
+        Schema::dropIfExists('purchase_order_products');
+        Schema::dropIfExists('_history_purchase_order_products');
     }
 
     private function scheme(Blueprint $table, $is_history = false)
@@ -33,12 +33,12 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('good_receive_id', 'grp_good_receive_id_idx');
-            $table->index('product_id', 'grp_product_id_idx');
-            $table->index('unit_detail_id', 'grp_unit_detail_id_idx');
+            $table->index('purchase_order_id', 'pop_purchase_order_id_idx');
+            $table->index('product_id', 'pop_product_id_idx');
+            $table->index('unit_detail_id', 'pop_unit_detail_id_idx');
         }
 
-        $table->bigInteger("good_receive_id")->unsigned()->comment('GoodReceive ID');
+        $table->bigInteger("purchase_order_id")->unsigned()->comment('Purchase Order ID');
 
         // Product Information
         $table->bigInteger("product_id")->unsigned()->comment('Product ID');

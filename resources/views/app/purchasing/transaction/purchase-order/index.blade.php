@@ -1,22 +1,22 @@
 @extends('app.layouts.panel')
 
-@section('title', 'Pembelian')
+@section('title', 'Pembelian Barang')
 
 @section('header')
     <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
         <!--begin::Title-->
-        <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">Pembelian</h1>
+        <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">Pembelian Barang</h1>
         <!--end::Title-->
         <!--begin::Breadcrumb-->
         <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-            <li class="breadcrumb-item text-muted">Pembelian</li>
+            <li class="breadcrumb-item text-muted">Pembelian Barang</li>
             {{-- <li class="breadcrumb-item">
                 <span class="bullet bg-gray-400 w-5px h-2px"></span>
             </li> --}}
         </ul>
         <!--end::Breadcrumb-->
 
-        @can(PermissionHelper::transform(PermissionHelper::ACCESS_PURCHASE_ORDER, PermissionHelper::TYPE_CREATE))
+        @can(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_CREATE))
             <div class='row'>
                 <div class="col-md-auto mt-2">
                     <a class="btn btn-success" href="{{ route('purchase_order.create') }}">
@@ -32,6 +32,7 @@
         @endcan
     </div>
 @stop
+
 @section('content')
     <div class="card">
         <div class="card-body">

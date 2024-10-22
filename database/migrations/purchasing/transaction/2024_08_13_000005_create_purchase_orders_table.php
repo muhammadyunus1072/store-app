@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('good_receives', function (Blueprint $table) {
+        Schema::create('purchase_orders', function (Blueprint $table) {
             $this->scheme($table, false);
         });
 
-        Schema::create('_history_good_receives', function (Blueprint $table) {
+        Schema::create('_history_purchase_orders', function (Blueprint $table) {
             $this->scheme($table, true);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('good_receives');
-        Schema::dropIfExists('_history_good_receives');
+        Schema::dropIfExists('purchase_orders');
+        Schema::dropIfExists('_history_purchase_orders');
     }
 
     private function scheme(Blueprint $table, $is_history = false)
@@ -33,13 +33,13 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('supplier_id', 'good_receives_supplier_id_idx');
-            $table->index('company_id', 'good_receives_company_id_idx');
-            $table->index('warehouse_id', 'good_receives_warehouse_id_idx');
+            $table->index('supplier_id', 'purchase_orders_supplier_id_idx');
+            $table->index('company_id', 'purchase_orders_company_id_idx');
+            $table->index('warehouse_id', 'purchase_orders_warehouse_id_idx');
             
-            $table->index('number', 'good_receives_number_idx');
-            $table->index('receive_date', 'good_receives_receive_date_idx');
-            $table->index('supplier_invoice_number', 'good_receives_supplier_invoice_number_idx');
+            $table->index('number', 'purchase_orders_number_idx');
+            $table->index('receive_date', 'purchase_orders_receive_date_idx');
+            $table->index('supplier_invoice_number', 'purchase_orders_supplier_invoice_number_idx');
         }
 
         $table->string('number')->comment('Nomor');
