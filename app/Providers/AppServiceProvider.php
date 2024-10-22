@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Helpers\Core\UserStateHandler;
 use App\Settings\SettingCore;
 use App\Settings\SettingLogistic;
+use App\Settings\SettingPurchasing;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Contracts\Foundation\Application;
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(SettingLogistic::class, function (Application $app) {
             return new SettingLogistic();
+        });
+
+        $this->app->singleton(SettingPurchasing::class, function (Application $app) {
+            return new SettingPurchasing();
         });
     }
 
