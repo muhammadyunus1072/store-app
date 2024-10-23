@@ -107,6 +107,7 @@ class Detail extends Component
             $this->requesterWarehouseId = $userState['warehouse_id'];
         } else {
             $this->requesterCompanyId = $userState['company_id'];
+            $this->requestedCompanyId = $userState['company_id'];
             $this->requesterWarehouses = $userState['warehouses'];
             $this->requesterWarehouseId = $userState['warehouse_id'];
         }
@@ -146,6 +147,10 @@ class Detail extends Component
             Alert::fail($this, "Gagal", "Gudang Diminta Belum Diinput");
             return;
         }
+        if (Crypt::decrypt($this->requesterWarehouseId) == Crypt::decrypt($this->requestedWarehouseId)) {
+            Alert::fail($this, "Gagal", "Gudang Peminta dan Diminta Tidak Boleh Sama");
+            return;
+        }
         if (count($this->stockRequestProducts) == 0) {
             Alert::fail($this, "Gagal", "Barang-barang diminta belum diinput");
             return;
@@ -154,8 +159,8 @@ class Detail extends Component
         $this->validate();
 
         $validatedData = [
-            'company_requester_id' => Crypt::decrypt($this->requesterWarehouseId),
-            'company_requested_id' => Crypt::decrypt($this->requestedWarehouseId),
+            'company_requester_id' => Crypt::decrypt($this->requesterCompanyId),
+            'company_requested_id' => Crypt::decrypt($this->requestedCompanyId),
             'warehouse_requester_id' => Crypt::decrypt($this->requesterWarehouseId),
             'warehouse_requested_id' => Crypt::decrypt($this->requestedWarehouseId),
             'transaction_date' => $this->transactionDate,

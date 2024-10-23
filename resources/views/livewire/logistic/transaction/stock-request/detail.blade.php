@@ -37,7 +37,7 @@
         {{-- SELECT COMPANY REQUESTED --}}
         <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}" wire:ignore>
             <label>Perusahaan Diminta</label>
-            <select class="form-select w-100" id="select-requested-company">
+            <select class="form-select w-100" id="select2-company-requested">
                 @if (!empty($requestedCompanyId))
                     <option value="{{ $requestedCompanyId }}" selected>{{ $requestedCompanyText }}</option>
                 @endif
@@ -47,7 +47,7 @@
         {{-- SELECT WAREHOUSE REQUESTED --}}
         <div class="col-md-6 mb-3" wire:ignore>
             <label>Gudang Diminta</label>
-            <select class="form-select w-100" id="select-requested-warehouse">
+            <select class="form-select w-100" id="select2-warehouse-requested">
                 @if (!empty($requestedWarehouseId))
                     <option value="{{ $requestedWarehouseId }}" selected>{{ $requestedWarehouseText }}</option>
                 @endif
@@ -82,7 +82,7 @@
     </div>
 
     <table class='table gy-1 gx-2'>
-        @foreach ($purchaseOrderProducts as $index => $item)
+        @foreach ($stockRequestProducts as $index => $item)
             {{-- MAIN ATTIRBUTE --}}
             <tr>
                 {{-- ACTION --}}
@@ -122,10 +122,10 @@
                     <label class='fw-bold'>Jumlah</label>
                     <div class="input-group">
                         <input type="text" class="form-control currency"
-                            wire:model.blur="purchaseOrderProducts.{{ $index }}.quantity" />
+                            wire:model.blur="stockRequestProducts.{{ $index }}.quantity" />
 
                         <select class="form-select @error('type') is-invalid @enderror"
-                            wire:model.blur="purchaseOrderProducts.{{ $index }}.unit_detail_id">
+                            wire:model.blur="stockRequestProducts.{{ $index }}.unit_detail_id">
                             @foreach ($item['unit_detail_choice'] as $unit)
                                 <option value="{{ $unit['id'] }}">
                                     {{ $unit['name'] }}
@@ -172,10 +172,6 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            initSelect2();
-        });
-
-        function initSelect2() {
             // Select2 Company Requested
             $('#select2-company-requested').select2({
                 placeholder: "Pilih Perusahaan Diminta",
@@ -216,6 +212,7 @@
                     type: "GET",
                     data: function(params) {
                         return {
+                            product_stock: 1,
                             search: params.term,
                         };
                     },
@@ -235,7 +232,7 @@
 
             $('#select2-warehouse-requested').on('change', async function(e) {
                 let data = $('#select2-warehouse-requested').val();
-                @this.set('requestedCompanyId', data);
+                @this.set('requestedWarehouseId', data);
             });
 
             // Select2 Product
@@ -247,6 +244,7 @@
                     type: "GET",
                     data: function(params) {
                         return {
+                            product_stock: 1,
                             search: params.term,
                         };
                     },
@@ -271,6 +269,6 @@
                     $('#select2-product').val('').trigger('change');
                 }
             });
-        }
+        });
     </script>
 @endpush

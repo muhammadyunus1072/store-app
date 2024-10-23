@@ -59,7 +59,9 @@ class StockRequest extends Model
         });
 
         self::deleted(function ($model) {
-            $model->stockRequestProducts()->delete();
+            foreach($model->stockRequestProducts as $item){
+                $item->delete();
+            }
         });
     }
 

@@ -2,7 +2,7 @@
 
 return [
     'title' => env('APP_NAME', 'Template Project'),
-    'subtitle' => 'Software House',
+    'subtitle' => 'Sistem Logistik RSMH',
 
     'logo_auth' => 'files/images/logo_rsmh.png',
     'logo_auth_background' => 'white',

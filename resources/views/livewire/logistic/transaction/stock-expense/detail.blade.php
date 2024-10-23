@@ -62,7 +62,7 @@
     </div>
 
     <table class='table gy-1 gx-2'>
-        @foreach ($purchaseOrderProducts as $index => $item)
+        @foreach ($stockExpenseProducts as $index => $item)
             {{-- MAIN ATTIRBUTE --}}
             <tr>
                 {{-- ACTION --}}
@@ -102,10 +102,10 @@
                     <label class='fw-bold'>Jumlah</label>
                     <div class="input-group">
                         <input type="text" class="form-control currency"
-                            wire:model.blur="purchaseOrderProducts.{{ $index }}.quantity" />
+                            wire:model.blur="stockExpenseProducts.{{ $index }}.quantity" />
 
                         <select class="form-select @error('type') is-invalid @enderror"
-                            wire:model.blur="purchaseOrderProducts.{{ $index }}.unit_detail_id">
+                            wire:model.blur="stockExpenseProducts.{{ $index }}.unit_detail_id">
                             @foreach ($item['unit_detail_choice'] as $unit)
                                 <option value="{{ $unit['id'] }}">
                                     {{ $unit['name'] }}
@@ -165,6 +165,7 @@
                     type: "GET",
                     data: function(params) {
                         return {
+                            product_stock: 1,
                             search: params.term,
                         };
                     },

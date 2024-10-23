@@ -37,8 +37,6 @@ return new class extends Migration
             $table->index('warehouse_id', 'stock_expenses_warehouse_id_idx');
             $table->index('number', 'stock_expenses_number_idx');
             $table->index('transaction_date', 'stock_expenses_transaction_date_idx');
-            $table->index('approved_date', 'stock_expenses_approved_date_idx');
-            $table->index('cancel_date', 'stock_expenses_cancel_date_idx');
         }
 
         // Company Info

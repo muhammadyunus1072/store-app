@@ -32,6 +32,6 @@ class ProductController extends Controller
     // Product
     public function search(Request $request)
     {
-        return ProductRepository::search($request->search);
+        return ProductRepository::search($request);
     }
 }

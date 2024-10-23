@@ -49,7 +49,9 @@ class StockExpense extends Model
         });
 
         self::deleted(function ($model) {
-            $model->stockExpenseProducts()->delete();
+            foreach($model->stockExpenseProducts as $item){
+                $item->delete();
+            }
         });
     }
 

@@ -128,27 +128,6 @@ class Datatable extends Component
                 'key' => 'note',
                 'name' => 'Catatan',
             ],
-
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Status',
-                'render' => function($item)
-                {
-                    $html = "";
-                    if($item->approved_date)
-                    {
-                        $html = "<p class='badge text-white bg-success'>Disetujui</p>";
-                    }elseif($item->cancel_date)
-                    {
-                        $html = "<p class='badge text-white bg-warning'>Cancel</p>";
-                    }else{
-                        $html = "<p class='badge text-white bg-warning'>Proses Persetujuan</p>";
-                    }
-
-                    return $html;
-                }
-            ],
         ];
     }
 

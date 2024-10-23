@@ -39,8 +39,6 @@ return new class extends Migration
             $table->index('warehouse_requested_id', 'stock_requests_warehouse_requested_id_idx');
             $table->index('number', 'stock_requests_number_idx');
             $table->index('transaction_date', 'stock_requests_transaction_date_idx');
-            $table->index('approved_date', 'stock_requests_approved_date_idx');
-            $table->index('cancel_date', 'stock_requests_cancel_date_idx');
         }
         // Company Info
         $table->bigInteger("company_requester_id")->unsigned()->comment('Perusahaan Requester ID');

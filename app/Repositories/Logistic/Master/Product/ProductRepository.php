@@ -18,11 +18,14 @@ class ProductRepository extends MasterDataRepository
         return Product::with('unit', 'productCategories', 'productCategories.categoryProduct')->where('id', $id)->first();
     }
 
-    public static function search($search)
+    public static function search($request)
     {
         $data = Product::select('id', 'name')
-            ->when($search, function ($query) use ($search) {
-                $query->where('name', env('QUERY_LIKE'), '%' . $search . '%');
+            ->when($request->product_stock, function ($query) {
+                $query->where('type', Product::TYPE_PRODUCT_WITH_STOCK);
+            })
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', env('QUERY_LIKE'), '%' . $request->search . '%');
             })
             ->orderBy('name', 'asc')
             ->get()
