@@ -57,7 +57,6 @@ class Detail extends Component
     public $taxPpnId;
     public $taxPpnName;
     public $taxPpnValue;
-
     public $companies = [];
     public $warehouses = [];
 
@@ -72,11 +71,14 @@ class Detail extends Component
         $this->loadUserState();
 
         $this->transactionDate = Carbon::now()->format("Y-m-d");
-        $this->supplierInvoiceNumber = "";
         $this->note = "";
+        $this->supplierInvoiceNumber = "";
 
         if ($this->objId) {
-            $purchaseOrder = PurchaseOrderRepository::findWithDetails(Crypt::decrypt($this->objId));
+            $purchaseOrder = PurchaseOrderRepository::find(Crypt::decrypt($this->objId));
+            $this->transactionDate = Carbon::parse($purchaseOrder->transaction_date)->format("Y-m-d");
+            $this->supplierInvoiceNumber = $purchaseOrder->supplier_invoice_number;
+            $this->note = $purchaseOrder->note;
 
             $this->supplierId = Crypt::encrypt($purchaseOrder->supplier_id);
             $this->supplierText = $purchaseOrder->supplier_name;
@@ -86,10 +88,6 @@ class Detail extends Component
 
             $this->companyId = Crypt::encrypt($purchaseOrder->company_id);
             $this->companyText = $purchaseOrder->company_name;
-
-            $this->transactionDate = Carbon::parse($purchaseOrder->transaction_date)->format("Y-m-d");
-            $this->supplierInvoiceNumber = $purchaseOrder->supplier_invoice_number;
-            $this->note = $purchaseOrder->note;
 
             foreach ($purchaseOrder->purchaseOrderProducts as $purchaseOrderProduct) {
                 // Set Default PPN
@@ -297,11 +295,11 @@ class Detail extends Component
                 }
             }
 
-            if ($this->objId) {
-                $purchaseOrder->onUpdated();
-            } else {
-                $purchaseOrder->onCreated();
-            }
+            // if ($this->objId) {
+            //     $purchaseOrder->onUpdated();
+            // } else {
+            //     $purchaseOrder->onCreated();
+            // }
 
             DB::commit();
 

@@ -44,9 +44,9 @@
             </select>
         </div>
 
-        {{-- RECEIVE DATE --}}
+        {{-- TRANSACTION DATE --}}
         <div class="col-md-4 mb-3">
-            <label>Tanggal Penerimaan</label>
+            <label>Tanggal</label>
             <input type="date" class="form-control @error('transactionDate') is-invalid @enderror"
                 wire:model="transactionDate" />
 
@@ -77,7 +77,7 @@
         </div>
     </div>
 
-    {{-- PURCHASE ORDER PRODUCTS --}}
+    {{-- PRODUCTS --}}
     <label>Barang-barang yang diterima</label>
     <div class="col-md-12 mb-4" wire:ignore>
         <select id="select2-product" class="form-select w-100">

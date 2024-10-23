@@ -13,16 +13,6 @@ class StockRequestRepository extends MasterDataRepository
         return StockRequest::class;
     }
 
-    public static function findWithDetails($id)
-    {
-        return StockRequest::with([
-            'warehouseRequester',    
-            'warehouseRequested',    
-            'stockRequestProducts',    
-        ]
-        )->where('id', $id)->first();
-    }
-
     public static function datatable()
     {
         return StockRequest::query();

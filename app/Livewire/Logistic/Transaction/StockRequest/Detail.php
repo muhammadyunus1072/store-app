@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Logistic\Transaction\StockRequest;
 
+use App\Helpers\Core\UserStateHandler;
 use Exception;
 use App\Helpers\General\Alert;
 use Livewire\Component;
@@ -12,62 +13,102 @@ use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\Logistic\Master\Product\Product;
+use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Transaction\StockRequest\StockRequestRepository;
 use App\Repositories\Logistic\Transaction\StockRequest\StockRequestProductRepository;
-
+use App\Settings\SettingCore;
+use Carbon\Carbon;
 
 class Detail extends Component
 {
     public $objId;
 
-    public $warehouse_requester_id;
-    public $warehouse_requester_text;
-
-    public $warehouse_requested_id;
-    public $warehouse_requested_text;
-
-    #[Validate('required', message: 'Tanggal Permintaan Harus Diisi', onUpdate: false)]
-    public $transaction_date;
+    #[Validate('required', message: 'Tanggal Harus Diisi', onUpdate: false)]
+    public $transactionDate;
     public $note;
+
+    public $requesterCompanyId;
+    public $requesterCompanyText;
+    public $requesterWarehouseId;
+    public $requesterWarehouseText;
+
+    public $requestedCompanyId;
+    public $requestedCompanyText;
+    public $requestedWarehouseId;
+    public $requestedWarehouseText;
 
     public $stockRequestProducts = [];
     public $stockRequestProductRemoves = [];
 
+    // Helpers
+    public $isMultipleCompany = false;
+    public $requesterCompanies = [];
+    public $requesterWarehouses = [];
+
+    public function render()
+    {
+        return view('livewire.logistic.transaction.stock-request.detail');
+    }
+
     public function mount()
     {
+        $this->loadSetting();
+        $this->loadUserState();
+
+        $this->transactionDate = Carbon::now()->format("Y-m-d");
+        $this->note = "";
 
         if ($this->objId) {
-            $id = Crypt::decrypt($this->objId);
-            $stockRequest = StockRequestRepository::findWithDetails($id);
-
-            $this->warehouse_requester_id = Crypt::encrypt($stockRequest->warehouse_requester_id);
-            $this->warehouse_requester_text = $stockRequest->warehouse_requester_name;
-
-            $this->warehouse_requested_id = Crypt::encrypt($stockRequest->warehouse_requested_id);
-            $this->warehouse_requested_text = $stockRequest->warehouse_requested_name;
-            
-            $this->transaction_date = $stockRequest->transaction_date;
+            $stockRequest = StockRequestRepository::find(Crypt::decrypt($this->objId));
+            $this->transactionDate = Carbon::parse($stockRequest->transaction_date)->format("Y-m-d");
             $this->note = $stockRequest->note;
-            
-            foreach($stockRequest->stockRequestProducts as $index => $stockRequestProduct)
-            {
-                
-                $unit_detail_choice = collect($stockRequestProduct->unitDetailChoices->toArray())->map(function($item) {
-                    $item['enc_id'] = Crypt::encrypt($item['id']);
-                    return $item;
-                })->all();
-                $unit_detail_id = collect($unit_detail_choice)->where('id', $stockRequestProduct->unit_detail_id)->pluck('enc_id')[0];
-                
+
+            $this->requesterCompanyId = Crypt::encrypt($stockRequest->company_requester_id);
+            $this->requesterCompanyText = $stockRequest->company_requester_name;
+            $this->requesterWarehouseId = Crypt::encrypt($stockRequest->warehouse_requester_id);
+            $this->requesterWarehouseText = $stockRequest->warehouse_requester_name;
+
+            $this->requestedCompanyId = Crypt::encrypt($stockRequest->company_requested_id);
+            $this->requestedCompanyText = $stockRequest->company_requested_name;
+            $this->requestedWarehouseId = Crypt::encrypt($stockRequest->warehouse_requested_id);
+            $this->requestedWarehouseText = $stockRequest->warehouse_requested_name;
+
+            foreach ($stockRequest->stockRequestProducts as $stockRequestProduct) {
+                $unitDetailChoice = UnitDetailRepository::getOptions($stockRequestProduct->unit_detail_unit_id);
+                $unitDetailId = collect($unitDetailChoice)->filter(function ($obj) use ($stockRequestProduct) {
+                    return Crypt::decrypt($obj['id']) == $stockRequestProduct->unit_detail_id;
+                })->first()['id'];
+
                 $this->stockRequestProducts[] = [
                     'id' => Crypt::encrypt($stockRequestProduct->id),
                     'product_id' => Crypt::encrypt($stockRequestProduct->product_id),
-                    'product_text' => $stockRequestProduct->product_name ." ( ".Product::translateType($stockRequestProduct->product_type).")",
-                    "unit_detail_id" => $unit_detail_id,
-                    "unit_detail_choice" => $unit_detail_choice,
+                    'product_text' => $stockRequestProduct->product_name,
+                    "unit_detail_id" => $unitDetailId,
+                    "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockRequestProduct->quantity),
                 ];
             }
+        }
+    }
+
+    public function loadSetting()
+    {
+        $this->isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
+    }
+
+    public function loadUserState()
+    {
+        $userState = UserStateHandler::get();
+        if ($this->isMultipleCompany) {
+            $this->requesterCompanies = $userState['companies'];
+            $this->requesterCompanyId = $userState['company_id'];
+            $this->requesterWarehouses = $userState['warehouses'];
+            $this->requesterWarehouseId = $userState['warehouse_id'];
+        } else {
+            $this->requesterCompanyId = $userState['company_id'];
+            $this->requesterWarehouses = $userState['warehouses'];
+            $this->requesterWarehouseId = $userState['warehouse_id'];
         }
     }
 
@@ -87,85 +128,56 @@ class Detail extends Component
         $this->redirectRoute('stock_request.index');
     }
 
-    public function removeDetail($index)
-    {
-        if ($this->stockRequestProducts[$index]['id']) {
-            $this->stockRequestProductRemoves[] = $this->stockRequestProducts[$index]['id'];
-        }
-        unset($this->stockRequestProducts[$index]);
-        $this->stockRequestProducts = array_values($this->stockRequestProducts);
-        
-    }
-
-    public function setWarehouseRequester($data)
-    {
-        $data = $data['selectedOption'];
-        $this->warehouse_requester_id = $data['id'];
-        
-    }
-
-    public function setWarehouseRequested($data)
-    {
-        $data = $data['selectedOption'];
-        $this->warehouse_requested_id = $data['id'];
-        
-    }
-    public function selectProduct($data)
-    {
-        $data = $data['selectedOption'];
-        $unit_detail_choice = UnitDetailRepository::getBy(Crypt::decrypt($data['id']));
-        $unit_detail_id = collect($unit_detail_choice)->where('is_main', true)->pluck('enc_id')[0];
-        $this->stockRequestProducts[] = [
-            'id' => null,
-            'product_id' => $data['id'],
-            'product_text' => $data['text'],
-            "unit_detail_id" => $unit_detail_id,
-            "unit_detail_choice" => $unit_detail_choice,
-            "quantity" => 0,
-        ];
-    }
-
-
     public function store()
     {
-        if (!$this->warehouse_requester_id) {
-            Alert::fail($this, "Gagal", "Peminta Gudang Belum Diinput");
+        if (!$this->requesterCompanyId) {
+            Alert::fail($this, "Gagal", "Perusahaan Peminta Belum Diinput");
             return;
         }
-        if (!$this->warehouse_requester_id) {
-            Alert::fail($this, "Gagal", "Permintaan Gudang Belum Diinput");
+        if (!$this->requesterWarehouseId) {
+            Alert::fail($this, "Gagal", "Gudang Peminta Belum Diinput");
+            return;
+        }
+        if (!$this->requestedCompanyId) {
+            Alert::fail($this, "Gagal", "Perusahaan Diminta Belum Diinput");
+            return;
+        }
+        if (!$this->requestedWarehouseId) {
+            Alert::fail($this, "Gagal", "Gudang Diminta Belum Diinput");
             return;
         }
         if (count($this->stockRequestProducts) == 0) {
-            Alert::fail($this, "Gagal", "Data Permintaan Produk Belum Diinput");
+            Alert::fail($this, "Gagal", "Barang-barang diminta belum diinput");
             return;
         }
+
         $this->validate();
 
         $validatedData = [
-            'warehouse_requester_id' => Crypt::decrypt($this->warehouse_requester_id),
-            'warehouse_requested_id' => Crypt::decrypt($this->warehouse_requested_id),
-            'transaction_date' => $this->transaction_date,
+            'company_requester_id' => Crypt::decrypt($this->requesterWarehouseId),
+            'company_requested_id' => Crypt::decrypt($this->requestedWarehouseId),
+            'warehouse_requester_id' => Crypt::decrypt($this->requesterWarehouseId),
+            'warehouse_requested_id' => Crypt::decrypt($this->requestedWarehouseId),
+            'transaction_date' => $this->transactionDate,
             'note' => $this->note,
         ];
 
         try {
             DB::beginTransaction();
             if ($this->objId) {
-                $objId = Crypt::decrypt($this->objId);
-                StockRequestRepository::update($objId, $validatedData);
+                $decId = Crypt::decrypt($this->objId);
+                StockRequestRepository::update($decId, $validatedData);
+                $stockRequest = StockRequestRepository::find($decId);
             } else {
-                $obj = StockRequestRepository::create($validatedData);
-                $objId = $obj->id;
+                $stockRequest = StockRequestRepository::create($validatedData);
             }
 
             // ===============================
             // ==== STOCK REQUEST PRODUCT ====
             // ===============================
-            foreach($this->stockRequestProducts as $index => $stockRequestProduct)
-            {
+            foreach ($this->stockRequestProducts as $stockRequestProduct) {
                 $validatedData = [
-                    'stock_request_id' => $objId,
+                    'stock_request_id' => $stockRequest->id,
                     'product_id' => Crypt::decrypt($stockRequestProduct['product_id']),
                     'unit_detail_id' => Crypt::decrypt($stockRequestProduct['unit_detail_id']),
                     'quantity' => NumberFormatter::imaskToValue($stockRequestProduct['quantity']),
@@ -173,15 +185,21 @@ class Detail extends Component
                 if ($stockRequestProduct['id']) {
                     $stockRequestProductId = Crypt::decrypt($stockRequestProduct['id']);
                     $object = StockRequestProductRepository::update($stockRequestProductId, $validatedData);
-                }else {
+                } else {
                     $object = StockRequestProductRepository::create($validatedData);
-                    $stockRequestProductId = $object->id;   
+                    $stockRequestProductId = $object->id;
                 }
             }
 
             foreach ($this->stockRequestProductRemoves as $item) {
                 StockRequestProductRepository::delete(Crypt::decrypt($item));
             }
+
+            // if ($this->objId) {
+            //     $stockRequest->onUpdated();
+            // } else {
+            //     $stockRequest->onCreated();
+            // }
 
             DB::commit();
 
@@ -201,8 +219,30 @@ class Detail extends Component
         }
     }
 
-    public function render()
+    /*
+    | HANDLER : STOCK EXPENSE PRODUCT
+    */
+    public function addDetail($productId)
     {
-        return view('livewire.logistic.transaction.stock-request.detail');
+        $product = ProductRepository::find(Crypt::decrypt($productId));
+        $unitDetailChoice = UnitDetailRepository::getOptions($product->unit_id);
+
+        $this->stockRequestProducts[] = [
+            'id' => null,
+            'product_id' => Crypt::encrypt($product->id),
+            'product_text' => $product->name,
+            "unit_detail_id" => $unitDetailChoice[0]['id'],
+            "unit_detail_choice" => $unitDetailChoice,
+            "quantity" => 0,
+        ];
+    }
+
+    public function removeDetail($index)
+    {
+        if ($this->stockRequestProducts[$index]['id']) {
+            $this->stockRequestProductRemoves[] = $this->stockRequestProducts[$index]['id'];
+        }
+        unset($this->stockRequestProducts[$index]);
+        $this->stockRequestProducts = array_values($this->stockRequestProducts);
     }
 }

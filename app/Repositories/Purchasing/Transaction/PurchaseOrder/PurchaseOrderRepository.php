@@ -12,20 +12,6 @@ class PurchaseOrderRepository extends MasterDataRepository
         return PurchaseOrder::class;
     }
 
-    public static function findWithDetails($id)
-    {
-        return PurchaseOrder::with(
-            [
-                'supplier',
-                'warehouse',
-                'purchaseOrderProducts',
-                'purchaseOrderProducts.ppn',
-                'purchaseOrderProducts.pph',
-                'purchaseOrderProducts.purchaseOrderProductAttachments',
-            ]
-        )->where('id', $id)->first();
-    }
-
     public static function datatable()
     {
         return PurchaseOrder::query();

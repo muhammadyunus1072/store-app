@@ -13,15 +13,6 @@ class StockExpenseRepository extends MasterDataRepository
         return StockExpense::class;
     }
 
-    public static function findWithDetails($id)
-    {
-        return StockExpense::with([
-            'warehouse',    
-            'stockExpenseProducts',    
-        ]
-        )->where('id', $id)->first();
-    }
-
     public static function datatable()
     {
         return StockExpense::query();

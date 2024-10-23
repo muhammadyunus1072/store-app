@@ -1,101 +1,148 @@
 <form wire:submit="store">
-    {{-- {{dd($purchaseOrderProducts)}} --}}
     <div class='row'>
-        <div class="col-md-4 mb-3">
-            <label>Peminta Gudang</label>
-            
-            <div class="col-md-12 mb-4">
-                <div class="w-100" wire:ignore>
-                    <select id="select2-warehouse_requester" class="form-select">
-                        @if ($objId)
-                            <option value="{{$warehouse_requester_id}}">{{$warehouse_requester_text}}</option>
-                        @endif
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Permintaan Gudang</label>
-            
-            <div class="col-md-12 mb-4">
-                <div class="w-100" wire:ignore>
-                    <select id="select2-warehouse_requested" class="form-select">
-                        @if ($objId)
-                            <option value="{{$warehouse_requested_id}}">{{$warehouse_requested_text}}</option>
-                        @endif
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <label>Tanggal Permintaan</label>
-            <input type="date" class="form-control @error('transaction_date') is-invalid @enderror" wire:model="transaction_date" />
+        {{-- SELECT COMPANY REQUESTER --}}
+        <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}">
+            <label>Perusahaan Peminta</label>
+            <select class="form-select w-100">
+                @php $isFound = false; @endphp
 
-            @error('transaction_date')
+                @foreach ($requesterCompanies as $company)
+                    @php $isFound = $isFound || $company['id'] == $requesterCompanyId; @endphp
+                    <option value="{{ $company['id'] }}">{{ $company['name'] }}</option>
+                @endforeach
+
+                @if (!$isFound && !empty($requesterCompanyId))
+                    <option value="{{ $requesterCompanyId }}" selected>{{ $requesterCompanyText }}</option>
+                @endif
+            </select>
+        </div>
+
+        {{-- SELECT WAREHOUSE REQUESTER --}}
+        <div class="col-md-6 mb-3">
+            <label>Gudang Peminta</label>
+            <select class="form-select w-100">
+                @php $isFound = false; @endphp
+
+                @foreach ($requesterWarehouses as $warehouse)
+                    @php $isFound = $isFound || $warehouse['id'] == $requesterWarehouseId; @endphp
+                    <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
+                @endforeach
+
+                @if (!$isFound && !empty($requesterWarehouseId))
+                    <option value="{{ $requesterWarehouseId }}" selected>{{ $requesterWarehouseText }}</option>
+                @endif
+            </select>
+        </div>
+
+        {{-- SELECT COMPANY REQUESTED --}}
+        <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}" wire:ignore>
+            <label>Perusahaan Diminta</label>
+            <select class="form-select w-100" id="select-requested-company">
+                @if (!empty($requestedCompanyId))
+                    <option value="{{ $requestedCompanyId }}" selected>{{ $requestedCompanyText }}</option>
+                @endif
+            </select>
+        </div>
+
+        {{-- SELECT WAREHOUSE REQUESTED --}}
+        <div class="col-md-6 mb-3" wire:ignore>
+            <label>Gudang Diminta</label>
+            <select class="form-select w-100" id="select-requested-warehouse">
+                @if (!empty($requestedWarehouseId))
+                    <option value="{{ $requestedWarehouseId }}" selected>{{ $requestedWarehouseText }}</option>
+                @endif
+            </select>
+        </div>
+
+        {{-- TRANSACTION DATE --}}
+        <div class="col-md-4 mb-3">
+            <label>Tanggal</label>
+            <input type="date" class="form-control @error('transactionDate') is-invalid @enderror"
+                wire:model="transactionDate" />
+
+            @error('transactionDate')
                 <div class="invalid-feedback">
                     {{ $message }}
                 </div>
             @enderror
         </div>
-    </div>
-    <div class="row">
+
+        {{-- NOTE --}}
         <div class="col-md-12 mb-4">
             <label>Catatan</label>
             <textarea class="form-control" cols="30" rows="4" wire:model="note"></textarea>
         </div>
     </div>
 
-    <div class="row">
-        {{-- INVOICE DETAIL --}}
-        <div class="col-md-12 mb-3">
-            <label>Data Permintaan</label>
-            
-            <div class="col-md-12 mb-4">
-                <div class="w-100" wire:ignore>
-                    <select id="select2-product" class="form-select">
-                    </select>
-                </div>
-            </div>
+    {{-- PRODUCTS --}}
+    <label>Barang-barang yang diminta</label>
+    <div class="col-md-12 mb-4" wire:ignore>
+        <select id="select2-product" class="form-select w-100">
+        </select>
+    </div>
 
-            @foreach ($stockRequestProducts as $index => $item)
-                
-                <div class="my-2 row">
-                    <div class="col-md-4">
-                        
-                            <label class='fw-bold'>Produk</label>
-                        
-                        <p class="form-control">{{$stockRequestProducts[$index]['product_text']}}</p>
-                    </div>
-                    <div class="col-md-2">
-                        
-                            <label class='fw-bold'>Satuan</label>
-                        
-                        
-                        <select class="form-select @error('type') is-invalid @enderror" wire:model.blur="stockRequestProducts.{{ $index }}.unit_detail_id">
-                            @foreach ($stockRequestProducts[$index]['unit_detail_choice'] as $unit)
-                                <option value="{{ $unit['id'] }}">{{ $unit['name'] }} ({{$unit['value']}})</option>
+    <table class='table gy-1 gx-2'>
+        @foreach ($purchaseOrderProducts as $index => $item)
+            {{-- MAIN ATTIRBUTE --}}
+            <tr>
+                {{-- ACTION --}}
+                <td style="width: 2%" class='align-bottom'>
+                    <label class='fw-bold'>Aksi</label>
+                    <button type="button"
+                        class="btn btn-outline btn-outline-dashed btn-outline-secondary btn-active-light-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button type="button" class="dropdown-item text-info"
+                                wire:click.prevent="duplicateDetail({{ $index }})">
+                                <i class="ki-solid ki-copy text-info"></i>
+                                Duplikat
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item text-danger"
+                                wire:click="removeDetail({{ $index }})">
+                                <i class="ki-solid ki-abstract-11 text-danger"></i>
+                                Hapus
+                            </button>
+                        </li>
+                    </ul>
+                </td>
+
+                {{-- NAME --}}
+                <td style="width: 25%;">
+                    <label class='fw-bold'>Produk</label>
+                    <input class='form-control' value="{{ $item['product_text'] }}" disabled>
+                </td>
+
+                {{-- QUANTITY & UNIT --}}
+                <td style="width: 25%">
+                    <label class='fw-bold'>Jumlah</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control currency"
+                            wire:model.blur="purchaseOrderProducts.{{ $index }}.quantity" />
+
+                        <select class="form-select @error('type') is-invalid @enderror"
+                            wire:model.blur="purchaseOrderProducts.{{ $index }}.unit_detail_id">
+                            @foreach ($item['unit_detail_choice'] as $unit)
+                                <option value="{{ $unit['id'] }}">
+                                    {{ $unit['name'] }}
+                                    {{ $unit['value_info'] ? "({$unit['value_info']})" : '' }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        
-                            <label class='fw-bold'>Jumlah</label>
-                        
-                        <input type="text" class="form-control currency"
-                            wire:model.blur="stockRequestProducts.{{ $index }}.quantity" />
-                    </div>
+                </td>
+            </tr>
 
-                    <div class="col-auto d-flex">
-                        <button type="button" class="btn btn-danger mx-auto align-self-end h-auto mb-4"
-                            wire:click="removeDetail({{ $index }})">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <hr>
-            @endforeach
-        </div>
-    </div>
+            {{-- LINE SEPARATOR --}}
+            <tr class='border-top'>
+                <td></td>
+            </tr>
+        @endforeach
+    </table>
 
     <button type="submit" class="btn btn-success mt-3">
         <i class='ki-duotone ki-check fs-1'></i>
@@ -124,24 +171,20 @@
 
 @push('js')
     <script>
-
         $(document).ready(function() {
             initSelect2();
         });
 
-        function initSelect2()
-        {
-
-            // Select2 Warehouse Requester
-            $('#select2-warehouse_requester').select2({
-                placeholder: "Pilih Peminta Gudang",
+        function initSelect2() {
+            // Select2 Company Requested
+            $('#select2-company-requested').select2({
+                placeholder: "Pilih Perusahaan Diminta",
                 ajax: {
-                    url: "{{ route('stock_request.get.warehouse') }}",
+                    url: "{{ route('stock_request.get.company') }}",
                     dataType: "json",
                     type: "GET",
                     data: function(params) {
                         return {
-                            access: 1,
                             search: params.term,
                         };
                     },
@@ -159,14 +202,13 @@
                 cache: true
             });
 
-            $('#select2-warehouse_requester').on('select2:select', function (e) {
-                // Triggered when an option is selected
-                var selectedOption = e.params.data;
-                @this.call('setWarehouseRequester',  { selectedOption } )
+            $('#select2-company-requested').on('change', async function(e) {
+                let data = $('#select2-company-requested').val();
+                @this.set('requestedCompanyId', data);
             });
 
             // Select2 Warehouse Requested
-            $('#select2-warehouse_requested').select2({
+            $('#select2-warehouse-requested').select2({
                 placeholder: "Pilih Permintaan Gudang",
                 ajax: {
                     url: "{{ route('stock_request.get.warehouse') }}",
@@ -174,7 +216,6 @@
                     type: "GET",
                     data: function(params) {
                         return {
-                            access: 1,
                             search: params.term,
                         };
                     },
@@ -192,10 +233,9 @@
                 cache: true
             });
 
-            $('#select2-warehouse_requested').on('select2:select', function (e) {
-                // Triggered when an option is selected
-                var selectedOption = e.params.data;
-                @this.call('setWarehouseRequested',  { selectedOption } )
+            $('#select2-warehouse-requested').on('change', async function(e) {
+                let data = $('#select2-warehouse-requested').val();
+                @this.set('requestedCompanyId', data);
             });
 
             // Select2 Product
@@ -224,12 +264,12 @@
                 cache: true
             });
 
-            $('#select2-product').on('select2:select', function (e) {
-                // Triggered when an option is selected
-                var selectedOption = e.params.data;
-                // console.log(selectedOption)
-                @this.call('selectProduct', { selectedOption })
-                $('#select2-product').val('').trigger('change')
+            $('#select2-product').on('select2:select', function(e) {
+                let data = $('#select2-product').val();
+                if (data) {
+                    @this.call('addDetail', data);
+                    $('#select2-product').val('').trigger('change');
+                }
             });
         }
     </script>

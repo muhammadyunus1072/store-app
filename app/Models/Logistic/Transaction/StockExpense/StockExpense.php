@@ -25,8 +25,6 @@ class StockExpense extends Model
         'warehouse_id',
         'company_id',
         'transaction_date',
-        'approved_date',
-        'cancel_date',
         'note',
     ];
 

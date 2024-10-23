@@ -2,23 +2,19 @@
 
 namespace App\Livewire\Logistic\Transaction\StockExpense;
 
-use Exception;
+use App\Helpers\Core\UserStateHandler;
 use App\Helpers\General\Alert;
-use App\Helpers\Core\UserStateHelper;
 use Livewire\Component;
-use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use App\Helpers\General\NumberFormatter;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\Logistic\Master\Product\Product;
-use App\Repositories\Core\Company\CompanyRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
-use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
 use App\Repositories\Logistic\Transaction\StockExpense\StockExpenseRepository;
 use App\Repositories\Logistic\Transaction\StockExpense\StockExpenseProductRepository;
+use App\Settings\SettingCore;
 use Carbon\Carbon;
 
 class Detail extends Component
@@ -26,17 +22,22 @@ class Detail extends Component
     public $objId;
 
     #[Validate('required', message: 'Tanggal Pengeluaran Harus Diisi', onUpdate: false)]
-    public $transaction_date;
+    public $transactionDate;
     public $note;
 
-    public $company_id;
-    public $company_text;
+    public $companyId;
+    public $companyText;
 
-    public $warehouse_id;
-    public $warehouse_text;
+    public $warehouseId;
+    public $warehouseText;
 
     public $stockExpenseProducts = [];
     public $stockExpenseProductRemoves = [];
+
+    // Helpers
+    public $isMultipleCompany = false;
+    public $companies = [];
+    public $warehouses = [];
 
     public function render()
     {
@@ -45,48 +46,58 @@ class Detail extends Component
 
     public function mount()
     {
-        $this->transaction_date = Carbon::now()->format("Y-m-d");
+        $this->loadSetting();
+        $this->loadUserState();
 
-        $userState = UserStateHelper::get();
-        if ($userState['company_id']) {
-            $company = CompanyRepository::find($userState['company_id']);
-            $this->company_id = Crypt::encrypt($company->id);
-            $this->company_text = $company->name;
-        }
-        if ($userState['warehouse_id']) {
-            $warehouse = WarehouseRepository::find($userState['warehouse_id']);
-            $this->warehouse_id = Crypt::encrypt($warehouse->id);
-            $this->warehouse_text = $warehouse->name;
-        }
+        $this->transactionDate = Carbon::now()->format("Y-m-d");
+        $this->note = "";
 
         if ($this->objId) {
-            $id = Crypt::decrypt($this->objId);
-            $stockExpense = StockExpenseRepository::findWithDetails($id);
-
-            $this->company_id = Crypt::encrypt($stockExpense->company_id);
-            $this->company_text = $stockExpense->company_name;
-
-            $this->warehouse_id = Crypt::encrypt($stockExpense->warehouse_id);
-            $this->warehouse_text = $stockExpense->warehouse_name;
-
-            $this->transaction_date = Carbon::parse($stockExpense->transaction_date)->format("Y-m-d");
+            $stockExpense = StockExpenseRepository::find(Crypt::decrypt($this->objId));
+            $this->transactionDate = Carbon::parse($stockExpense->transaction_date)->format("Y-m-d");
             $this->note = $stockExpense->note;
 
+            $this->companyId = Crypt::encrypt($stockExpense->company_id);
+            $this->companyText = $stockExpense->company_name;
+
+            $this->warehouseId = Crypt::encrypt($stockExpense->warehouse_id);
+            $this->warehouseText = $stockExpense->warehouse_name;
+
             foreach ($stockExpense->stockExpenseProducts as $stockExpenseProduct) {
-                $unit_detail_choice = UnitDetailRepository::getOptions($stockExpenseProduct->unit_detail_unit_id);
-                $unit_detail_id = collect($unit_detail_choice)->filter(function ($obj) use ($stockExpenseProduct) {
+                $unitDetailChoice = UnitDetailRepository::getOptions($stockExpenseProduct->unit_detail_unit_id);
+                $unitDetailId = collect($unitDetailChoice)->filter(function ($obj) use ($stockExpenseProduct) {
                     return Crypt::decrypt($obj['id']) == $stockExpenseProduct->unit_detail_id;
                 })->first()['id'];
 
                 $this->stockExpenseProducts[] = [
                     'id' => Crypt::encrypt($stockExpenseProduct->id),
                     'product_id' => Crypt::encrypt($stockExpenseProduct->product_id),
-                    'product_text' => $stockExpenseProduct->product_name . " ( " . Product::translateType($stockExpenseProduct->product_type) . ")",
-                    "unit_detail_id" => $unit_detail_id,
-                    "unit_detail_choice" => $unit_detail_choice,
+                    'product_text' => $stockExpenseProduct->product_name,
+                    "unit_detail_id" => $unitDetailId,
+                    "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
                 ];
             }
+        }
+    }
+
+    public function loadSetting()
+    {
+        $this->isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
+    }
+
+    public function loadUserState()
+    {
+        $userState = UserStateHandler::get();
+        if ($this->isMultipleCompany) {
+            $this->companies = $userState['companies'];
+            $this->companyId = $userState['company_id'];
+            $this->warehouses = $userState['warehouses'];
+            $this->warehouseId = $userState['warehouse_id'];
+        } else {
+            $this->companyId = $userState['company_id'];
+            $this->warehouses = $userState['warehouses'];
+            $this->warehouseId = $userState['warehouse_id'];
         }
     }
 
@@ -108,48 +119,49 @@ class Detail extends Component
 
     public function store()
     {
-        if (!$this->company_id) {
+        if (!$this->companyId) {
             Alert::fail($this, "Gagal", "Perusahaan Belum Diinput");
             return;
         }
-        if (!$this->warehouse_id) {
+        if (!$this->warehouseId) {
             Alert::fail($this, "Gagal", "Gudang Belum Diinput");
             return;
         }
         if (count($this->stockExpenseProducts) == 0) {
-            Alert::fail($this, "Gagal", "Data Pengeluaran Produk Belum Diinput");
+            Alert::fail($this, "Gagal", "Barang-barang yang dikeluarkan belum diinput");
             return;
         }
 
         $this->validate();
 
         $validatedData = [
-            'company_id' => Crypt::decrypt($this->company_id),
-            'warehouse_id' => Crypt::decrypt($this->warehouse_id),
-            'transaction_date' => $this->transaction_date,
+            'company_id' => Crypt::decrypt($this->companyId),
+            'warehouse_id' => Crypt::decrypt($this->warehouseId),
+            'transaction_date' => $this->transactionDate,
             'note' => $this->note,
         ];
 
         try {
             DB::beginTransaction();
             if ($this->objId) {
-                $objId = Crypt::decrypt($this->objId);
-                StockExpenseRepository::update($objId, $validatedData);
+                $decId = Crypt::decrypt($this->objId);
+                StockExpenseRepository::update($decId, $validatedData);
+                $stockExpense = StockExpenseRepository::find($decId);
             } else {
-                $obj = StockExpenseRepository::create($validatedData);
-                $objId = $obj->id;
+                $stockExpense = StockExpenseRepository::create($validatedData);
             }
 
             // ===============================
             // ==== STOCK EXPENSE PRODUCT ====
             // ===============================
-            foreach ($this->stockExpenseProducts as $index => $stockExpenseProduct) {
+            foreach ($this->stockExpenseProducts as $stockExpenseProduct) {
                 $validatedData = [
-                    'stock_expense_id' => $objId,
+                    'stock_expense_id' => $stockExpense->id,
                     'product_id' => Crypt::decrypt($stockExpenseProduct['product_id']),
                     'unit_detail_id' => Crypt::decrypt($stockExpenseProduct['unit_detail_id']),
                     'quantity' => NumberFormatter::imaskToValue($stockExpenseProduct['quantity']),
                 ];
+
                 if ($stockExpenseProduct['id']) {
                     $stockExpenseProductId = Crypt::decrypt($stockExpenseProduct['id']);
                     $object = StockExpenseProductRepository::update($stockExpenseProductId, $validatedData);
@@ -163,6 +175,12 @@ class Detail extends Component
                 StockExpenseProductRepository::delete(Crypt::decrypt($item));
             }
 
+            // if ($this->objId) {
+            //     $stockExpense->onUpdated();
+            // } else {
+            //     $stockExpense->onCreated();
+            // }
+
             DB::commit();
 
             Alert::confirmation(
@@ -175,7 +193,7 @@ class Detail extends Component
                 "Oke",
                 "Tutup",
             );
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
@@ -187,14 +205,14 @@ class Detail extends Component
     public function addDetail($productId)
     {
         $product = ProductRepository::find(Crypt::decrypt($productId));
-        $unit_detail_choice = UnitDetailRepository::getOptions($product->unit_id);
+        $unitDetailChoice = UnitDetailRepository::getOptions($product->unit_id);
 
         $this->stockExpenseProducts[] = [
             'id' => null,
             'product_id' => Crypt::encrypt($product->id),
             'product_text' => $product->name,
-            "unit_detail_id" => $unit_detail_choice[0]['id'],
-            "unit_detail_choice" => $unit_detail_choice,
+            "unit_detail_id" => $unitDetailChoice[0]['id'],
+            "unit_detail_choice" => $unitDetailChoice,
             "quantity" => 0,
         ];
     }

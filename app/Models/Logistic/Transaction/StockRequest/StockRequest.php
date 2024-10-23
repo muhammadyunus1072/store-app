@@ -7,6 +7,7 @@ use App\Traits\Document\HasApproval;
 use App\Settings\SettingLogistic;
 use App\Helpers\General\NumberGenerator;
 use App\Helpers\Logistic\Stock\StockHandler;
+use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
@@ -22,11 +23,11 @@ class StockRequest extends Model
     use HasFactory, SoftDeletes, HasTrackHistory, HasApproval;
 
     protected $fillable = [
+        'company_requester_id',
+        'company_requested_id',
         'warehouse_requester_id',
         'warehouse_requested_id',
         'transaction_date',
-        'approved_date',
-        'cancel_date',
         'note',
     ];
 
@@ -36,16 +37,24 @@ class StockRequest extends Model
     {
         self::creating(function ($model) {
             $model->number = NumberGenerator::generate(self::class, "SR");
+            $model = $model->companyRequester->saveInfo($model, 'company_requester');
+            $model = $model->companyRequested->saveInfo($model, 'company_requested');
             $model = $model->warehouseRequester->saveInfo($model, 'warehouse_requester');
             $model = $model->warehouseRequested->saveInfo($model, 'warehouse_requested');
         });
 
         self::updating(function ($model) {
+            if ($model->getOriginal('company_requester_id') != $model->company_requester_id) {
+                $model = $model->companyRequester->saveInfo($model, 'company_requester');
+            }
+            if ($model->getOriginal('company_requested_id') != $model->company_requested_id) {
+                $model = $model->companyRequested->saveInfo($model, 'company_requested');
+            }
             if ($model->getOriginal('warehouse_requester_id') != $model->warehouse_requester_id) {
                 $model = $model->warehouseRequester->saveInfo($model, 'warehouse_requester');
             }
-            if ($model->getOriginal('warehouse_requested_id') != $model->warehouse_requested_id) {
-                $model = $model->warehouseRequested->saveInfo($model, 'warehouse_requested');
+            if ($model->getOriginal('warehouse_requester_id') != $model->warehouse_requester_id) {
+                $model = $model->warehouseRequester->saveInfo($model, 'warehouse_requester');
             }
         });
 
@@ -214,6 +223,16 @@ class StockRequest extends Model
     /*
     | RELATIONSHIP
     */
+    public function companyRequester()
+    {
+        return $this->belongsTo(Company::class, 'company_requester_id', 'id');
+    }
+
+    public function companyRequested()
+    {
+        return $this->belongsTo(Company::class, 'company_requested_id', 'id');
+    }
+
     public function warehouseRequester()
     {
         return $this->belongsTo(Warehouse::class, 'warehouse_requester_id', 'id');
