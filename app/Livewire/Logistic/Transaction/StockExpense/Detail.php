@@ -7,6 +7,7 @@ use App\Helpers\General\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Helpers\General\NumberFormatter;
+use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
@@ -38,6 +39,9 @@ class Detail extends Component
     public $isMultipleCompany = false;
     public $companies = [];
     public $warehouses = [];
+    
+    public $historyRemarksIds = []; // History Datatable
+    public $historyRemarksType = StockExpenseProduct::class; // History Datatable
 
     public function render()
     {
@@ -77,6 +81,9 @@ class Detail extends Component
                     "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
                 ];
+
+                // History Datatable
+                $this->historyRemarksIds[] = $stockExpenseProduct->id;
             }
         }
     }
@@ -175,11 +182,11 @@ class Detail extends Component
                 StockExpenseProductRepository::delete(Crypt::decrypt($item));
             }
 
-            // if ($this->objId) {
-            //     $stockExpense->onUpdated();
-            // } else {
-            //     $stockExpense->onCreated();
-            // }
+            if ($this->objId) {
+                $stockExpense->onUpdated();
+            } else {
+                $stockExpense->onCreated();
+            }
 
             DB::commit();
 

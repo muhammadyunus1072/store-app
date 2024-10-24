@@ -4,9 +4,11 @@ namespace App\Livewire\Purchasing\Transaction\PurchaseOrder;
 
 use App\Helpers\Core\UserStateHandler;
 use App\Helpers\General\Alert;
+use App\Helpers\General\FileHelper;
 use App\Helpers\General\NumberFormatter;
 use App\Helpers\General\ImageLocationHelper;
 use App\Models\Finance\Master\Tax;
+use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -60,6 +62,9 @@ class Detail extends Component
     public $companies = [];
     public $warehouses = [];
 
+    public $historyRemarksIds = []; // History Datatable
+    public $historyRemarksType = PurchaseOrderProduct::class; // History Datatable
+
     public function render()
     {
         return view('livewire.purchasing.transaction.purchase-order.detail');
@@ -90,27 +95,20 @@ class Detail extends Component
             $this->companyText = $purchaseOrder->company_name;
 
             foreach ($purchaseOrder->purchaseOrderProducts as $purchaseOrderProduct) {
-                // Set Default PPN
-                if ($purchaseOrderProduct->ppn) {
-                    $this->taxPpnId = Crypt::encrypt($purchaseOrderProduct->ppn->tax_id);
-                    $this->taxPpnName = $purchaseOrderProduct->ppn->tax_name;
-                    $this->taxPpnValue = $purchaseOrderProduct->ppn->tax_value;
-                }
-
                 $unitDetailChoice = UnitDetailRepository::getOptions($purchaseOrderProduct->unit_detail_unit_id);
                 $unitDetailId = collect($unitDetailChoice)->filter(function ($obj) use ($purchaseOrderProduct) {
                     return Crypt::decrypt($obj['id']) == $purchaseOrderProduct->unit_detail_id;
                 })->first()['id'];
 
                 $uploadedFiles = [];
-                foreach ($purchaseOrderProduct->purchaseOrderProductAttachments as $value) {
+                foreach ($purchaseOrderProduct->purchaseOrderProductAttachments as $attachment) {
                     $uploadedFiles[] = [
-                        'id' => Crypt::encrypt($value['id']),
-                        'file_name' => $value['file_name'],
-                        'original_file_name' => $value['original_file_name'],
-                        'note' => $value['note'],
+                        'id' => Crypt::encrypt($attachment['id']),
+                        'file_name' => $attachment['file_name'],
+                        'original_file_name' => $attachment['original_file_name'],
+                        'note' => $attachment['note'],
                         'path' => null,
-                        'url' => $value->getFile(),
+                        'url' => $attachment->getFile(),
                     ];
                 }
 
@@ -139,6 +137,16 @@ class Detail extends Component
                     'uploadedFiles' => $uploadedFiles,
                     'uploadedFileRemoves' => [],
                 ];
+
+                // Set Default PPN
+                if ($purchaseOrderProduct->ppn) {
+                    $this->taxPpnId = Crypt::encrypt($purchaseOrderProduct->ppn->tax_id);
+                    $this->taxPpnName = $purchaseOrderProduct->ppn->tax_name;
+                    $this->taxPpnValue = $purchaseOrderProduct->ppn->tax_value;
+                }
+
+                // History Datatable
+                $this->historyRemarksIds[] = $purchaseOrderProduct->id;
             }
         }
     }
@@ -281,7 +289,7 @@ class Detail extends Component
                             'note' => $file['note'],
                         ]);
                     } else {
-                        $newPath = ImageLocationHelper::FILE_GOOD_RECEIVE_PRODUCT_LOCATION . basename($file['path']);
+                        $newPath = FileHelper::LOCATION_PRODUCT_DETAIL_ATTACHMENT . basename($file['path']);
                         Storage::move($file['path'], $newPath);
                         $file['path'] = $newPath;
 
@@ -295,11 +303,11 @@ class Detail extends Component
                 }
             }
 
-            // if ($this->objId) {
-            //     $purchaseOrder->onUpdated();
-            // } else {
-            //     $purchaseOrder->onCreated();
-            // }
+            if ($this->objId) {
+                $purchaseOrder->onUpdated();
+            } else {
+                $purchaseOrder->onCreated();
+            }
 
             DB::commit();
 

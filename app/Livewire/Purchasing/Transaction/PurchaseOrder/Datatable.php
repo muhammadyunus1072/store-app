@@ -26,6 +26,8 @@ class Datatable extends Component
 
     public function onMount()
     {
+        $this->sortDirection = 'desc';
+        
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_DELETE));

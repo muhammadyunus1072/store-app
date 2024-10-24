@@ -9,28 +9,128 @@ use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 trait IntegerRuleHandler
 {
     /*
-    | EXPLANATION
-    | o Case Product A 10 Pcs @930.2 (Total 9302)
-    | Solusi : 
-    | Split Product A into:
-    | - Product A1 9 Pcs @930 (Total 8370)
-    |                                     }---> Total: 9302
-    | - Product A2 1 Pcs @932 (Total  932)
+    | Price = price + (savedValue/quantity) 
+    | NOT LAST ITEM
+    | Example Product A 9100.12 (10 Pcs)
+    | - priceN = floor(9100.12) = 9100 (9 Pcs)
+    | - priceRest = priceN + (9100.12 - priceN) * 10 = 9101.2 (1 Pcs)
+    | - price1 = floor(priceRest) = 9101 (1 Pcs)
+    | - savedValue = priceRest - price1 = 0.2
     |
-    | o Case Product A 1 Pcs @1000.5
-    | Solusi : 
-    | - Save 0.5 and use it at other product
+    | Example Product A 9100.1 (10 Pcs)
+    | - priceN = floor(9100.12) = 9100 (9 Pcs)
+    | - priceRest = priceN + (9100.1 - priceN) * 10 = 9101 (1 Pcs)
+    | - price1 = floor(priceRest) = 9101 (1 Pcs)
+    | - savedValue = priceRest - price1 = 0
+    |
+    | LAST ITEM
+    | Example Product A 9100.12 (10 Pcs)
+    | - priceN = floor(9100.12) = 9100 (9 Pcs)
+    | - priceRest = priceN + (9100.12 - priceN) * 10 = 9101.2 (1 Pcs)
+    | - price1 = priceRest = 9101.2 (1 Pcs)
+    |
+    | Example Product A 9100.1 (10 Pcs)
+    | - priceN = floor(9100.12) = 9100 (9 Pcs)
+    | - priceRest = priceN + (9100.1 - priceN) * 10 = 9101 (1 Pcs)
+    | - price1 = priceRest = 9101.2 (1 Pcs)
     */
     public static function convertProductsToIntegerRule($data)
     {
         $convertedData = [];
         $savedValue = 0;
 
-        foreach ($data as $item) {
+        // Sort Ascending By Quantity
+        usort($data, function ($a, $b) {
+            return $a['quantity'] > $b['quantity'];
+        });
+
+        foreach ($data as $index => $item) {
             $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $item['price'] + ($savedValue / $item['quantity']), $item['unit_detail_id']);
-            if (is_float($resultConvert['price'])) {
-                // o Case Product A 10 Pcs @930.2
-                if ($resultConvert['quantity'] > 1) {
+
+            if ($resultConvert['price'] - floor($resultConvert['price']) == 0) {
+                $convertedData[$item['id']] = [[
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['product_name'],
+                    'company_id' => $item['company_id'],
+                    'warehouse_id' => $item['warehouse_id'],
+                    'quantity' => $resultConvert['quantity'],
+                    'unit_detail_id' => $resultConvert['unit_detail_id'],
+                    'transaction_date' => $item['transaction_date'],
+                    'price' => $resultConvert['price'],
+                    'code' => $item['code'],
+                    'batch' => $item['batch'],
+                    'expired_date' => $item['expired_date'],
+                    'remarks_id' => $item['remarks_id'],
+                    'remarks_type' => $item['remarks_type'],
+                    'remarks_note' => '-',
+                ]];
+                continue;
+            }
+
+            // HANDLE NOT INTEGER STOCK
+
+            // Single Item
+            if ($resultConvert['quantity'] == 1) {
+                if ($index < count($data) - 1) {
+                    // Not Last Item
+                    $price = floor($resultConvert['price']);
+                    $savedValue = $resultConvert['price'] - $price;
+                } else {
+                    // Last Item
+                    $price = $resultConvert['price'];
+                    $savedValue = 0;
+                }
+
+                $convertedData[$item['id']] = [[
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['product_name'],
+                    'company_id' => $item['company_id'],
+                    'warehouse_id' => $item['warehouse_id'],
+                    'quantity' => $resultConvert['quantity'],
+                    'unit_detail_id' => $resultConvert['unit_detail_id'],
+                    'transaction_date' => $item['transaction_date'],
+                    'price' => $price,
+                    'code' => $item['code'],
+                    'batch' => $item['batch'],
+                    'expired_date' => $item['expired_date'],
+                    'remarks_id' => $item['remarks_id'],
+                    'remarks_type' => $item['remarks_type'],
+                    'remarks_note' => '-',
+                ]];
+            }
+            // Multiple Item
+            else {
+                $priceN = floor($resultConvert['price']);
+                $priceRest = $priceN + ($resultConvert['price'] - $priceN) * $resultConvert['quantity'];
+
+                if ($index < count($data) - 1) {
+                    // Not Last Item
+                    $price1 = floor($priceRest);
+                    $savedValue = $priceRest - $price1;
+                } else {
+                    // Last Item
+                    $price1 = $priceRest;
+                    $savedValue = 0;
+                }
+
+                if ($price1 == $priceN) {
+                    $convertedData[$item['id']] = [[
+                        'product_id' => $item['product_id'],
+                        'product_name' => $item['product_name'],
+                        'company_id' => $item['company_id'],
+                        'warehouse_id' => $item['warehouse_id'],
+                        'quantity' => $resultConvert['quantity'],
+                        'unit_detail_id' => $resultConvert['unit_detail_id'],
+                        'transaction_date' => $item['transaction_date'],
+                        'price' => $priceN,
+                        'code' => $item['code'],
+                        'batch' => $item['batch'],
+                        'expired_date' => $item['expired_date'],
+                        'remarks_id' => $item['remarks_id'],
+                        'remarks_type' => $item['remarks_type'],
+                        'remarks_note' => '-',
+                    ]];
+                } else {
                     $convertedData[$item['id']] = [
                         [
                             'product_id' => $item['product_id'],
@@ -40,7 +140,7 @@ trait IntegerRuleHandler
                             'quantity' => $resultConvert['quantity'] - 1,
                             'unit_detail_id' => $resultConvert['unit_detail_id'],
                             'transaction_date' => $item['transaction_date'],
-                            'price' => floor($resultConvert['price']),
+                            'price' => $priceN,
                             'code' => $item['code'],
                             'batch' => $item['batch'],
                             'expired_date' => $item['expired_date'],
@@ -56,7 +156,7 @@ trait IntegerRuleHandler
                             'quantity' => 1,
                             'unit_detail_id' => $resultConvert['unit_detail_id'],
                             'transaction_date' => $item['transaction_date'],
-                            'price' => floor($resultConvert['price']) + (($resultConvert['price'] - floor($resultConvert['price'])) * $resultConvert['quantity']),
+                            'price' => $price1,
                             'code' => $item['code'],
                             'batch' => $item['batch'],
                             'expired_date' => $item['expired_date'],
@@ -65,54 +165,8 @@ trait IntegerRuleHandler
                             'remarks_note' => '1 Unit',
                         ]
                     ];
-
-                    $savedValue = 0;
                 }
-                // o Case Product A 1 Pcs @1000.5
-                else {
-                    $resultConvert = StockHandler::convertUnitPrice($item['quantity'], $item['price'], $item['unit_detail_id']);
-                    $convertedData[$item['id']] = [[
-                        'product_id' => $item['product_id'],
-                        'product_name' => $item['product_name'],
-                        'company_id' => $item['company_id'],
-                        'warehouse_id' => $item['warehouse_id'],
-                        'quantity' => $resultConvert['quantity'],
-                        'unit_detail_id' => $resultConvert['unit_detail_id'],
-                        'transaction_date' => $item['transaction_date'],
-                        'price' => floor($resultConvert['price']),
-                        'code' => $item['code'],
-                        'batch' => $item['batch'],
-                        'expired_date' => $item['expired_date'],
-                        'remarks_id' => $item['remarks_id'],
-                        'remarks_type' => $item['remarks_type'],
-                        'remarks_note' => '-',
-                    ]];
-
-                    $savedValue += $resultConvert['price'] - floor($resultConvert['price']);
-                }
-                continue;
             }
-
-            $convertedData[$item['id']] = [[
-                'product_id' => $item['product_id'],
-                'product_name' => $item['product_name'],
-                'company_id' => $item['company_id'],
-                'warehouse_id' => $item['warehouse_id'],
-                'quantity' => $resultConvert['quantity'],
-                'unit_detail_id' => $resultConvert['unit_detail_id'],
-                'transaction_date' => $item['transaction_date'],
-                'price' => floor($resultConvert['price']),
-                'code' => $item['code'],
-                'batch' => $item['batch'],
-                'expired_date' => $item['expired_date'],
-                'remarks_id' => $item['remarks_id'],
-                'remarks_type' => $item['remarks_type'],
-                'remarks_note' => '-',
-            ]];
-        }
-
-        if ($savedValue != 0) {
-            throw new \Exception("Nilai Total Tidak Dapat Dibulatkan");
         }
 
         return $convertedData;
@@ -173,8 +227,27 @@ trait IntegerRuleHandler
                 ['remarks_type', $groupProduct[0]['remarks_type']],
             ]);
 
+            // New Added
+            if (count($histories) == 0) {
+                foreach ($groupProduct as $item) {
+                    StockHandler::createStock(
+                        productId: $item['product_id'],
+                        companyId: $item['company_id'],
+                        warehouseId: $item['warehouse_id'],
+                        transactionDate: $item['transaction_date'],
+                        quantity: $item['quantity'],
+                        price: $item['price'],
+                        code: $item['code'],
+                        batch: $item['batch'],
+                        expiredDate: $item['expired_date'],
+                        remarksId: $item['remarks_id'],
+                        remarksType: $item['remarks_type'],
+                        remarksNote: $item['remarks_note']
+                    );
+                }
+            }
             // Case 2 Stock Type => 2 Stock Type
-            if (count($histories) == count($groupProduct)) {
+            else if (count($histories) == count($groupProduct)) {
                 foreach ($groupProduct as $item) {
                     // Update Information
                     ProductDetailRepository::updateBy(

@@ -97,6 +97,10 @@ class StockHandler
     */
     public static function add($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         $isPriceIntegerValue = SettingLogistic::get(SettingLogistic::PRICE_INTEGER_VALUE);
 
         if ($isPriceIntegerValue) {
@@ -108,6 +112,10 @@ class StockHandler
 
     public static function updateAdd($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         $isPriceIntegerValue = SettingLogistic::get(SettingLogistic::PRICE_INTEGER_VALUE);
 
         if ($isPriceIntegerValue) {
@@ -119,6 +127,10 @@ class StockHandler
 
     public static function substract($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         $createdHistories = [];
 
         foreach ($data as $item) {
@@ -170,6 +182,10 @@ class StockHandler
 
     public static function updateSubstract($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         foreach ($data as $item) {
             $resultConvert = self::convertUnitPrice($item['quantity'], 0, $item['unit_detail_id']);
             $histories = ProductDetailHistoryRepository::getBy(
@@ -215,6 +231,10 @@ class StockHandler
 
     public static function transfer($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         foreach ($data as $item) {
             $item['company_id'] = $item['company_requested_id'];
             $item['warehouse_id'] = $item['warehouse_requested_id'];
@@ -244,6 +264,10 @@ class StockHandler
 
     public static function updateTransfer($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         foreach ($data as $item) {
             $resultConvert = self::convertUnitPrice($item['quantity'], 0, $item['unit_detail_id']);
             $substractHistories = ProductDetailHistoryRepository::getBy(
@@ -322,6 +346,10 @@ class StockHandler
 
     public static function cancel($data)
     {
+        if (count($data) == 0) {
+            return;
+        }
+
         foreach ($data as $item) {
             $whereClause = [
                 ['remarks_id', $item['remarks_id']],
@@ -339,15 +367,16 @@ class StockHandler
                 $affectedProductDetails[] = $history->productDetail;
                 $history->delete();
             }
-
+            
             // Check Histories & Current Stock
             foreach ($affectedProductDetails as $productDetail) {
                 if ($productDetail->histories()->count() == 0) {
                     $productDetail->delete();
-                } else if (StockHandler::getStockDetail($productDetail['id']) < 0) {
+                } else if (StockHandler::getStockDetail($productDetail->id) < 0) {
                     throw new \Exception(ErrorMessageHelper::stockNotAvailable($productDetail->product->name));
                 }
             }
+            
         }
     }
 
@@ -826,7 +855,7 @@ class StockHandler
             whereClause: [
                 ['product_id', $productId]
             ]
-        );
+        )->quantity;
     }
 
     public static function getStockDetail($productDetailId)
@@ -835,7 +864,7 @@ class StockHandler
             whereClause: [
                 ['product_detail_id', $productDetailId]
             ]
-        );
+        )->quantity;
     }
 
     public static function getStockWarehouse($productId, $warehouseId)
@@ -845,7 +874,7 @@ class StockHandler
                 ['product_id', $productId],
                 ['warehouse_id', $warehouseId]
             ]
-        );
+        )->quantity;
     }
 
     public static function getStockCompany($productId, $companyId)
@@ -855,7 +884,7 @@ class StockHandler
                 ['product_id', $productId],
                 ['company_id', $companyId]
             ]
-        );
+        )->quantity;
     }
 
     public static function getStockCompanyWarehouse($productId, $companyId, $warehouseId)
@@ -866,7 +895,7 @@ class StockHandler
                 ['company_id', $companyId],
                 ['warehouse_id', $warehouseId]
             ]
-        );
+        )->quantity;
     }
 
     public static function getStockHistories(
@@ -890,7 +919,7 @@ class StockHandler
         }
 
         // Order By Clause
-        $orderByClause = ['id', 'DESC'];
+        $orderByClause = [['id', 'DESC']];
 
         return ProductDetailHistoryRepository::getBy($whereClause, $orderByClause);
     }

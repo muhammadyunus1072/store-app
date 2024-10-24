@@ -143,8 +143,7 @@ class PurchaseOrder extends Model
 
         $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
 
-        $addData = [];
-        $updateData = [];
+        $data = [];
         $cancelData = [];
 
         // Prepare Stock Cancel
@@ -166,46 +165,26 @@ class PurchaseOrder extends Model
                 continue;
             }
 
-            if ($item->created_at == $item->updated_at) {
-                $addData[] = [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'product_name' => $item->product_name,
-                    'company_id' => $this->company_id,
-                    'warehouse_id' => $this->warehouse_id,
-                    'quantity' => $item->quantity,
-                    'unit_detail_id' => $item->unit_detail_id,
-                    'transaction_date' => $this->transaction_date,
-                    'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
-                    'code' => $item->code,
-                    'batch' => $item->batch,
-                    'expired_date' => $item->expired_date,
-                    'remarks_id' => $item->id,
-                    'remarks_type' => get_class($item)
-                ];
-            } else {
-                $updateData[] = [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'product_name' => $item->product_name,
-                    'company_id' => $this->company_id,
-                    'warehouse_id' => $this->warehouse_id,
-                    'quantity' => $item->quantity,
-                    'unit_detail_id' => $item->unit_detail_id,
-                    'transaction_date' => $this->transaction_date,
-                    'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
-                    'code' => $item->code,
-                    'batch' => $item->batch,
-                    'expired_date' => $item->expired_date,
-                    'remarks_id' => $item->id,
-                    'remarks_type' => get_class($item)
-                ];
-            }
+            $data[] = [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
+                'company_id' => $this->company_id,
+                'warehouse_id' => $this->warehouse_id,
+                'quantity' => $item->quantity,
+                'unit_detail_id' => $item->unit_detail_id,
+                'transaction_date' => $this->transaction_date,
+                'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
+                'code' => $item->code,
+                'batch' => $item->batch,
+                'expired_date' => $item->expired_date,
+                'remarks_id' => $item->id,
+                'remarks_type' => get_class($item)
+            ];
         }
 
         StockHandler::cancel($cancelData);
-        StockHandler::add($addData);
-        StockHandler::updateAdd($updateData);
+        StockHandler::updateAdd($data);
     }
 
     public function cancelStock()

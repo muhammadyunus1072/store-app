@@ -2,7 +2,7 @@
 
 namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
-use App\Helpers\General\ImageLocationHelper;
+use App\Helpers\General\FileHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,7 +24,7 @@ class PurchaseOrderProductAttachment extends Model
 
     public function getFile()
     {
-        return Storage::url(ImageLocationHelper::FILE_GOOD_RECEIVE_PRODUCT_LOCATION . $this->file_name);
+        return Storage::url(FileHelper::LOCATION_PRODUCT_DETAIL_ATTACHMENT . $this->file_name);
     }
 
     public function isDeletable()

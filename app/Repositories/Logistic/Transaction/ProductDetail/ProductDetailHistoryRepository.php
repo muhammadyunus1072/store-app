@@ -13,6 +13,50 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         return ProductDetailHistory::class;
     }
 
+    public static function datatable($remarksIds = [], $remarksType = null)
+    {
+        return ProductDetailHistory::select(
+            'product_detail_histories.id',
+            'product_detail_histories.product_detail_id',
+            'product_detail_histories.transaction_date',
+            'product_detail_histories.quantity',
+            'product_detail_histories.remarks_note',
+            'product_details.price',
+            'product_details.entry_date',
+            'product_details.expired_date',
+            'product_details.batch',
+            'product_details.code',
+            'companies.name as company_name',
+            'warehouses.name as warehouse_name',
+            'products.name as product_name',
+            'unit_details.name as unit_detail_name',
+        )
+            ->join('product_details', function ($join) {
+                $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id');
+            })
+            ->join('companies', function ($join) {
+                $join->on('companies.id', '=', 'product_details.company_id');
+            })
+            ->join('warehouses', function ($join) {
+                $join->on('warehouses.id', '=', 'product_details.warehouse_id');
+            })
+            ->join('products', function ($join) {
+                $join->on('products.id', '=', 'product_details.product_id');
+            })
+            ->join('units', function ($join) {
+                $join->on('products.unit_id', '=', 'units.id');
+            })
+            ->join('unit_details', function ($join) {
+                $join->on('units.id', '=', 'unit_details.unit_id')->where('is_main', 1);
+            })
+            ->when(count($remarksIds) > 0, function ($query) use ($remarksIds) {
+                $query->whereIn("product_detail_histories.remarks_id", $remarksIds);
+            })
+            ->when($remarksType, function ($query) use ($remarksType) {
+                $query->where('product_detail_histories.remarks_type', $remarksType);
+            });
+    }
+
     public static function getSumStock(
         $productDetailId,
         $productId,

@@ -13,6 +13,7 @@ use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\Logistic\Master\Product\Product;
+use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Transaction\StockRequest\StockRequestRepository;
@@ -45,6 +46,9 @@ class Detail extends Component
     public $isMultipleCompany = false;
     public $requesterCompanies = [];
     public $requesterWarehouses = [];
+    
+    public $historyRemarksIds = []; // History Datatable
+    public $historyRemarksType = StockRequestProduct::class; // History Datatable
 
     public function render()
     {
@@ -88,6 +92,9 @@ class Detail extends Component
                     "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockRequestProduct->quantity),
                 ];
+
+                // History Datatable
+                $this->historyRemarksIds[] = $stockRequestProduct->id;
             }
         }
     }

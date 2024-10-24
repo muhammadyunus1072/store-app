@@ -63,6 +63,11 @@ class ProductDetail extends Model
         return $this->hasMany(ProductDetailHistory::class, 'product_detail_id', 'id');
     }
 
+    public function attachments()
+    {
+        return $this->hasMany(ProductDetailAttachment::class, 'product_detail_id', 'id');
+    }
+
     public function productStockDetail()
     {
         return $this->hasOne(ProductStockDetail::class, 'product_detail_id');
