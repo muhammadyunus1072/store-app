@@ -367,7 +367,7 @@ class StockHandler
                 $affectedProductDetails[] = $history->productDetail;
                 $history->delete();
             }
-            
+
             // Check Histories & Current Stock
             foreach ($affectedProductDetails as $productDetail) {
                 if ($productDetail->histories()->count() == 0) {
@@ -376,7 +376,6 @@ class StockHandler
                     throw new \Exception(ErrorMessageHelper::stockNotAvailable($productDetail->product->name));
                 }
             }
-            
         }
     }
 
@@ -959,7 +958,7 @@ class StockHandler
     public static function isStockMovedByRemarks(
         $remarksId,
         $remarksType,
-        $remarksNote,
+        $remarksNote = null,
         $transactionSign = null,
         $isGrouped = false,
     ) {

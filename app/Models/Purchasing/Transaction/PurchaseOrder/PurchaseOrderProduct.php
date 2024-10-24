@@ -2,6 +2,7 @@
 
 namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Finance\Master\Tax;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
@@ -53,6 +54,17 @@ class PurchaseOrderProduct extends Model
                 $item->delete();
             }
         });
+    }
+
+    public function isStockMoved()
+    {
+        return StockHandler::isStockMovedByRemarks(
+            remarksId: $this->id,
+            remarksType: self::class,
+            remarksNote: null,
+            transactionSign: 1,
+            isGrouped: true
+        );
     }
 
     public function isDeletable()

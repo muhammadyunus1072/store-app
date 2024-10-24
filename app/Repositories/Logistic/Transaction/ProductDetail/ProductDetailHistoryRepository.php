@@ -26,6 +26,7 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             'product_details.expired_date',
             'product_details.batch',
             'product_details.code',
+            'product_stock_details.quantity as stock',
             'companies.name as company_name',
             'warehouses.name as warehouse_name',
             'products.name as product_name',
@@ -33,6 +34,9 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         )
             ->join('product_details', function ($join) {
                 $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id');
+            })
+            ->join('product_stock_details', function ($join) {
+                $join->on('product_details.id', '=', 'product_stock_details.product_detail_id');
             })
             ->join('companies', function ($join) {
                 $join->on('companies.id', '=', 'product_details.company_id');

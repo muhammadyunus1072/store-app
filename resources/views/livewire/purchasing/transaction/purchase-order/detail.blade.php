@@ -118,13 +118,15 @@
                                     Duplikat
                                 </button>
                             </li>
-                            <li>
-                                <button type="button" class="dropdown-item text-danger"
-                                    wire:click="removeDetail({{ $index }})">
-                                    <i class="ki-solid ki-abstract-11 text-danger"></i>
-                                    Hapus
-                                </button>
-                            </li>
+                            @if ($item['is_deletable'])
+                                <li>
+                                    <button type="button" class="dropdown-item text-danger"
+                                        wire:click="removeDetail({{ $index }})">
+                                        <i class="ki-solid ki-abstract-11 text-danger"></i>
+                                        Hapus
+                                    </button>
+                                </li>
+                            @endif
                         </ul>
                     </td>
 

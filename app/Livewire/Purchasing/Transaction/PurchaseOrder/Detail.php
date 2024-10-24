@@ -115,6 +115,9 @@ class Detail extends Component
                 $this->purchaseOrderProducts[] = [
                     'id' => Crypt::encrypt($purchaseOrderProduct->id),
 
+                    // Helpers
+                    'is_deletable' => $purchaseOrderProduct->isDeletable(),
+
                     // Core Information
                     'product_id' => Crypt::encrypt($purchaseOrderProduct->product_id),
                     'product_text' => $purchaseOrderProduct->product_name,

@@ -58,6 +58,13 @@ class HistoryDatatable extends Component
                 }
             ],
             [
+                'key' => 'product_stock_details.quantity',
+                'name' => 'Stok',
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->stock);
+                }
+            ],
+            [
                 'searchable' => false,
                 'key' => 'product_detail_histories.quantity',
                 'name' => 'Jml',
@@ -97,13 +104,6 @@ class HistoryDatatable extends Component
                     return $item->warehouse_name;
                 }
             ],
-            [
-                'key' => 'product_detail_histories.remarks_note',
-                'name' => 'Remarks Note',
-                'render' => function ($item) {
-                    return $item->remarks_note;
-                }
-            ]
         ];
 
         if ($this->isMultipleCompany) {
