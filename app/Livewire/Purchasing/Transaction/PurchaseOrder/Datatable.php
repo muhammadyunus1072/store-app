@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
+use Illuminate\Support\Facades\DB;
 
 class Datatable extends Component
 {
@@ -27,7 +28,7 @@ class Datatable extends Component
     public function onMount()
     {
         $this->sortDirection = 'desc';
-        
+
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_DELETE));
@@ -36,12 +37,21 @@ class Datatable extends Component
     #[On('on-delete-dialog-confirm')]
     public function onDialogDeleteConfirm()
     {
-        if (!$this->isCanDelete || $this->targetDeleteId == null) {
-            return;
-        }
+        try {
+            DB::beginTransaction();
 
-        PurchaseOrderRepository::delete(Crypt::decrypt($this->targetDeleteId));
-        Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
+            if (!$this->isCanDelete || $this->targetDeleteId == null) {
+                return;
+            }
+
+            PurchaseOrderRepository::delete(Crypt::decrypt($this->targetDeleteId));
+            Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Alert::fail($this, 'Gagal', $e->getMessage());
+        }
     }
 
     #[On('on-delete-dialog-cancel')]

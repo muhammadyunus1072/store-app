@@ -56,6 +56,8 @@ class PurchaseOrder extends Model
         });
 
         self::deleted(function ($model) {
+            $model->cancelStock();
+
             foreach ($model->purchaseOrderProducts as $item) {
                 $item->delete();
             }
