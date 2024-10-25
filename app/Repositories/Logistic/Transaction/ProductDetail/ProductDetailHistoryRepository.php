@@ -13,9 +13,9 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         return ProductDetailHistory::class;
     }
 
-    public static function datatable($remarksIds = [], $remarksType = null)
+    public static function datatable($isShowStock = false, $remarksIds = [], $remarksType = null)
     {
-        return ProductDetailHistory::select(
+        $query = ProductDetailHistory::select(
             'product_detail_histories.id',
             'product_detail_histories.product_detail_id',
             'product_detail_histories.transaction_date',
@@ -26,7 +26,6 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             'product_details.expired_date',
             'product_details.batch',
             'product_details.code',
-            'product_stock_details.quantity as stock',
             'companies.name as company_name',
             'warehouses.name as warehouse_name',
             'products.name as product_name',
@@ -34,9 +33,6 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         )
             ->join('product_details', function ($join) {
                 $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id');
-            })
-            ->join('product_stock_details', function ($join) {
-                $join->on('product_details.id', '=', 'product_stock_details.product_detail_id');
             })
             ->join('companies', function ($join) {
                 $join->on('companies.id', '=', 'product_details.company_id');
@@ -59,6 +55,15 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             ->when($remarksType, function ($query) use ($remarksType) {
                 $query->where('product_detail_histories.remarks_type', $remarksType);
             });
+
+        if ($isShowStock) {
+            $query->addSelect('product_stock_details.quantity as stock')
+                ->join('product_stock_details', function ($join) {
+                    $join->on('product_details.id', '=', 'product_stock_details.product_detail_id');
+                });
+        }
+
+        return $query;
     }
 
     public static function getSumStock(

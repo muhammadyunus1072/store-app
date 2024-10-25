@@ -139,8 +139,8 @@ class StockHandler
             $substractQty = $resultConvert['quantity'];
 
             // Check Availability Stock
-            if (empty($stock) || $substractQty > $stock->quantity) {
-                throw new \Exception(ErrorMessageHelper::stockNotAvailable($item['product_name'], $resultConvert['unit_detail_name'], $stock->quantity, $item['quantity']));
+            if (empty($stock) || $substractQty > $stock) {
+                throw new \Exception(ErrorMessageHelper::stockNotAvailable($item['product_name'], $resultConvert['unit_detail_name'], $stock, $item['quantity']));
             }
 
             // Get Substract Stock Method
@@ -850,51 +850,61 @@ class StockHandler
     */
     public static function getStock($productId)
     {
-        return ProductStockRepository::findBy(
+        $stock = ProductStockRepository::findBy(
             whereClause: [
                 ['product_id', $productId]
             ]
-        )->quantity;
+        );
+
+        return $stock ? $stock->quantity : 0;
     }
 
     public static function getStockDetail($productDetailId)
     {
-        return ProductStockDetailRepository::findBy(
+        $stock = ProductStockDetailRepository::findBy(
             whereClause: [
                 ['product_detail_id', $productDetailId]
             ]
-        )->quantity;
+        );
+
+        return $stock ? $stock->quantity : 0;
     }
 
     public static function getStockWarehouse($productId, $warehouseId)
     {
-        return ProductStockWarehouseRepository::findBy(
+        $stock = ProductStockWarehouseRepository::findBy(
             whereClause: [
                 ['product_id', $productId],
                 ['warehouse_id', $warehouseId]
             ]
-        )->quantity;
+        );
+
+        return $stock ? $stock->quantity : 0;
     }
 
     public static function getStockCompany($productId, $companyId)
     {
-        return ProductStockCompanyRepository::findBy(
+        $stock = ProductStockCompanyRepository::findBy(
             whereClause: [
                 ['product_id', $productId],
                 ['company_id', $companyId]
             ]
-        )->quantity;
+        );
+
+        return $stock ? $stock->quantity : 0;
     }
 
     public static function getStockCompanyWarehouse($productId, $companyId, $warehouseId)
     {
-        return ProductStockCompanyWarehouseRepository::findBy(
+        $stock = ProductStockCompanyWarehouseRepository::findBy(
             whereClause: [
                 ['product_id', $productId],
                 ['company_id', $companyId],
                 ['warehouse_id', $warehouseId]
             ]
-        )->quantity;
+        );
+
+        return $stock ? $stock->quantity : 0;
     }
 
     public static function getStockHistories(

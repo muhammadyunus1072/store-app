@@ -7,6 +7,7 @@ use App\Helpers\General\Alert;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Helpers\General\NumberFormatter;
+use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +40,7 @@ class Detail extends Component
     public $isMultipleCompany = false;
     public $companies = [];
     public $warehouses = [];
-    
+
     public $historyRemarksIds = []; // History Datatable
     public $historyRemarksType = StockExpenseProduct::class; // History Datatable
 
@@ -73,6 +74,12 @@ class Detail extends Component
                     return Crypt::decrypt($obj['id']) == $stockExpenseProduct->unit_detail_id;
                 })->first()['id'];
 
+                $currentStock = StockHandler::getStockCompanyWarehouse(
+                    $stockExpenseProduct->product_id,
+                    $stockExpense->company_id,
+                    $stockExpense->warehouse_id
+                );
+
                 $this->stockExpenseProducts[] = [
                     'id' => Crypt::encrypt($stockExpenseProduct->id),
                     'product_id' => Crypt::encrypt($stockExpenseProduct->product_id),
@@ -80,12 +87,17 @@ class Detail extends Component
                     "unit_detail_id" => $unitDetailId,
                     "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
+                    'current_stock' => NumberFormatter::format($currentStock),
+                    'current_stock_unit_name' => $unitDetailChoice[0]['name'],
+                    "old_quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
                 ];
 
                 // History Datatable
                 $this->historyRemarksIds[] = $stockExpenseProduct->id;
             }
         }
+
+        // dd($this->stockExpenseProducts);
     }
 
     public function loadSetting()
@@ -105,6 +117,21 @@ class Detail extends Component
             $this->companyId = $userState['company_id'];
             $this->warehouses = $userState['warehouses'];
             $this->warehouseId = $userState['warehouse_id'];
+        }
+    }
+
+    public function updated($property)
+    {
+        if ($property == 'companyId' || $property == 'warehouseId') {
+            foreach ($this->stockExpenseProducts as $index => $item) {
+                $currentStock = StockHandler::getStockCompanyWarehouse(
+                    Crypt::decrypt($item['product_id']),
+                    Crypt::decrypt($this->companyId),
+                    Crypt::decrypt($this->warehouseId),
+                );
+
+                $this->stockExpenseProducts[$index]['current_stock'] = NumberFormatter::format($currentStock);
+            }
         }
     }
 
@@ -213,14 +240,22 @@ class Detail extends Component
     {
         $product = ProductRepository::find(Crypt::decrypt($productId));
         $unitDetailChoice = UnitDetailRepository::getOptions($product->unit_id);
+        $currentStock = StockHandler::getStockCompanyWarehouse(
+            $product->id,
+            Crypt::decrypt($this->companyId),
+            Crypt::decrypt($this->warehouseId)
+        );
 
         $this->stockExpenseProducts[] = [
             'id' => null,
-            'product_id' => Crypt::encrypt($product->id),
+            'product_id' => $productId,
             'product_text' => $product->name,
             "unit_detail_id" => $unitDetailChoice[0]['id'],
             "unit_detail_choice" => $unitDetailChoice,
             "quantity" => 0,
+            'current_stock' => NumberFormatter::valueToImask($currentStock),
+            'current_stock_unit_name' => $unitDetailChoice[0]['name'],
+            "old_quantity" => 0,
         ];
     }
 

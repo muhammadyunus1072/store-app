@@ -77,14 +77,11 @@ class StockRequest extends Model
 
     public function onCreated()
     {
-        $setting = SettingRepository::findBy(whereClause: [['name' => SettingLogistic::NAME]]);
-        $settings = json_decode($setting->setting, true);
-
-        if (!isset($settings[SettingLogistic::APPROVAL_KEY_STOCK_REQUEST]) || empty($settings[SettingLogistic::APPROVAL_KEY_STOCK_REQUEST])) {
+        if (SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST)) {
             $this->processStock();
         }
 
-        $approval = ApprovalConfig::createApprovalIfMatch($settings[SettingLogistic::APPROVAL_KEY_STOCK_REQUEST], $this);
+        $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST), $this);
         if (!$approval) {
             $this->processStock();
         }

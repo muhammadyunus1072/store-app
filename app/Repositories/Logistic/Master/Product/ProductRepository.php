@@ -28,6 +28,7 @@ class ProductRepository extends MasterDataRepository
                 $query->where('name', env('QUERY_LIKE'), '%' . $request->search . '%');
             })
             ->orderBy('name', 'asc')
+            ->limit(10)
             ->get()
             ->toArray();
 

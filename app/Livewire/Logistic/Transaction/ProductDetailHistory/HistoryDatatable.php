@@ -14,6 +14,7 @@ class HistoryDatatable extends Component
 {
     use WithDatatable;
 
+    public $isShowStock = true;
     public $remarksIds = [];
     public $remarksType;
 
@@ -41,69 +42,76 @@ class HistoryDatatable extends Component
 
     public function getColumns(): array
     {
-        $columns = [
-            [
-                'searchable' => false,
-                'key' => 'product_detail_histories.transaction_date',
-                'name' => 'Tgl',
-                'render' => function ($item) {
-                    return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
-                }
-            ],
-            [
-                'key' => 'products.name',
-                'name' => 'Nama',
-                'render' => function ($item) {
-                    return $item->product_name;
-                }
-            ],
-            [
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'product_detail_histories.transaction_date',
+            'name' => 'Tgl',
+            'render' => function ($item) {
+                return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
+            }
+        ];
+
+        $columns[] = [
+            'key' => 'products.name',
+            'name' => 'Nama',
+            'render' => function ($item) {
+                return $item->product_name;
+            }
+        ];
+
+        if ($this->isShowStock) {
+            $columns[] = [
                 'key' => 'product_stock_details.quantity',
                 'name' => 'Stok',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock);
                 }
-            ],
-            [
-                'searchable' => false,
-                'key' => 'product_detail_histories.quantity',
-                'name' => 'Jml',
-                'render' => function ($item) {
-                    return NumberFormatter::format($item->quantity);
-                }
-            ],
-            [
-                'searchable' => false,
-                'sortable' => false,
-                'key' => 'unit_details.name',
-                'name' => 'Satuan',
-                'render' => function ($item) {
-                    return $item->unit_detail_name;
-                }
-            ],
-            [
-                'searchable' => false,
-                'key' => 'product_details.price',
-                'name' => 'Nilai Per Satuan',
-                'render' => function ($item) {
-                    return NumberFormatter::format($item->price);
-                }
-            ],
-            [
-                'searchable' => false,
-                'key' => 'product_details.entry_date',
-                'name' => 'Tgl Masuk',
-                'render' => function ($item) {
-                    return Carbon::parse($item->entry_date)->translatedFormat('d F Y');
-                }
-            ],
-            [
-                'key' => 'warehouses.name',
-                'name' => 'Gudang',
-                'render' => function ($item) {
-                    return $item->warehouse_name;
-                }
-            ],
+            ];
+        }
+
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'product_detail_histories.quantity',
+            'name' => 'Jml',
+            'render' => function ($item) {
+                return NumberFormatter::format($item->quantity);
+            }
+        ];
+
+        $columns[] = [
+            'searchable' => false,
+            'sortable' => false,
+            'key' => 'unit_details.name',
+            'name' => 'Satuan',
+            'render' => function ($item) {
+                return $item->unit_detail_name;
+            }
+        ];
+
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'product_details.price',
+            'name' => 'Nilai Per Satuan',
+            'render' => function ($item) {
+                return NumberFormatter::format($item->price);
+            }
+        ];
+
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'product_details.entry_date',
+            'name' => 'Tgl Masuk Barang',
+            'render' => function ($item) {
+                return Carbon::parse($item->entry_date)->translatedFormat('d F Y');
+            }
+        ];
+
+        $columns[] = [
+            'key' => 'warehouses.name',
+            'name' => 'Gudang',
+            'render' => function ($item) {
+                return $item->warehouse_name;
+            }
         ];
 
         if ($this->isMultipleCompany) {
@@ -153,7 +161,11 @@ class HistoryDatatable extends Component
 
     public function getQuery()
     {
-        return ProductDetailHistoryRepository::datatable($this->remarksIds, $this->remarksType);
+        return ProductDetailHistoryRepository::datatable(
+            $this->isShowStock,
+            $this->remarksIds,
+            $this->remarksType
+        );
     }
 
     public function getView(): string

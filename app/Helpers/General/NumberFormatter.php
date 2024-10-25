@@ -19,7 +19,7 @@ class NumberFormatter
 
     public static function valueToImask($data)
     {
-        return str($data)->replace('.', ',');
+        return str($data)->replace('.', ',')->toString();
     }
 
     public static function denominator($nilai)

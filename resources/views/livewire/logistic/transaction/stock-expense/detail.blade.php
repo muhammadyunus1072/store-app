@@ -4,7 +4,7 @@
             {{-- SELECT COMPANY --}}
             <div class="col-md-4 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}">
                 <label>Perusahaan</label>
-                <select class="form-select w-100">
+                <select class="form-select w-100" wire:model.live='companyId'>
                     @php $isFound = false; @endphp
 
                     @foreach ($companies as $company)
@@ -21,7 +21,7 @@
             {{-- SELECT WAREHOUSE --}}
             <div class="col-md-4 mb-3">
                 <label>Gudang</label>
-                <select class="form-select w-100">
+                <select class="form-select w-100" wire:model.live='warehouseId'>
                     @php $isFound = false; @endphp
 
                     @foreach ($warehouses as $warehouse)
@@ -64,8 +64,19 @@
 
         <table class='table gy-1 gx-2'>
             @foreach ($stockExpenseProducts as $index => $item)
-                {{-- MAIN ATTIRBUTE --}}
-                <tr>
+                @php
+                    $qty = NumberFormatter::imaskToValue($item['quantity']);
+                    $qtyOld = NumberFormatter::imaskToValue($item['old_quantity']);
+                    $qtyChange = $qty - $qtyOld;
+                    $rowClass =
+                        $qtyChange == 0
+                            ? ''
+                            : ($qtyChange <= $item['current_stock']
+                                ? 'table-success'
+                                : 'table-danger');
+                @endphp
+
+                <tr class="{{ $rowClass }}">
                     {{-- ACTION --}}
                     <td style="width: 2%" class='align-bottom'>
                         <label class='fw-bold'>Aksi</label>
@@ -75,13 +86,6 @@
                             <span class="visually-hidden">Toggle Dropdown</span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li>
-                                <button type="button" class="dropdown-item text-info"
-                                    wire:click.prevent="duplicateDetail({{ $index }})">
-                                    <i class="ki-solid ki-copy text-info"></i>
-                                    Duplikat
-                                </button>
-                            </li>
                             <li>
                                 <button type="button" class="dropdown-item text-danger"
                                     wire:click="removeDetail({{ $index }})">
@@ -116,6 +120,18 @@
                             </select>
                         </div>
                     </td>
+
+                    {{-- CURRENT STOCK --}}
+                    <td style="width: 25%">
+                        <label class='fw-bold'>Stok Sekarang</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control"
+                                wire:model="stockExpenseProducts.{{ $index }}.current_stock" disabled />
+                            <input type="text" class="form-control"
+                                wire:model="stockExpenseProducts.{{ $index }}.current_stock_unit_name"
+                                disabled />
+                        </div>
+                    </td>
                 </tr>
 
                 {{-- LINE SEPARATOR --}}
@@ -145,7 +161,7 @@
                     data-bs-parent="#accordionExample" wire:ignore.self>
                     <div class="accordion-body" wire:ignore.self>
                         <livewire:logistic.transaction.product-detail-history.history-datatable :remarksIds="$historyRemarksIds"
-                            :remarksType="$historyRemarksType" />
+                            :remarksType="$historyRemarksType" :isShowStock="false" />
                     </div>
                 </div>
             </div>

@@ -186,6 +186,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         'Captcha' => Mews\Captcha\Facades\Captcha::class,
         'PermissionHelper' => App\Permissions\PermissionHelper::class,
+        'NumberFormatter' => App\Helpers\General\NumberFormatter::class,
         'Alert' => App\Helpers\General\Alert::class,
         'SettingCore' => App\Settings\SettingCore::class,
         'SettingLogistic' => App\Settings\SettingLogistic::class,

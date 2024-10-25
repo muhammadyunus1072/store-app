@@ -4,7 +4,7 @@
             {{-- SELECT COMPANY REQUESTER --}}
             <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}">
                 <label>Perusahaan Peminta</label>
-                <select class="form-select w-100">
+                <select class="form-select w-100" wire:model='requesterCompanyId'>
                     @php $isFound = false; @endphp
 
                     @foreach ($requesterCompanies as $company)
@@ -21,7 +21,7 @@
             {{-- SELECT WAREHOUSE REQUESTER --}}
             <div class="col-md-6 mb-3">
                 <label>Gudang Peminta</label>
-                <select class="form-select w-100">
+                <select class="form-select w-100" wire:model='requesterWarehouseId'>
                     @php $isFound = false; @endphp
 
                     @foreach ($requesterWarehouses as $warehouse)

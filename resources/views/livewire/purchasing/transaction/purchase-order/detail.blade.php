@@ -4,7 +4,7 @@
             {{-- SELECT COMPANY --}}
             <div class="col-md-4 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}">
                 <label>Perusahaan</label>
-                <select class="form-select w-100">
+                <select class="form-select w-100" wire:model='companyId'>
                     @php $isFound = false; @endphp
 
                     @foreach ($companies as $company)
@@ -21,7 +21,7 @@
             {{-- SELECT WAREHOUSE --}}
             <div class="col-md-4 mb-3">
                 <label>Gudang</label>
-                <select class="form-select w-100">
+                <select class="form-select w-100" wire:model='warehouseId'>
                     @php $isFound = false; @endphp
 
                     @foreach ($warehouses as $warehouse)

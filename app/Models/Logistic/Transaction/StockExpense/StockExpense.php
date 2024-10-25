@@ -49,7 +49,7 @@ class StockExpense extends Model
         });
 
         self::deleted(function ($model) {
-            foreach($model->stockExpenseProducts as $item){
+            foreach ($model->stockExpenseProducts as $item) {
                 $item->delete();
             }
         });
@@ -67,14 +67,11 @@ class StockExpense extends Model
 
     public function onCreated()
     {
-        $setting = SettingRepository::findBy(whereClause: [['name' => SettingLogistic::NAME]]);
-        $settings = json_decode($setting->setting, true);
-
-        if (!isset($settings[SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE]) || empty($settings[SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE])) {
+        if (SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE)) {
             $this->processStock();
         }
 
-        $approval = ApprovalConfig::createApprovalIfMatch($settings[SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE], $this);
+        $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE), $this);
         if (!$approval) {
             $this->processStock();
         }
