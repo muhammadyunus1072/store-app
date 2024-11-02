@@ -25,6 +25,7 @@ class ProductDetail extends Model
         'batch',
         'price',
         'code',
+        'last_stock',
         'remarks_id',
         'remarks_type',
         'remarks_note',

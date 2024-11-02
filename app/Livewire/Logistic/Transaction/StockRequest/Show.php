@@ -23,11 +23,11 @@ class Show extends Component
     public $objId;
     public $approvalId;
 
-    public $warehouse_requester_id;
-    public $warehouse_requester_text;
+    public $destination_warehouse_id;
+    public $destination_warehouse_text;
 
-    public $warehouse_requested_id;
-    public $warehouse_requested_text;
+    public $source_warehouse_id;
+    public $source_warehouse_text;
 
     #[Validate('required', message: 'Tanggal Permintaan Harus Diisi', onUpdate: false)]
     public $transaction_date;
@@ -48,11 +48,11 @@ class Show extends Component
             $this->objId = Crypt::encrypt($stockRequest->id);
             $id = Crypt::decrypt($this->objId);
 
-            $this->warehouse_requester_id = Crypt::encrypt($stockRequest->warehouse_requester_id);
-            $this->warehouse_requester_text = $stockRequest->warehouse_requester_name;
+            $this->destination_warehouse_id = Crypt::encrypt($stockRequest->destination_warehouse_id);
+            $this->destination_warehouse_text = $stockRequest->destination_warehouse_name;
 
-            $this->warehouse_requested_id = Crypt::encrypt($stockRequest->warehouse_requested_id);
-            $this->warehouse_requested_text = $stockRequest->warehouse_requested_name;
+            $this->source_warehouse_id = Crypt::encrypt($stockRequest->source_warehouse_id);
+            $this->source_warehouse_text = $stockRequest->source_warehouse_name;
             
             $this->transaction_date = $stockRequest->transaction_date;
             $this->note = $stockRequest->note;
@@ -104,17 +104,17 @@ class Show extends Component
         
     }
 
-    public function setWarehouseRequester($data)
+    public function setWarehouseDestination($data)
     {
         $data = $data['selectedOption'];
-        $this->warehouse_requester_id = $data['id'];
+        $this->destination_warehouse_id = $data['id'];
         
     }
 
-    public function setWarehouseRequested($data)
+    public function setWarehouseSource($data)
     {
         $data = $data['selectedOption'];
-        $this->warehouse_requested_id = $data['id'];
+        $this->source_warehouse_id = $data['id'];
         
     }
     public function selectProduct($data)
@@ -135,11 +135,11 @@ class Show extends Component
 
     public function store()
     {
-        if (!$this->warehouse_requester_id) {
+        if (!$this->destination_warehouse_id) {
             Alert::fail($this, "Gagal", "Peminta Gudang Belum Diinput");
             return;
         }
-        if (!$this->warehouse_requester_id) {
+        if (!$this->destination_warehouse_id) {
             Alert::fail($this, "Gagal", "Permintaan Gudang Belum Diinput");
             return;
         }
@@ -150,8 +150,8 @@ class Show extends Component
         $this->validate();
 
         $validatedData = [
-            'warehouse_requester_id' => Crypt::decrypt($this->warehouse_requester_id),
-            'warehouse_requested_id' => Crypt::decrypt($this->warehouse_requested_id),
+            'destination_warehouse_id' => Crypt::decrypt($this->destination_warehouse_id),
+            'source_warehouse_id' => Crypt::decrypt($this->source_warehouse_id),
             'transaction_date' => $this->transaction_date,
             'note' => $this->note,
         ];

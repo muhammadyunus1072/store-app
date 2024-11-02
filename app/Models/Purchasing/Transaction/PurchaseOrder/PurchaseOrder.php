@@ -2,16 +2,16 @@
 
 namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
-use App\Settings\SettingLogistic;
+use App\Settings\SettingPurchasing;
+use App\Traits\Logistic\HasTransactionStock;
 use App\Traits\Document\HasApproval;
 use App\Helpers\General\NumberGenerator;
-use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
+use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
 use App\Models\Purchasing\Master\Supplier\Supplier;
-use App\Settings\SettingPurchasing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +19,7 @@ use Sis\TrackHistory\HasTrackHistory;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory, HasApproval;
+    use HasFactory, SoftDeletes, HasTrackHistory, HasApproval, HasTransactionStock;
 
     protected $fillable = [
         'purchase_order_id',
@@ -56,7 +56,7 @@ class PurchaseOrder extends Model
         });
 
         self::deleted(function ($model) {
-            $model->cancelStock();
+            $model->transactionStockCancel();
 
             foreach ($model->purchaseOrderProducts as $item) {
                 $item->delete();
@@ -83,48 +83,50 @@ class PurchaseOrder extends Model
     public function onCreated()
     {
         if (!empty(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER))) {
-            $this->processStock();
+            $this->transactionStockProcess();
         }
 
         $approval = ApprovalConfig::createApprovalIfMatch(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER), $this);
         if (!$approval) {
-            $this->processStock();
+            $this->transactionStockProcess();
         }
     }
 
     public function onUpdated()
     {
         if (!$this->isHasApproval() || $this->isApprovalDone()) {
-            $this->updateStock();
+            $this->transactionStockProcess();
         }
     }
 
     /*
-    | STOCK PROCESS
+    | TRANSACTION STOCK
     */
-    public function processStock()
+    public function transactionStockData(): array
     {
-        if (!SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK)) {
-            return;
-        }
-
         $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
 
-        $data = [];
+        $data = [
+            'transaction_date' => $this->transaction_date,
+            'transaction_type' => TransactionStock::TYPE_ADD,
+            'source_company_id' => $this->company_id,
+            'source_warehouse_id' => $this->warehouse_id,
+            'destination_company_id' => null,
+            'destination_warehouse_id' => null,
+            'products' => [],
+            'remarks_id' => $this->id,
+            'remarks_type' => get_class($this)
+        ];
+
         foreach ($this->purchaseOrderProducts as $item) {
             if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
                 continue;
             }
 
-            $data[] = [
-                'id' => $item->id,
+            $data['products'][] = [
                 'product_id' => $item->product_id,
-                'product_name' => $item->product_name,
-                'company_id' => $this->company_id,
-                'warehouse_id' => $this->warehouse_id,
                 'quantity' => $item->quantity,
                 'unit_detail_id' => $item->unit_detail_id,
-                'transaction_date' => $this->transaction_date,
                 'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
                 'code' => $item->code,
                 'batch' => $item->batch,
@@ -134,80 +136,7 @@ class PurchaseOrder extends Model
             ];
         }
 
-        StockHandler::add($data);
-    }
-
-    public function updateStock()
-    {
-        if (!SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK)) {
-            return;
-        }
-
-        $isValueAddTaxPpn = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN);
-
-        $data = [];
-        $cancelData = [];
-
-        // Prepare Stock Cancel
-        $deletedGrProducts = $this->purchaseOrderProducts()->onlyTrashed()->get();
-        foreach ($deletedGrProducts as $deletedGrProduct) {
-            if ($deletedGrProduct->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
-                continue;
-            }
-
-            $cancelData[] = [
-                'remarks_id' => $deletedGrProduct->id,
-                'remarks_type' => get_class($deletedGrProduct)
-            ];
-        }
-
-        // Prepare Stock Add & Update
-        foreach ($this->purchaseOrderProducts as $item) {
-            if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
-                continue;
-            }
-
-            $data[] = [
-                'id' => $item->id,
-                'product_id' => $item->product_id,
-                'product_name' => $item->product_name,
-                'company_id' => $this->company_id,
-                'warehouse_id' => $this->warehouse_id,
-                'quantity' => $item->quantity,
-                'unit_detail_id' => $item->unit_detail_id,
-                'transaction_date' => $this->transaction_date,
-                'price' => $item->price + ($isValueAddTaxPpn ? (!empty($item->ppn) ? $item->price * $item->ppn->tax_value / 100.0 : 0) : 0),
-                'code' => $item->code,
-                'batch' => $item->batch,
-                'expired_date' => $item->expired_date,
-                'remarks_id' => $item->id,
-                'remarks_type' => get_class($item)
-            ];
-        }
-
-        StockHandler::cancel($cancelData);
-        StockHandler::updateAdd($data);
-    }
-
-    public function cancelStock()
-    {
-        if (!SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK)) {
-            return;
-        }
-
-        $data = [];
-        foreach ($this->purchaseOrderProducts as $item) {
-            if ($item->product_type != Product::TYPE_PRODUCT_WITH_STOCK) {
-                continue;
-            }
-
-            $data[] = [
-                'remarks_id' => $item->id,
-                'remarks_type' => get_class($item)
-            ];
-        }
-
-        StockHandler::cancel($data);
+        return $data;
     }
 
     /*
@@ -216,11 +145,11 @@ class PurchaseOrder extends Model
     public function approvalViewShow() {}
     public function onApprovalDone()
     {
-        $this->processStock();
+        $this->transactionStockProcess();
     }
     public function onApprovalRevertDone()
     {
-        $this->cancelStock();
+        $this->transactionStockCancel();
     }
     public function onApprovalCanceled() {}
     public function onApprovalRevertCancel() {}

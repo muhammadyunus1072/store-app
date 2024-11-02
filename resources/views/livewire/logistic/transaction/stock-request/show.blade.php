@@ -6,9 +6,9 @@
                 
                 <div class="col-md-12 mb-4">
                     <div class="w-100" wire:ignore>
-                        <select id="select2-warehouse_requester" class="form-select">
+                        <select id="select2-destination_warehouse" class="form-select">
                             @if ($objId)
-                                <option value="{{$warehouse_requester_id}}">{{$warehouse_requester_text}}</option>
+                                <option value="{{$destination_warehouse_id}}">{{$destination_warehouse_text}}</option>
                             @endif
                         </select>
                     </div>
@@ -19,9 +19,9 @@
                 
                 <div class="col-md-12 mb-4">
                     <div class="w-100" wire:ignore>
-                        <select id="select2-warehouse_requested" class="form-select">
+                        <select id="select2-source_warehouse" class="form-select">
                             @if ($objId)
-                                <option value="{{$warehouse_requested_id}}">{{$warehouse_requested_text}}</option>
+                                <option value="{{$source_warehouse_id}}">{{$source_warehouse_text}}</option>
                             @endif
                         </select>
                     </div>
@@ -133,8 +133,8 @@
         function initSelect2()
         {
 
-            // Select2 Warehouse Requester
-            $('#select2-warehouse_requester').select2({
+            // Select2 Warehouse Destination
+            $('#select2-destination_warehouse').select2({
                 placeholder: "Pilih Peminta Gudang",
                 ajax: {
                     url: "{{ route('stock_request.get.warehouse') }}",
@@ -159,13 +159,13 @@
                 cache: true
             });
 
-            $('#select2-warehouse_requester').on('select2:select', function (e) {
+            $('#select2-destination_warehouse').on('select2:select', function (e) {
                 // Triggered when an option is selected
                 var selectedOption = e.params.data;
-                @this.call('setWarehouseRequester',  { selectedOption } )
+                @this.call('setWarehouseDestination',  { selectedOption } )
             });
-            // Select2 Warehouse Requested
-            $('#select2-warehouse_requested').select2({
+            // Select2 Warehouse Source
+            $('#select2-source_warehouse').select2({
                 placeholder: "Pilih Permintaan Gudang",
                 ajax: {
                     url: "{{ route('stock_request.get.warehouse') }}",
@@ -190,10 +190,10 @@
                 cache: true
             });
 
-            $('#select2-warehouse_requested').on('select2:select', function (e) {
+            $('#select2-source_warehouse').on('select2:select', function (e) {
                 // Triggered when an option is selected
                 var selectedOption = e.params.data;
-                @this.call('setWarehouseRequested',  { selectedOption } )
+                @this.call('setWarehouseSource',  { selectedOption } )
             });
 
             // Select2 Product

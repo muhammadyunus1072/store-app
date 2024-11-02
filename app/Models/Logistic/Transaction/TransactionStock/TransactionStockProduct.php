@@ -1,28 +1,30 @@
 <?php
 
-namespace App\Models\Logistic\Transaction\StockExpense;
+namespace App\Models\Logistic\Transaction\TransactionStock;
 
-use App\Helpers\General\NumberGenerator;
-use Sis\TrackHistory\HasTrackHistory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Logistic\Transaction\StockExpense\StockExpense;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Sis\TrackHistory\HasTrackHistory;
 
-class StockExpenseProduct extends Model
+class TransactionStockProduct extends Model
 {
     use HasFactory, SoftDeletes, HasTrackHistory;
 
     protected $fillable = [
-        'stock_expense_id',
+        'transaction_stock_id',
         'product_id',
         'unit_detail_id',
         'quantity',
+        'price',
+        'code',
+        'batch',
+        'expired_date',
+        'remarks_id',
+        'remarks_type'
     ];
-
-    protected $guarded = ['id'];
 
     protected static function onBoot()
     {
@@ -39,21 +41,21 @@ class StockExpenseProduct extends Model
                 $model = $model->unitDetail->saveInfo($model);
             }
         });
-    }
 
-    public function isDeletable()
-    {
-        return true;
-    }
-
-    public function isEditable()
-    {
-        return true;
+        self::deleted(function ($model) {
+            foreach ($model->attachments as $item) {
+                $item->delete();
+            }
+        });
     }
 
     /*
     | RELATIONSHIP
     */
+    public function transactionStock()
+    {
+        return $this->belongsTo(TransactionStock::class, 'transaction_stock_id', 'id');
+    }
 
     public function product()
     {
@@ -65,8 +67,8 @@ class StockExpenseProduct extends Model
         return $this->belongsTo(UnitDetail::class, 'unit_detail_id', 'id');
     }
 
-    public function stockExpense()
+    public function attachments()
     {
-        return $this->belongsTo(StockExpense::class, 'stock_expense_id', 'id');
+        return $this->hasMany(TransactionStockProductAttachment::class, 'transaction_stock_product_id', 'id');
     }
 }

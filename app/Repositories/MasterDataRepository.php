@@ -72,9 +72,13 @@ abstract class MasterDataRepository
         return app(static::className())->find($id);
     }
 
-    public static function findBy($whereClause)
+    public static function findBy($whereClause, $lockForUpdate = false)
     {
-        return self::clauseProcess($whereClause)->first();
+        return self::clauseProcess($whereClause)
+            ->when($lockForUpdate, function ($query) {
+                $query->lockForUpdate();
+            })
+            ->first();
     }
 
     public static function update($id, $data)
@@ -97,8 +101,26 @@ abstract class MasterDataRepository
 
     public static function deleteBy($whereClause)
     {
-        $obj = self::findBy($whereClause);
-        return empty($obj) ? false : $obj->delete();
+        $objs = self::getBy($whereClause);
+        foreach ($objs as $obj) {
+            $obj->delete();
+        }
+        return count($objs) > 0;
+    }
+
+    public static function forceDelete($id)
+    {
+        $obj = self::find($id);
+        return empty($obj) ? false : $obj->forceDelete();
+    }
+
+    public static function forceDeleteBy($whereClause)
+    {
+        $objs = self::getBy($whereClause);
+        foreach ($objs as $obj) {
+            $obj->forceDelete();
+        }
+        return count($objs) > 0;
     }
 
     public static function all()

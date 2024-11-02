@@ -195,7 +195,7 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            // Select2 Company Requested
+            // Select2 Company Source
             $('#select2-company-requested').select2({
                 placeholder: "Pilih Perusahaan Diminta",
                 ajax: {
@@ -226,7 +226,7 @@
                 @this.set('requestedCompanyId', data);
             });
 
-            // Select2 Warehouse Requested
+            // Select2 Warehouse Source
             $('#select2-warehouse-requested').select2({
                 placeholder: "Pilih Permintaan Gudang",
                 ajax: {

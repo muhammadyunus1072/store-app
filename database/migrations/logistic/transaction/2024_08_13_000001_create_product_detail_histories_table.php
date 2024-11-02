@@ -35,6 +35,7 @@ return new class extends Migration
         } else {
             $table->index('product_detail_id', 'pdh_product_detail_id_idx');
             $table->index('transaction_date', 'pdh_transaction_date_idx');
+            $table->index('last_stock', 'pdh_last_stock_idx');
             $table->index('remarks_id', 'pdh_remarks_id_idx');
             $table->index('remarks_type', 'pdh_remarks_type_idx');
             $table->index('remarks_note', 'pdh_remarks_note_idx');
@@ -42,8 +43,11 @@ return new class extends Migration
 
         $table->bigInteger("product_detail_id")->unsigned()->comment('ProductDetail ID');
         $table->dateTime('transaction_date')->comment('Tanggal dan Waktu Transaksi');
-        $table->double('quantity')->nullable()->comment('Jumlah Keluar Masuk');
         $table->text('note')->nullable()->comment('Catatan');
+        $table->double('start_stock')->comment('Stok Awal');
+        $table->double('quantity')->comment('Jumlah Keluar Masuk');
+        $table->double('last_stock')->comment('Stok Akhir');
+        
         $table->bigInteger('remarks_id')->nullable()->unsigned()->comment('FK Polimorfik Penyebab Keluar / Masuk');
         $table->string('remarks_type')->nullable()->comment('Jenis Polimorfik Penyebab Keluar / Masuk');
         $table->string('remarks_note')->nullable()->comment('Catatan Polimorfik Penyebab Keluar / Masuk');

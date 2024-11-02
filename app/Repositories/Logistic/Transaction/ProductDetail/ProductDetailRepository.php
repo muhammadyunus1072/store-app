@@ -61,13 +61,14 @@ class ProductDetailRepository extends MasterDataRepository
         $warehouseId,
         $substractStockMethod
     ) {
-        return ProductDetail::with('productStockDetail')
+        return ProductDetail::select(
+            'id',
+            'last_stock'
+        )
             ->where('product_id', $productId)
             ->where('company_id', $companyId)
             ->where('warehouse_id', $warehouseId)
-            ->whereHas('productStockDetail', function ($query) {
-                $query->where('quantity', '>', 0);
-            })
+            ->where('last_stock', '>', 0)
             ->when($substractStockMethod == StockHandler::SUBSTRACT_STOCK_METHOD_FIFO, function ($query) {
                 $query->orderBy('entry_date', 'ASC')->orderBy('id', 'ASC');
             })

@@ -18,7 +18,6 @@ class PurchaseOrderProduct extends Model
 
     protected $fillable = [
         'purchase_order_id',
-        'purchase_order_product_id',
         'product_id',
         'unit_detail_id',
         'quantity',
@@ -56,20 +55,9 @@ class PurchaseOrderProduct extends Model
         });
     }
 
-    public function isStockMoved()
-    {
-        return StockHandler::isStockMovedByRemarks(
-            remarksId: $this->id,
-            remarksType: self::class,
-            remarksNote: null,
-            transactionSign: 1,
-            isGrouped: true
-        );
-    }
-
     public function isDeletable()
     {
-        return !$this->isStockMoved();
+        return true;
     }
 
     public function isEditable()
@@ -89,11 +77,6 @@ class PurchaseOrderProduct extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
-    }
-
-    public function unitDetailChoices()
-    {
-        return $this->hasMany(UnitDetail::class, 'unit_id', 'product_unit_id');
     }
 
     public function unitDetail()

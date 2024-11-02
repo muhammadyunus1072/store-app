@@ -68,15 +68,15 @@ class Detail extends Component
             $this->transactionDate = Carbon::parse($stockRequest->transaction_date)->format("Y-m-d");
             $this->note = $stockRequest->note;
 
-            $this->requesterCompanyId = Crypt::encrypt($stockRequest->company_requester_id);
-            $this->requesterCompanyText = $stockRequest->company_requester_name;
-            $this->requesterWarehouseId = Crypt::encrypt($stockRequest->warehouse_requester_id);
-            $this->requesterWarehouseText = $stockRequest->warehouse_requester_name;
+            $this->requesterCompanyId = Crypt::encrypt($stockRequest->destination_company_id);
+            $this->requesterCompanyText = $stockRequest->destination_company_name;
+            $this->requesterWarehouseId = Crypt::encrypt($stockRequest->destination_warehouse_id);
+            $this->requesterWarehouseText = $stockRequest->destination_warehouse_name;
 
-            $this->requestedCompanyId = Crypt::encrypt($stockRequest->company_requested_id);
-            $this->requestedCompanyText = $stockRequest->company_requested_name;
-            $this->requestedWarehouseId = Crypt::encrypt($stockRequest->warehouse_requested_id);
-            $this->requestedWarehouseText = $stockRequest->warehouse_requested_name;
+            $this->requestedCompanyId = Crypt::encrypt($stockRequest->source_company_id);
+            $this->requestedCompanyText = $stockRequest->source_company_name;
+            $this->requestedWarehouseId = Crypt::encrypt($stockRequest->source_warehouse_id);
+            $this->requestedWarehouseText = $stockRequest->source_warehouse_name;
 
             foreach ($stockRequest->stockRequestProducts as $stockRequestProduct) {
                 $unitDetailChoice = UnitDetailRepository::getOptions($stockRequestProduct->unit_detail_unit_id);
@@ -166,10 +166,10 @@ class Detail extends Component
         $this->validate();
 
         $validatedData = [
-            'company_requester_id' => Crypt::decrypt($this->requesterCompanyId),
-            'company_requested_id' => Crypt::decrypt($this->requestedCompanyId),
-            'warehouse_requester_id' => Crypt::decrypt($this->requesterWarehouseId),
-            'warehouse_requested_id' => Crypt::decrypt($this->requestedWarehouseId),
+            'destination_company_id' => Crypt::decrypt($this->requesterCompanyId),
+            'source_company_id' => Crypt::decrypt($this->requestedCompanyId),
+            'destination_warehouse_id' => Crypt::decrypt($this->requesterWarehouseId),
+            'source_warehouse_id' => Crypt::decrypt($this->requestedWarehouseId),
             'transaction_date' => $this->transactionDate,
             'note' => $this->note,
         ];

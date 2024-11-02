@@ -161,7 +161,7 @@
                     data-bs-parent="#accordionExample" wire:ignore.self>
                     <div class="accordion-body" wire:ignore.self>
                         <livewire:logistic.transaction.product-detail-history.history-datatable :remarksIds="$historyRemarksIds"
-                            :remarksType="$historyRemarksType" :isShowStock="false" />
+                            :remarksType="$historyRemarksType" />
                     </div>
                 </div>
             </div>

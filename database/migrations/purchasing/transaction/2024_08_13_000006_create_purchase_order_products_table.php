@@ -42,7 +42,6 @@ return new class extends Migration
 
         // Product Information
         $table->bigInteger("product_id")->unsigned()->comment('Product ID');
-        $table->bigInteger("product_unit_id")->unsigned()->comment('Product Unit ID');
         $table->string('product_name')->comment('Product Nama Produk');
         $table->string('product_type')->comment('Product Tipe Produk');
         

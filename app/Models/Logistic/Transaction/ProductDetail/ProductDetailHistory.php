@@ -26,28 +26,32 @@ class ProductDetailHistory extends Model
 
     protected static function onBoot()
     {
-        self::created(function ($model) {
-            StockHandler::calculateStock($model->productDetail->product_id);
-            StockHandler::calculateStockDetail($model->product_detail_id);
-            StockHandler::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
-            StockHandler::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
-            StockHandler::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
+        self::creating(function ($model) {
+            $productDetail = $model->productDetail()->lockForUpdate()->first();
+            $productDetail->last_stock += $model->quantity;
+            $productDetail->save();
+
+            $model->start_stock = $productDetail->last_stock - $model->quantity;
+            $model->last_stock = $productDetail->last_stock;
         });
 
-        self::updated(function ($model) {
-            StockHandler::calculateStock($model->productDetail->product_id);
-            StockHandler::calculateStockDetail($model->product_detail_id);
-            StockHandler::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
-            StockHandler::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
-            StockHandler::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
+        self::updating(function ($model) {
+            if ($model->quantity != $model->getOriginal('quantity')) {
+                $diffQty = $model->quantity - $model->getOriginal('quantity');
+
+                $productDetail = $model->productDetail()->lockForUpdate()->first();
+                $productDetail->last_stock += $diffQty;
+                $productDetail->save();
+
+                $model->start_stock = $productDetail->last_stock - $diffQty;
+                $model->last_stock = $productDetail->last_stock;
+            }
         });
 
         self::deleted(function ($model) {
-            StockHandler::calculateStock($model->productDetail->product_id);
-            StockHandler::calculateStockDetail($model->product_detail_id);
-            StockHandler::calculateStockWarehouse($model->productDetail->product_id, $model->productDetail->warehouse_id);
-            StockHandler::calculateStockCompany($model->productDetail->product_id, $model->productDetail->company_id);
-            StockHandler::calculateStockCompanyWarehouse($model->productDetail->product_id, $model->productDetail->company_id, $model->productDetail->warehouse_id);
+            $productDetail = $model->productDetail()->lockForUpdate()->first();
+            $productDetail->last_stock -= $model->quantity;
+            $productDetail->save();
         });
     }
 

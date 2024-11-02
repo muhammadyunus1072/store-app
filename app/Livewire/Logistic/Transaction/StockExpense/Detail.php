@@ -74,10 +74,12 @@ class Detail extends Component
                     return Crypt::decrypt($obj['id']) == $stockExpenseProduct->unit_detail_id;
                 })->first()['id'];
 
-                $currentStock = StockHandler::getStockCompanyWarehouse(
-                    $stockExpenseProduct->product_id,
-                    $stockExpense->company_id,
-                    $stockExpense->warehouse_id
+                $currentStock = StockHandler::getStock(
+                    productDetailId: null,
+                    productId: $stockExpenseProduct->product_id,
+                    companyId: $stockExpense->company_id,
+                    warehouseId: $stockExpense->warehouse_id,
+                    thresholdDate: $this->transactionDate
                 );
 
                 $this->stockExpenseProducts[] = [
@@ -96,8 +98,6 @@ class Detail extends Component
                 $this->historyRemarksIds[] = $stockExpenseProduct->id;
             }
         }
-
-        // dd($this->stockExpenseProducts);
     }
 
     public function loadSetting()
@@ -122,12 +122,14 @@ class Detail extends Component
 
     public function updated($property)
     {
-        if ($property == 'companyId' || $property == 'warehouseId') {
+        if ($property == 'companyId' || $property == 'warehouseId' || $property == 'transactionDate') {
             foreach ($this->stockExpenseProducts as $index => $item) {
-                $currentStock = StockHandler::getStockCompanyWarehouse(
-                    Crypt::decrypt($item['product_id']),
-                    Crypt::decrypt($this->companyId),
-                    Crypt::decrypt($this->warehouseId),
+                $currentStock = StockHandler::getStock(
+                    productDetailId: null,
+                    productId: Crypt::decrypt($item['product_id']),
+                    companyId: Crypt::decrypt($this->companyId),
+                    warehouseId: Crypt::decrypt($this->warehouseId),
+                    thresholdDate: $this->transactionDate,
                 );
 
                 $this->stockExpenseProducts[$index]['current_stock'] = NumberFormatter::format($currentStock);
@@ -240,10 +242,12 @@ class Detail extends Component
     {
         $product = ProductRepository::find(Crypt::decrypt($productId));
         $unitDetailChoice = UnitDetailRepository::getOptions($product->unit_id);
-        $currentStock = StockHandler::getStockCompanyWarehouse(
-            $product->id,
-            Crypt::decrypt($this->companyId),
-            Crypt::decrypt($this->warehouseId)
+        $currentStock = StockHandler::getStock(
+            productDetailId: null,
+            productId: $product->id,
+            companyId: Crypt::decrypt($this->companyId),
+            warehouseId: Crypt::decrypt($this->warehouseId),
+            thresholdDate: $this->transactionDate,
         );
 
         $this->stockExpenseProducts[] = [

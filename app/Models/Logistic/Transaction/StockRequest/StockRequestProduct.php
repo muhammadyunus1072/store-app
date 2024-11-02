@@ -59,12 +59,7 @@ class StockRequestProduct extends Model
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
-
-    public function unitDetailChoices()
-    {
-        return $this->hasMany(UnitDetail::class, 'unit_id', 'product_unit_id');
-    }
-
+    
     public function unitDetail()
     {
         return $this->belongsTo(UnitDetail::class, 'unit_detail_id', 'id');

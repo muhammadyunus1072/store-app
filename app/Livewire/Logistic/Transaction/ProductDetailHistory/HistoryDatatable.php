@@ -14,7 +14,6 @@ class HistoryDatatable extends Component
 {
     use WithDatatable;
 
-    public $isShowStock = true;
     public $remarksIds = [];
     public $remarksType;
 
@@ -59,22 +58,30 @@ class HistoryDatatable extends Component
             }
         ];
 
-        if ($this->isShowStock) {
-            $columns[] = [
-                'key' => 'product_stock_details.quantity',
-                'name' => 'Stok',
-                'render' => function ($item) {
-                    return NumberFormatter::format($item->stock);
-                }
-            ];
-        }
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'product_detail_histories.start_stock',
+            'name' => 'Stok Awal',
+            'render' => function ($item) {
+                return NumberFormatter::format($item->start_stock);
+            }
+        ];
 
         $columns[] = [
             'searchable' => false,
             'key' => 'product_detail_histories.quantity',
-            'name' => 'Jml',
+            'name' => 'Jumlah',
             'render' => function ($item) {
                 return NumberFormatter::format($item->quantity);
+            }
+        ];
+
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'product_detail_histories.last_stock',
+            'name' => 'Stok Akhir',
+            'render' => function ($item) {
+                return NumberFormatter::format($item->last_stock);
             }
         ];
 
@@ -162,7 +169,6 @@ class HistoryDatatable extends Component
     public function getQuery()
     {
         return ProductDetailHistoryRepository::datatable(
-            $this->isShowStock,
             $this->remarksIds,
             $this->remarksType
         );

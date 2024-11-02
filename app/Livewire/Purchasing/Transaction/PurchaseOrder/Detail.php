@@ -388,6 +388,9 @@ class Detail extends Component
         $this->purchaseOrderProducts[] = [
             'id' => null,
 
+            // Helpers
+            'is_deletable' => true,
+
             // Core Information
             'product_id' => Crypt::encrypt($product->id),
             'product_text' => $product->name,
@@ -427,6 +430,9 @@ class Detail extends Component
 
         $item = [
             'id' => null,
+
+            // Helpers
+            'is_deletable' => true,
 
             // Core Information
             'product_id' => $copy['product_id'],

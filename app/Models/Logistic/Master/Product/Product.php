@@ -45,7 +45,6 @@ class Product extends Model
 
     public function saveInfo($object, $prefix = "product")
     {
-        $object[$prefix . "_unit_id"] = $this->unit_id;
         $object[$prefix . "_name"] = $this->name;
         $object[$prefix . "_type"] = $this->type;
 

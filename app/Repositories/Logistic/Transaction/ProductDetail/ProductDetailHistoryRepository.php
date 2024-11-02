@@ -13,14 +13,15 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         return ProductDetailHistory::class;
     }
 
-    public static function datatable($isShowStock = false, $remarksIds = [], $remarksType = null)
+    public static function datatable($remarksIds = [], $remarksType = null)
     {
         $query = ProductDetailHistory::select(
             'product_detail_histories.id',
             'product_detail_histories.product_detail_id',
             'product_detail_histories.transaction_date',
+            'product_detail_histories.start_stock',
             'product_detail_histories.quantity',
-            'product_detail_histories.remarks_note',
+            'product_detail_histories.last_stock',
             'product_details.price',
             'product_details.entry_date',
             'product_details.expired_date',
@@ -56,73 +57,40 @@ class ProductDetailHistoryRepository extends MasterDataRepository
                 $query->where('product_detail_histories.remarks_type', $remarksType);
             });
 
-        if ($isShowStock) {
-            $query->addSelect('product_stock_details.quantity as stock')
-                ->join('product_stock_details', function ($join) {
-                    $join->on('product_details.id', '=', 'product_stock_details.product_detail_id');
-                });
-        }
-
         return $query;
     }
 
-    public static function getSumStock(
+    public static function findLastHistory(
         $productDetailId,
+        $thresholdDate,
+    ) {
+        return ProductDetailHistory::where('product_detail_id', $productDetailId)
+            ->where('transaction_date', '<=', $thresholdDate)
+            ->orderBy('transaction_date', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->first();
+    }
+
+    public static function getLastHistories(
         $productId,
         $companyId,
         $warehouseId,
-        $groupByProductDetailId,
-        $groupByProductId,
-        $groupByCompanyId,
-        $groupByWarehouseId,
+        $thresholdDate,
     ) {
-        return ProductDetailHistory::select(
-            DB::raw("SUM(product_detail_histories.quantity) as sum_quantity")
-        )
-            ->join('product_details', function ($join) {
-                $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id');
-            })
-            ->when($productDetailId, function ($query) use ($productDetailId) {
-                $query->where('product_detail_histories.product_detail_id', $productDetailId);
-            })
-            ->when($productId, function ($query) use ($productId) {
-                $query->where('product_details.product_id', $productId);
-            })
-            ->when($warehouseId, function ($query) use ($warehouseId) {
-                $query->where('product_details.warehouse_id', $warehouseId);
-            })
-            ->when($companyId, function ($query) use ($companyId) {
-                $query->where('product_details.company_id', $companyId);
-            })
-            ->when($groupByProductDetailId, function ($query) {
-                $query->addSelect('product_detail_histories.product_detail_id')
-                    ->groupBy('product_detail_histories.product_detail_id');
-            })
-            ->when($groupByProductId, function ($query) {
-                $query->addSelect('product_details.product_id')
-                    ->groupBy('product_details.product_id');
-            })
-            ->when($groupByWarehouseId, function ($query) {
-                $query->addSelect('product_details.warehouse_id')
-                    ->groupBy('product_details.warehouse_id');
-            })
-            ->when($groupByCompanyId, function ($query) {
-                $query->addSelect('product_details.company_id')
-                    ->groupBy('product_details.company_id');
-            })
-            ->get();
-    }
+        $queryStockRowNumber = ProductDetailHistory::where('product_id', $productId)
+            ->where('company_id', $companyId)
+            ->where('warehouse_id', $warehouseId)
+            ->where('transaction_date', '<=', $thresholdDate)
+            ->where(DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_id ORDER BY id DESC) as rn'))
+            ->first();
 
-    public static function getNewerHistories(ProductDetailHistory $productiDetailHistory)
-    {
-        return ProductDetailHistory::where('product_detail_id', $productiDetailHistory->id)
-            ->where(function ($query) use ($productiDetailHistory) {
-                $query->where('transaction_date', '>', $productiDetailHistory->transaction_date)
-                    ->orWhere(function ($query)  use ($productiDetailHistory) {
-                        $query->where('transaction_date', '=', $productiDetailHistory->transaction_date)
-                            ->where('id', '>', $productiDetailHistory->id);
-                    });
-            })
+        return DB::table($queryStockRowNumber, "histories")
+            ->select(
+                'product_detail_id',
+                'last_stock',
+            )
+            ->where('last_stock', '>', 0)
+            ->where('rn', '=', 1)
             ->get();
     }
 }
