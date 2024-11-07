@@ -58,6 +58,17 @@ class ProductDetailHistory extends Model
     /*
     | RELATIONSHIP
     */
+
+    public function remarksTable()
+    {
+        return $this->belongsTo($this->remarks_type, 'remarks_id', 'id');
+    }
+
+    public function remarksMasterTable()
+    {
+        return $this->remarksTable->masterTable();
+    }
+
     public function product()
     {
         return $this->belongsToMany(Product::class, 'product_details', 'product_detail_id', 'product_id');

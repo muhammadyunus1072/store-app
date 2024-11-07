@@ -118,7 +118,7 @@ class StockHandler
             );
 
             foreach ($productDetails as $productDetail) {
-                $usedQty = min($productDetail->stock, $substractQty) * -1;
+                $usedQty = min($productDetail->last_stock, $substractQty) * -1;
 
                 $createdHistories[$item['id']][] = ProductDetailHistoryRepository::create([
                     'product_detail_id' => $productDetail->id,
@@ -216,6 +216,7 @@ class StockHandler
     }
 
     public static function getStock(
+        $productDetailId = null,
         $productId,
         $companyId,
         $warehouseId,
@@ -231,7 +232,7 @@ class StockHandler
             return $productDetails->sum('last_stock');
         } else {
             // Last Stock Based On Date (Source : Product Detail Histories)
-            $histories = ProductDetailHistoryRepository::getLastHistories($productId, $companyId, $warehouseId, $thresholdDate);
+            $histories = ProductDetailHistoryRepository::getLastHistories($productDetailId, $productId, $companyId, $warehouseId, $thresholdDate);
             return $histories->sum('last_stock');
         }
     }

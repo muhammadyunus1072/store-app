@@ -2,18 +2,21 @@
 
 namespace App\Models\Logistic\Transaction\StockExpense;
 
-use App\Helpers\General\NumberGenerator;
+use App\Permissions\AccessLogistic;
+use App\Permissions\PermissionHelper;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\General\NumberGenerator;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
+use App\Traits\Logistic\HasProductDetailHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockExpense\StockExpense;
 
 class StockExpenseProduct extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, SoftDeletes, HasTrackHistory, HasProductDetailHistory;
 
     protected $fillable = [
         'stock_expense_id',
@@ -23,6 +26,8 @@ class StockExpenseProduct extends Model
     ];
 
     protected $guarded = ['id'];
+
+    CONST TRANSLATE_NAME = 'Pengeluaran';
 
     protected static function onBoot()
     {
@@ -49,6 +54,24 @@ class StockExpenseProduct extends Model
     public function isEditable()
     {
         return true;
+    }
+
+    /*
+    | PRODUCT DETAIL HISTORY
+    */
+
+    public function masterTable()
+    {
+        return $this->stockExpense();
+    }
+    
+    public function remarksTableInfo(): array
+    {
+        return [
+            "translated_name" => self::TRANSLATE_NAME,
+            "access_name" => PermissionHelper::transform(AccessLogistic::STOCK_EXPENSE, PermissionHelper::TYPE_READ),
+            "route_name" => "stock_expense.edit"
+        ];
     }
 
     /*

@@ -2,19 +2,26 @@
 
 namespace App\Models\Purchasing\Transaction\PurchaseOrder;
 
-use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Finance\Master\Tax;
+use App\Permissions\AccessLogistic;
+use App\Permissions\PermissionHelper;
+use Sis\TrackHistory\HasTrackHistory;
+use Illuminate\Database\Eloquent\Model;
+use App\Helpers\Logistic\Stock\StockHandler;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\Logistic\HasProductDetailHistory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Sis\TrackHistory\HasTrackHistory;
+use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrder;
+use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductTax;
+use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductAttachment;
+use App\Permissions\AccessPurchasing;
 
 class PurchaseOrderProduct extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, SoftDeletes, HasTrackHistory, HasProductDetailHistory;
 
     protected $fillable = [
         'purchase_order_id',
@@ -28,6 +35,8 @@ class PurchaseOrderProduct extends Model
     ];
 
     protected $guarded = ['id'];
+
+    CONST TRANSLATE_NAME = 'Pembelian';
 
     protected static function onBoot()
     {
@@ -65,6 +74,29 @@ class PurchaseOrderProduct extends Model
         return true;
     }
 
+    /*
+    | PRODUCT DETAIL HISTORY
+    */
+
+    public function masterTable()
+    {
+        return $this->purchaseOrder();
+    }
+
+    public function translatedName(): string
+    {
+        return self::TRANSLATE_NAME;
+    }
+
+    public function remarksTableInfo(): array
+    {
+        return [
+            "translated_name" => self::TRANSLATE_NAME,
+            "access_name" => PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_READ),
+            "route_name" => "purchase_order.edit"
+        ];
+    }
+    
     /*
     | RELATIONSHIP
     */

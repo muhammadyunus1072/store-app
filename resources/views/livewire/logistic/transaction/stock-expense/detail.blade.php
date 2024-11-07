@@ -65,8 +65,8 @@
         <table class='table gy-1 gx-2'>
             @foreach ($stockExpenseProducts as $index => $item)
                 @php
-                    $qty = NumberFormatter::imaskToValue($item['quantity']);
-                    $qtyOld = NumberFormatter::imaskToValue($item['old_quantity']);
+                    $qty = App\Helpers\General\NumberFormatter::imaskToValue($item['quantity']);
+                    $qtyOld = App\Helpers\General\NumberFormatter::imaskToValue($item['old_quantity']);
                     $qtyChange = $qty - $qtyOld;
                     $rowClass =
                         $qtyChange == 0

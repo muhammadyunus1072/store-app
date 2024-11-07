@@ -2,14 +2,16 @@
 
 namespace App\Models\Document\Transaction;
 
-use App\Helpers\General\NumberGenerator;
+use Carbon\Carbon;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\General\NumberGenerator;
+use App\Models\Core\User\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Transaction\ApprovalUser;
-use App\Repositories\Document\Transaction\ApprovalRepository;
-use Carbon\Carbon;
+use App\Models\Document\Transaction\ApprovalHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Repositories\Document\Transaction\ApprovalRepository;
 
 class Approval extends Model
 {
@@ -104,6 +106,11 @@ class Approval extends Model
         return !empty($this->cancel_at);
     }
 
+    public function is_enabled()
+    {
+        return true;
+    }
+
     public function isAllApproved()
     {
         return $this->approvalUsers()->count() == $this->approvalUserHistories()->count();
@@ -112,6 +119,12 @@ class Approval extends Model
     /*
     | RELATIONSHIP
     */
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
     public function approvalUsers()
     {
         return $this->hasMany(ApprovalUser::class, 'approval_id', 'id');
@@ -119,7 +132,7 @@ class Approval extends Model
 
     public function approvalUserHistories()
     {
-        return $this->belongsToMany(ApprovalUserHistory::class, 'approval_users', 'approval_id', 'approval_user_id')->whereNull('approval_users.deleted_at');
+        return $this->belongsToMany(ApprovalUserHistory::class, 'approval_users', 'approval_id', 'user_id')->whereNull('approval_users.deleted_at');
     }
 
     public function remarks()

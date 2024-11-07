@@ -72,17 +72,30 @@ class ProductDetailHistoryRepository extends MasterDataRepository
     }
 
     public static function getLastHistories(
+        $productDetailId,
         $productId,
         $companyId,
         $warehouseId,
         $thresholdDate,
     ) {
-        $queryStockRowNumber = ProductDetailHistory::where('product_id', $productId)
-            ->where('company_id', $companyId)
-            ->where('warehouse_id', $warehouseId)
-            ->where('transaction_date', '<=', $thresholdDate)
-            ->where(DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_id ORDER BY id DESC) as rn'))
-            ->first();
+        $queryStockRowNumber = ProductDetailHistory::select(
+            'product_detail_histories.product_detail_id',
+            'product_detail_histories.last_stock',
+            DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_histories.product_detail_id ORDER BY product_detail_histories.id DESC) as rn')
+        )
+            ->when($productDetailId, function($query) use($productDetailId) 
+            {
+                $query->where('product_detail_histories.product_detail_id', $productDetailId);
+            })
+            ->where('product_details.product_id', $productId)
+            ->where('product_details.company_id', $companyId)
+            ->where('product_details.warehouse_id', $warehouseId)
+            ->where('product_detail_histories.transaction_date', '<=', $thresholdDate)
+            ->join('product_details', function($join)
+            {
+                $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id')
+                ->whereNull('product_details.deleted_at');
+            });
 
         return DB::table($queryStockRowNumber, "histories")
             ->select(
