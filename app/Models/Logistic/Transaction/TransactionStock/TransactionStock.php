@@ -84,6 +84,7 @@ class TransactionStock extends Model
         foreach ($this->products as $item) {
             $data[] = [
                 // Header Information
+                'id' => $this->id,
                 'transaction_date' => $this->transaction_date,
                 'source_company_id' => $this->source_company_id,
                 'source_warehouse_id' => $this->source_warehouse_id,

@@ -7,7 +7,9 @@
         </div>
         <div class="card-body">
             <div class="row">
-                @livewire($object['component'], $object['data'])
+                <div class="col-md-7">
+                    @livewire($object['component'], $object['data'])
+                </div>
 
                 <div class="col-md-5 border p-3 d-flex flex-column">
                     <div class="w-100">

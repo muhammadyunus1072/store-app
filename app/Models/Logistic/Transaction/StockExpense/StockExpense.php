@@ -2,20 +2,21 @@
 
 namespace App\Models\Logistic\Transaction\StockExpense;
 
-use App\Helpers\General\NumberGenerator;
+use App\Settings\SettingLogistic;
+use Illuminate\Support\Facades\Log;
 use App\Models\Core\Company\Company;
+use App\Traits\Document\HasApproval;
+use Sis\TrackHistory\HasTrackHistory;
+use Illuminate\Database\Eloquent\Model;
+use App\Helpers\General\NumberGenerator;
+use App\Traits\Logistic\HasTransactionStock;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
-use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
-use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Settings\SettingLogistic;
-use App\Traits\Document\HasApproval;
-use App\Traits\Logistic\HasTransactionStock;
-use Sis\TrackHistory\HasTrackHistory;
+use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
+use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
 
 class StockExpense extends Model
 {
@@ -123,7 +124,12 @@ class StockExpense extends Model
     /*
     | APPROVAL
     */
-    public function approvalViewShow() {}
+    public function approvalViewShow() {
+        return [
+            'component' => 'logistic.master.product.datatable',
+            'data' => [],
+        ];
+    }
     public function onApprovalDone()
     {
         $this->transactionStockProcess();

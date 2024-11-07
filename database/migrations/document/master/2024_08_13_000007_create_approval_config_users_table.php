@@ -40,11 +40,11 @@ return new class extends Migration
 
         $table->unsignedBigInteger("approval_config_id")->comment('Approval Config ID');
         $table->unsignedBigInteger("user_id")->comment('User ID');
-        $table->unsignedBigInteger("status_approval_id")->comment('Status Approval ID');
+        $table->unsignedBigInteger("status_approval_id")->nullable()->comment('Status Approval ID');
 
         $table->double('position')->comment('Urutan Persetujuan');
-        $table->boolean('is_trigger_done')->comment('Penanda Selesai Persetujuan');
-        $table->boolean('is_can_cancel')->comment('Dapat Membatalkan');
+        $table->boolean('is_trigger_done')->default(false)->comment('Penanda Selesai Persetujuan');
+        $table->boolean('is_can_cancel')->default(false)->comment('Dapat Membatalkan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

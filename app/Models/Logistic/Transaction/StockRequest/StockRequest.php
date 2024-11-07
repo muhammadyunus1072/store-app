@@ -3,20 +3,21 @@
 namespace App\Models\Logistic\Transaction\StockRequest;
 
 
-use App\Traits\Document\HasApproval;
 use App\Settings\SettingLogistic;
-use App\Helpers\General\NumberGenerator;
+use Illuminate\Support\Facades\Log;
 use App\Models\Core\Company\Company;
+use App\Traits\Document\HasApproval;
+use Sis\TrackHistory\HasTrackHistory;
+use Illuminate\Database\Eloquent\Model;
+use App\Helpers\General\NumberGenerator;
+use App\Traits\Logistic\HasTransactionStock;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
-use App\Traits\Logistic\HasTransactionStock;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Sis\TrackHistory\HasTrackHistory;
 
 class StockRequest extends Model
 {
@@ -79,11 +80,13 @@ class StockRequest extends Model
 
     public function onCreated()
     {
+        Log::info(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST));
         if (SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST)) {
             $this->transactionStockProcess();
         }
 
         $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST), $this);
+        Log::info($approval);
         if (!$approval) {
             $this->transactionStockProcess();
         }
@@ -102,6 +105,7 @@ class StockRequest extends Model
     public function transactionStockData(): array
     {
         $data = [
+            'id' => $this->id,
             'transaction_date' => $this->transaction_date,
             'transaction_type' => TransactionStock::TYPE_TRANSFER,
             'source_company_id' => $this->source_company_id,

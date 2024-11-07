@@ -83,6 +83,53 @@ return [
             'route'  => 'setting_logistic.index',
             'icon' => 'ki-duotone ki-setting-2',
         ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Laporan',
+            'icon' => 'ki-duotone ki-category',
+            'submenu' => [
+                [
+                    'text' => 'Stok Akhir',
+                    'route'  => 'current_stock.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Stok Akhir Detail',
+                    'route'  => 'current_stock_detail.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Stok Akhir Gudang',
+                    'route'  => 'current_stock_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Stok Akhir Detail Gudang',
+                    'route'  => 'current_stock_warehouse_detail.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Kartu Stok',
+                    'route'  => 'card_stock.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Kartu Stok Detail',
+                    'route'  => 'card_stock_detail.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Kartu Stok Gudang',
+                    'route'  => 'card_stock_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Kartu Stok Detail Gudang',
+                    'route'  => 'card_stock_warehouse_detail.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+            ],
+        ],
 
         /*
         | ======================================

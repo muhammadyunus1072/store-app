@@ -1,4 +1,20 @@
 <div>
+    @if (isset($show_header) && $show_header)
+        <div class="row d-flex align-items-stretch my-4">
+            @foreach ($header as $item)
+                <div class="col-md-{{$item['col']}} mb-2">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-center">
+                            <h2 class="text-center pt-5">{{$item['name']}}</h2>
+                        </div>
+                        <div class="card-body text-white text-center">
+                            <h2>{{ App\Helpers\General\NumberFormatter::format($item['value'])}}</h2>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
     <div class="row justify-content-between mb-3">
         <div class="col-auto mb-2 {{ !isset($show_filter) || $show_filter == true ? '' : 'd-none' }}">
             <label>Show</label>

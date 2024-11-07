@@ -2,18 +2,21 @@
 
 namespace App\Models\Logistic\Transaction\StockRequest;
 
-use App\Helpers\General\NumberGenerator;
+use App\Permissions\AccessLogistic;
+use App\Permissions\PermissionHelper;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\General\NumberGenerator;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
+use App\Traits\Logistic\HasProductDetailHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockRequest\StockRequest;
 
 class StockRequestProduct extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, SoftDeletes, HasTrackHistory, HasProductDetailHistory;
 
     protected $fillable = [
         'stock_request_id',
@@ -21,6 +24,8 @@ class StockRequestProduct extends Model
         'unit_detail_id',
         'quantity',
     ];
+
+    CONST TRANSLATE_NAME = 'Permintaan';
 
     protected $guarded = ['id'];
 
@@ -49,6 +54,24 @@ class StockRequestProduct extends Model
     public function isEditable()
     {
         return true;
+    }
+
+    /*
+    | PRODUCT DETAIL HISTORY
+    */
+
+    public function masterTable()
+    {
+        return $this->stockRequest();
+    }
+
+    public function remarksTableInfo(): array
+    {
+        return [
+            "translated_name" => self::TRANSLATE_NAME,
+            "access_name" => PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_READ),
+            "route_name" => "stock_request.edit"
+        ];
     }
 
     /*

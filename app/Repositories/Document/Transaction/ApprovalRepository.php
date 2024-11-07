@@ -20,7 +20,7 @@ class ApprovalRepository extends MasterDataRepository
             'creator',    
             'approvalUsers',    
             'approvalUsers.user',
-            'approvalHistories.user',
+            'approvalUserHistories.user',
         ]
         )->where('id', $id)->first();
     }
@@ -30,12 +30,12 @@ class ApprovalRepository extends MasterDataRepository
         $user_id = Auth::id();
         $approval = self::find($id);
         $obj = app($approval->remarks_type)->find($approval->remarks_id);
-        return $obj->viewShow($approval->approvalUser);
+        return $obj->approvalViewShow($approval->approvalUser);
     }
 
     public static function datatable()
     {
-        return Approval::with('approvalUsers', 'approvalHistories')->whereHas('approvalUsers', function($query)
+        return Approval::with('approvalUsers', 'approvalUserHistories')->whereHas('approvalUsers', function($query)
             {
                 $query->where('user_id', Auth::id());
             }
