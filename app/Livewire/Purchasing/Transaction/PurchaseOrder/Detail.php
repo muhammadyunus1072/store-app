@@ -32,7 +32,10 @@ class Detail extends Component
     use WithFileUploads;
 
     public $objId;
+    public $newObjId;
+    public $isShow;
 
+    public $number;
     #[Validate('required', message: 'Tanggal Penerimaan Harus Diisi', onUpdate: false)]
     public $transactionDate;
     public $supplierInvoiceNumber;
@@ -81,6 +84,7 @@ class Detail extends Component
 
         if ($this->objId) {
             $purchaseOrder = PurchaseOrderRepository::find(Crypt::decrypt($this->objId));
+            $this->number = $purchaseOrder->number;
             $this->transactionDate = Carbon::parse($purchaseOrder->transaction_date)->format("Y-m-d");
             $this->supplierInvoiceNumber = $purchaseOrder->supplier_invoice_number;
             $this->note = $purchaseOrder->note;
@@ -231,6 +235,7 @@ class Detail extends Component
                 $purchaseOrder = PurchaseOrderRepository::find($decId);
             } else {
                 $purchaseOrder = PurchaseOrderRepository::create($validatedData);
+                $this->newObjId = Crypt::encrypt($purchaseOrder->id);
             }
 
             $objId = $purchaseOrder->id;
@@ -325,6 +330,7 @@ class Detail extends Component
                 "Tutup",
             );
         } catch (\Exception $e) {
+            $this->newObjId = null;
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
@@ -336,7 +342,7 @@ class Detail extends Component
         if ($this->objId) {
             $this->redirectRoute('purchase_order.edit', $this->objId);
         } else {
-            $this->redirectRoute('purchase_order.create');
+            $this->redirectRoute('purchase_order.show', $this->newObjId);
         }
     }
 

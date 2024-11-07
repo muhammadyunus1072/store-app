@@ -34,7 +34,6 @@ class ProcessTransactionStockJob implements ShouldQueue, ShouldBeUnique
             DB::beginTransaction();
 
             $oldestTransaction = TransactionStockRepository::findOldestNeedToBeProcessed();
-            Log::debug($oldestTransaction->id . " : " . $oldestTransaction->transaction_type);
 
             if ($oldestTransaction) {
                 // Cancel Oldest Transaction

@@ -14,16 +14,16 @@ class PurchaseOrderController extends Controller
 
     public function create()
     {
-        return view('app.purchasing.transaction.purchase-order.detail', ["objId" => null]);
+        return view('app.purchasing.transaction.purchase-order.detail', ["objId" => null, 'isShow' => 0]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.purchasing.transaction.purchase-order.detail', ["objId" => $request->id]);
+        return view('app.purchasing.transaction.purchase-order.detail', ["objId" => $request->id, 'isShow' => 0]);
     }
 
     public function show(Request $request)
     {
-        return view('app.purchasing.transaction.purchase-order.show', ["objId" => $request->id]);
+        return view('app.purchasing.transaction.purchase-order.detail', ["objId" => $request->id, 'isShow' => 1]);
     }
 }

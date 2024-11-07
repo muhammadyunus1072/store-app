@@ -35,7 +35,9 @@ return new class extends Migration
         } else {
             $table->index('number', 'approvals_number_idx');
             $table->index('done_at', 'approvals_done_at_idx');
+            $table->index('done_by_id', 'approvals_done_by_id_idx');
             $table->index('cancel_at', 'approvals_cancel_at_idx');
+            $table->index('cancel_by_id', 'approvals_cancel_by_id_idx');
             $table->index('remarks_id', 'approvals_remarks_id_idx');
             $table->index('remarks_type', 'approvals_remarks_type_idx');
 

@@ -14,16 +14,16 @@ class StockRequestController extends Controller
 
     public function create()
     {
-        return view('app.logistic.transaction.stock-request.detail', ["objId" => null]);
+        return view('app.logistic.transaction.stock-request.detail', ["objId" => null, 'isShow' => 0]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.logistic.transaction.stock-request.detail', ["objId" => $request->id]);
+        return view('app.logistic.transaction.stock-request.detail', ["objId" => $request->id, 'isShow' => 0]);
     }
 
     public function show(Request $request)
     {
-        return view('app.logistic.transaction.stock-request.show', ["objId" => $request->id]);
+        return view('app.logistic.transaction.stock-request.detail', ["objId" => $request->id, 'isShow' => 1]);
     }
 }

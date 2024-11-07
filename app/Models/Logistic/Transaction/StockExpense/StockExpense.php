@@ -33,7 +33,7 @@ class StockExpense extends Model
     protected static function onBoot()
     {
         self::creating(function ($model) {
-            $model->number = NumberGenerator::generate(self::class, "SE");
+            $model->number = NumberGenerator::simpleYearCode(self::class, "SP", $model->transaction_date);
 
             $model = $model->warehouse->saveInfo($model);
             $model = $model->company->saveInfo($model);

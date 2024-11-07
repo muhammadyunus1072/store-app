@@ -26,6 +26,8 @@ class Datatable extends Component
 
     public function onMount()
     {
+        $this->sortDirection = 'desc';
+        
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_DELETE));
@@ -72,9 +74,17 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'render' => function ($item) {
+                    $id = Crypt::encrypt($item->id);
+
+                    $showUrl = route('stock_request.show', $id);
+                    $showHtml = "<div class='col-auto mb-2'>
+                        <a class='btn btn-info btn-sm' href='$showUrl'>
+                            <i class='ki-solid ki-eye fs-1'></i>
+                            Lihat
+                        </a>
+                    </div>";
 
                     $editHtml = "";
-                    $id = Crypt::encrypt($item->id);
                     if ($this->isCanUpdate) {
                         $editUrl = route('stock_request.edit', $id);
                         $editHtml = "<div class='col-auto mb-2'>
@@ -106,7 +116,7 @@ class Datatable extends Component
                     }
 
                     $html = "<div class='row'>
-                        $editHtml $destroyHtml 
+                        $showHtml $editHtml $destroyHtml 
                     </div>";
 
                     return $html;

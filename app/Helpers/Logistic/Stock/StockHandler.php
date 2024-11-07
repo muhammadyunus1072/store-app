@@ -7,6 +7,8 @@ use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
 use App\Settings\SettingLogistic;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class StockHandler
 {
@@ -22,27 +24,9 @@ class StockHandler
         self::SUBSTRACT_STOCK_METHOD_FEFO => "First Expired First Out (FEFO)",
     ];
 
-    public static function convertUnitPrice(
-        $quantity,
-        $price,
-        $fromUnitDetailId
-    ) {
-        $fromUnitDetail = UnitDetailRepository::find($fromUnitDetailId);
-
-        if (empty($targetUnitDetailId)) {
-            $targetUnitDetail = UnitDetailRepository::findMainUnit($fromUnitDetail->unit_id);
-        } else {
-            $targetUnitDetail = UnitDetailRepository::find($targetUnitDetailId);
-        }
-
-        return [
-            'quantity' => $quantity * $fromUnitDetail->value / $targetUnitDetail->value,
-            'price' => $price * $targetUnitDetail->value / $fromUnitDetail->value,
-            'unit_detail_id' => $targetUnitDetail->id,
-            'unit_detail_name' => $targetUnitDetail->name,
-        ];
-    }
-
+    /*
+    | TRANSACTION STOCK
+    */
     public static function createStock(
         $productId,
         $companyId,
@@ -81,9 +65,7 @@ class StockHandler
         ]);
     }
 
-    /*
-    | TRANSACTION STOCK
-    */
+
     public static function add($data)
     {
         if (count($data) == 0) {
@@ -105,7 +87,7 @@ class StockHandler
 
         $createdHistories = [];
 
-        foreach ($data as $item) {
+        foreach ($data as $index => $item) {
             $resultConvert = self::convertUnitPrice($item['quantity'], 0, $item['unit_detail_id']);
             $substractQty = $resultConvert['quantity'];
 
@@ -118,9 +100,9 @@ class StockHandler
             );
 
             foreach ($productDetails as $productDetail) {
-                $usedQty = min($productDetail->stock, $substractQty) * -1;
+                $usedQty = min($productDetail->last_stock, $substractQty) * -1;
 
-                $createdHistories[$item['id']][] = ProductDetailHistoryRepository::create([
+                $createdHistories[$index][] = ProductDetailHistoryRepository::create([
                     'product_detail_id' => $productDetail->id,
                     'transaction_date' => $item['transaction_date'],
                     'quantity' => $usedQty,
@@ -156,8 +138,8 @@ class StockHandler
 
         $createdHistories = self::substract($data);
 
-        foreach ($data as $item) {
-            foreach ($createdHistories[$item['id']] as $history) {
+        foreach ($data as $index => $item) {
+            foreach ($createdHistories[$index] as $history) {
                 self::createStock(
                     productId: $item['product_id'],
                     companyId: $item['destination_company_id'],
@@ -182,6 +164,8 @@ class StockHandler
             return;
         }
 
+        Log::debug("CANCEL | " . json_encode($data));
+
         foreach ($data as $item) {
             $whereClause = [
                 ['remarks_id', $item['remarks_id']],
@@ -202,15 +186,15 @@ class StockHandler
     */
     public static function getStockByProductDetail(
         $productDetailId,
-        $thresholdDate = null,
+        $transactionDate,
     ) {
-        if ($thresholdDate == null) {
+        if ($transactionDate == Carbon::now()->format("Y-m-d")) {
             // Last Stock (Source : Product Detail)
             $productDetail = ProductDetailRepository::find($productDetailId);
             return $productDetail ? $productDetail->last_stock : 0;
         } else {
             // Last Stock Based On Date (Source : Product Detail Histories)
-            $lastHistory = ProductDetailHistoryRepository::findLastHistory($productDetailId, $thresholdDate);
+            $lastHistory = ProductDetailHistoryRepository::findLastHistory($productDetailId, $transactionDate);
             return $lastHistory ? $lastHistory->last_stock : 0;
         }
     }
@@ -219,9 +203,9 @@ class StockHandler
         $productId,
         $companyId,
         $warehouseId,
-        $thresholdDate = null,
+        $transactionDate,
     ) {
-        if ($thresholdDate == null) {
+        if ($transactionDate == Carbon::now()->format("Y-m-d")) {
             // Last Stock (Source : Product Detail)
             $productDetails = ProductDetailRepository::getBy([
                 ['product_id', $productId],
@@ -231,8 +215,48 @@ class StockHandler
             return $productDetails->sum('last_stock');
         } else {
             // Last Stock Based On Date (Source : Product Detail Histories)
-            $histories = ProductDetailHistoryRepository::getLastHistories($productId, $companyId, $warehouseId, $thresholdDate);
+            $histories = ProductDetailHistoryRepository::getLastHistories($productId, $companyId, $warehouseId, $transactionDate);
             return $histories->sum('last_stock');
         }
+    }
+
+    public static function convertUnitPrice(
+        $quantity,
+        $price,
+        $fromUnitDetailId
+    ) {
+        $fromUnitDetail = UnitDetailRepository::find($fromUnitDetailId);
+
+        if (empty($targetUnitDetailId)) {
+            $targetUnitDetail = UnitDetailRepository::findMainUnit($fromUnitDetail->unit_id);
+        } else {
+            $targetUnitDetail = UnitDetailRepository::find($targetUnitDetailId);
+        }
+
+        return [
+            'quantity' => $quantity * $fromUnitDetail->value / $targetUnitDetail->value,
+            'price' => $price * $targetUnitDetail->value / $fromUnitDetail->value,
+            'unit_detail_id' => $targetUnitDetail->id,
+            'unit_detail_name' => $targetUnitDetail->name,
+        ];
+    }
+
+    public static function getStockAvailablity(
+        $productId,
+        $companyId,
+        $warehouseId,
+        $qtyToBeUsed,
+        $unitDetailId,
+        $transactionDate
+    ) {
+        $currentStock = self::getStock($productId, $companyId, $warehouseId, $transactionDate);
+        $convertResult = self::convertUnitPrice($qtyToBeUsed, 0, $unitDetailId);
+
+        return [
+            'is_stock_available' => $convertResult['quantity'] <= $currentStock,
+            'current_stock' => $currentStock,
+            'quantity_to_be_used' => $convertResult['quantity'],
+            'unit_detail_name' => $convertResult['unit_detail_name'],
+        ];
     }
 }

@@ -14,16 +14,16 @@ class StockExpenseController extends Controller
 
     public function create()
     {
-        return view('app.logistic.transaction.stock-expense.detail', ["objId" => null]);
+        return view('app.logistic.transaction.stock-expense.detail', ["objId" => null, 'isShow' => 0]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.logistic.transaction.stock-expense.detail', ["objId" => $request->id]);
+        return view('app.logistic.transaction.stock-expense.detail', ["objId" => $request->id, 'isShow' => 0]);
     }
 
     public function show(Request $request)
     {
-        return view('app.logistic.transaction.stock-expense.show', ["objId" => $request->id]);
+        return view('app.logistic.transaction.stock-expense.detail', ["objId" => $request->id, 'isShow' => 1]);
     }
 }

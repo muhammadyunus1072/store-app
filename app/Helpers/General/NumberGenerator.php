@@ -55,4 +55,31 @@ class NumberGenerator
 
         return $formattedNumber;
     }
+
+
+    public static function simpleYearCode(
+        $className,
+        $code,
+        $date,
+        $zeroPad = 6,
+    ) {
+        $dateTime = Carbon::parse($date);
+        $year = substr($dateTime->year, 2);
+
+        $lastModel = $className::withTrashed()->select('number')
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        if (!empty($lastModel)) {
+            $lastNumber = intval(substr($lastModel->number, 4));
+        } else {
+            $lastNumber = 0;
+        }
+
+        // Get Current Number
+        $currentNumber = strval($lastNumber + 1);
+        $currentNumber = str_pad($currentNumber, $zeroPad, "0", STR_PAD_LEFT);
+
+        return "{$code}{$year}{$currentNumber}";
+    }
 }

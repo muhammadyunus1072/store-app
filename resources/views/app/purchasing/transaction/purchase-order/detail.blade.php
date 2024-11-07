@@ -28,6 +28,20 @@
                     Kembali
                 </a>
             </div>
+            @if ($objId)
+                @can(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_CREATE))
+                    <div class="col-md-auto mt-2">
+                        <a class="btn btn-success" href="{{ route('purchase_order.create') }}">
+                            <i class="ki-duotone ki-plus fs-1">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                            </i>
+                            Tambah Baru
+                        </a>
+                    </div>
+                @endcan
+            @endif
         </div>
     </div>
 @stop
@@ -35,7 +49,7 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <livewire:purchasing.transaction.purchase-order.detail :objId="$objId">
+            <livewire:purchasing.transaction.purchase-order.detail :objId="$objId" :isShow="$isShow">
         </div>
     </div>
 @stop

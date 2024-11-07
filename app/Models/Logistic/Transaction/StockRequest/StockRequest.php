@@ -36,7 +36,7 @@ class StockRequest extends Model
     protected static function onBoot()
     {
         self::creating(function ($model) {
-            $model->number = NumberGenerator::generate(self::class, "SR");
+            $model->number = NumberGenerator::simpleYearCode(self::class, "SP", $model->transaction_date);
             $model = $model->companyDestination->saveInfo($model, 'destination_company');
             $model = $model->companySource->saveInfo($model, 'source_company');
             $model = $model->warehouseDestination->saveInfo($model, 'destination_warehouse');

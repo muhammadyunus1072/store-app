@@ -6,6 +6,7 @@ use App\Helpers\Logistic\Stock\StockHandler;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use Sis\TrackHistory\HasTrackHistory;
 
 class TransactionStock extends Model
@@ -42,7 +43,7 @@ class TransactionStock extends Model
     protected static function onBoot()
     {
         self::deleted(function ($model) {
-            foreach ($model->purchaseOrderProducts as $item) {
+            foreach ($model->products as $item) {
                 $item->delete();
             }
         });

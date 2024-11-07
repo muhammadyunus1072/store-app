@@ -135,8 +135,8 @@ return [
         ],
         [
             // 'id' => 'menu_admin'
-            'text' => 'Pengaturan',
-            'icon' => 'ki-duotone ki-setting-2',
+            'text' => 'Master Data',
+            'icon' => 'ki-duotone ki-category',
             'submenu' => [
                 [
                     'text' => 'Aturan Persetujuan',

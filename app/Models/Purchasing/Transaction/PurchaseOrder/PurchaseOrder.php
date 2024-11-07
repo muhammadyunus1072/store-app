@@ -36,7 +36,7 @@ class PurchaseOrder extends Model
     protected static function onBoot()
     {
         self::creating(function ($model) {
-            $model->number = NumberGenerator::generate(self::class, "GR");
+            $model->number = NumberGenerator::simpleYearCode(self::class, "TR", $model->transaction_date);
 
             $model = $model->supplier->saveInfo($model);
             $model = $model->company->saveInfo($model);

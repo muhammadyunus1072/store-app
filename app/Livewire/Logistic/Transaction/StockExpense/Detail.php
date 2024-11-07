@@ -22,7 +22,10 @@ use Carbon\Carbon;
 class Detail extends Component
 {
     public $objId;
+    public $newObjId;
+    public $isShow;
 
+    public $number;
     #[Validate('required', message: 'Tanggal Pengeluaran Harus Diisi', onUpdate: false)]
     public $transactionDate;
     public $note;
@@ -59,6 +62,7 @@ class Detail extends Component
 
         if ($this->objId) {
             $stockExpense = StockExpenseRepository::find(Crypt::decrypt($this->objId));
+            $this->number = $stockExpense->number;
             $this->transactionDate = Carbon::parse($stockExpense->transaction_date)->format("Y-m-d");
             $this->note = $stockExpense->note;
 
@@ -74,14 +78,6 @@ class Detail extends Component
                     return Crypt::decrypt($obj['id']) == $stockExpenseProduct->unit_detail_id;
                 })->first()['id'];
 
-                $currentStock = StockHandler::getStock(
-                    productDetailId: null,
-                    productId: $stockExpenseProduct->product_id,
-                    companyId: $stockExpense->company_id,
-                    warehouseId: $stockExpense->warehouse_id,
-                    thresholdDate: $this->transactionDate
-                );
-
                 $this->stockExpenseProducts[] = [
                     'id' => Crypt::encrypt($stockExpenseProduct->id),
                     'product_id' => Crypt::encrypt($stockExpenseProduct->product_id),
@@ -89,14 +85,18 @@ class Detail extends Component
                     "unit_detail_id" => $unitDetailId,
                     "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
-                    'current_stock' => NumberFormatter::format($currentStock),
-                    'current_stock_unit_name' => $unitDetailChoice[0]['name'],
-                    "old_quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
+
+                    // Validity Purposes
+                    "old_quantity" => $stockExpenseProduct->quantity,
+                    "old_company_id" => $this->companyId,
+                    "old_warehouse_id" => $this->warehouseId,
                 ];
 
                 // History Datatable
                 $this->historyRemarksIds[] = $stockExpenseProduct->id;
             }
+
+            $this->refreshStock();
         }
     }
 
@@ -122,18 +122,18 @@ class Detail extends Component
 
     public function updated($property)
     {
-        if ($property == 'companyId' || $property == 'warehouseId' || $property == 'transactionDate') {
-            foreach ($this->stockExpenseProducts as $index => $item) {
-                $currentStock = StockHandler::getStock(
-                    productDetailId: null,
-                    productId: Crypt::decrypt($item['product_id']),
-                    companyId: Crypt::decrypt($this->companyId),
-                    warehouseId: Crypt::decrypt($this->warehouseId),
-                    thresholdDate: $this->transactionDate,
-                );
+        if (
+            $property == 'companyId'
+            || $property == 'warehouseId'
+            || $property == 'transactionDate'
+        ) {
+            $this->refreshStock();
+        }
 
-                $this->stockExpenseProducts[$index]['current_stock'] = NumberFormatter::format($currentStock);
-            }
+        if (str_contains($property, "quantity")) {
+            $properties = explode(".", $property);
+            $index = $properties[1];
+            $this->refreshStock($index);
         }
     }
 
@@ -143,7 +143,7 @@ class Detail extends Component
         if ($this->objId) {
             $this->redirectRoute('stock_expense.edit', $this->objId);
         } else {
-            $this->redirectRoute('stock_expense.create');
+            $this->redirectRoute('stock_expense.show', $this->newObjId);
         }
     }
 
@@ -168,6 +168,15 @@ class Detail extends Component
             return;
         }
 
+        // Check Stock
+        $this->refreshStock();
+        foreach ($this->stockExpenseProducts as $item) {
+            if (!$item['is_stock_available']) {
+                Alert::fail($this, "Gagal", "Stok {$item['product_text']} Tidak Mencukupi");
+                return;
+            }
+        }
+
         $this->validate();
 
         $validatedData = [
@@ -185,6 +194,7 @@ class Detail extends Component
                 $stockExpense = StockExpenseRepository::find($decId);
             } else {
                 $stockExpense = StockExpenseRepository::create($validatedData);
+                $this->newObjId = Crypt::encrypt($stockExpense->id);
             }
 
             // ===============================
@@ -230,6 +240,7 @@ class Detail extends Component
                 "Tutup",
             );
         } catch (\Exception $e) {
+            $this->newObjId = null;
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
@@ -242,13 +253,6 @@ class Detail extends Component
     {
         $product = ProductRepository::find(Crypt::decrypt($productId));
         $unitDetailChoice = UnitDetailRepository::getOptions($product->unit_id);
-        $currentStock = StockHandler::getStock(
-            productDetailId: null,
-            productId: $product->id,
-            companyId: Crypt::decrypt($this->companyId),
-            warehouseId: Crypt::decrypt($this->warehouseId),
-            thresholdDate: $this->transactionDate,
-        );
 
         $this->stockExpenseProducts[] = [
             'id' => null,
@@ -257,10 +261,14 @@ class Detail extends Component
             "unit_detail_id" => $unitDetailChoice[0]['id'],
             "unit_detail_choice" => $unitDetailChoice,
             "quantity" => 0,
-            'current_stock' => NumberFormatter::valueToImask($currentStock),
-            'current_stock_unit_name' => $unitDetailChoice[0]['name'],
+
+            // Validity Purposes
             "old_quantity" => 0,
+            "old_company_id" => null,
+            "old_warehouse_id" => null,
         ];
+
+        $this->refreshStock(count($this->stockExpenseProducts) - 1);
     }
 
     public function removeDetail($index)
@@ -270,5 +278,38 @@ class Detail extends Component
         }
         unset($this->stockExpenseProducts[$index]);
         $this->stockExpenseProducts = array_values($this->stockExpenseProducts);
+    }
+
+    public function refreshStock($index = null)
+    {
+        $items = [];
+        if ($index) {
+            $items[$index] = $this->stockExpenseProducts[$index];
+        } else {
+            $items = $this->stockExpenseProducts;
+        }
+
+        foreach ($items as $index => $item) {
+            if ($item['old_company_id'] == $this->companyId && $item['old_warehouse_id'] == $this->warehouseId) {
+                // Check By Quantity Change
+                $qtyToBeUsed = NumberFormatter::imaskToValue($item['quantity']) - $item['old_quantity'];
+            } else {
+                // Check By Input Quantity
+                $qtyToBeUsed = NumberFormatter::imaskToValue($item['quantity']);
+            }
+
+            $stockAvailablity = StockHandler::getStockAvailablity(
+                productId: Crypt::decrypt($item['product_id']),
+                companyId: Crypt::decrypt($this->companyId),
+                warehouseId: Crypt::decrypt($this->warehouseId),
+                qtyToBeUsed: $qtyToBeUsed,
+                unitDetailId: Crypt::decrypt($item["unit_detail_id"]),
+                transactionDate: $this->transactionDate,
+            );
+
+            $this->stockExpenseProducts[$index]['current_stock'] = $stockAvailablity['current_stock'];
+            $this->stockExpenseProducts[$index]['current_stock_unit_name'] = $stockAvailablity['unit_detail_name'];
+            $this->stockExpenseProducts[$index]['is_stock_available'] = $stockAvailablity['is_stock_available'];
+        }
     }
 }

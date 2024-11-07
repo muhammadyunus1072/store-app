@@ -63,18 +63,16 @@ class UserStateHandler
             ]);
         } else {
             $this->state = json_decode($userState->state, true);
-            $this->state = [
-                'company_id' => $this->state['company_id'] ? Crypt::encrypt($this->state['company_id']) : null,
-                'warehouse_id' => $this->state['warehouse_id'] ? Crypt::encrypt($this->state['warehouse_id']) : null,
-            ];
 
             // Check Validity Old State : Company
             $isFound = false;
-            foreach ($user->companies as $index => $company) {
-                if ($company->id == $this->state['company_id']) {
-                    $isFound = true;
-                    $this->state['company_id'] = $this->companies[$index]['id']; // Set Encrypted ID
-                    break;
+            if (isset($this->state['company_id'])) {
+                foreach ($user->companies as $index => $company) {
+                    if ($company->id == $this->state['company_id']) {
+                        $isFound = true;
+                        $this->state['company_id'] = $this->companies[$index]['id']; // Set Encrypted ID
+                        break;
+                    }
                 }
             }
             if (!$isFound && count($this->companies) > 0) {
@@ -83,11 +81,13 @@ class UserStateHandler
 
             // Check Validity Old State : Warehouse
             $isFound = false;
-            foreach ($user->warehouses as $index => $warehouse) {
-                if ($warehouse->id == $this->state['warehouse_id']) {
-                    $isFound = true;
-                    $this->state['warehouse_id'] = $this->warehouses[$index]['id']; // Set Encrypted ID
-                    break;
+            if (isset($this->state['warehouse_id'])) {
+                foreach ($user->warehouses as $index => $warehouse) {
+                    if ($warehouse->id == $this->state['warehouse_id']) {
+                        $isFound = true;
+                        $this->state['warehouse_id'] = $this->warehouses[$index]['id']; // Set Encrypted ID
+                        break;
+                    }
                 }
             }
             if (!$isFound && count($this->warehouses) > 0) {

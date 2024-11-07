@@ -77,12 +77,17 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         $warehouseId,
         $thresholdDate,
     ) {
-        $queryStockRowNumber = ProductDetailHistory::where('product_id', $productId)
-            ->where('company_id', $companyId)
-            ->where('warehouse_id', $warehouseId)
-            ->where('transaction_date', '<=', $thresholdDate)
-            ->where(DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_id ORDER BY id DESC) as rn'))
-            ->first();
+        $queryStockRowNumber = ProductDetailHistory::select(
+            'product_detail_id',
+            'last_stock',
+            DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_id ORDER BY id DESC) as rn'),
+        )
+            ->whereHas('productDetail', function ($query) use ($productId, $companyId, $warehouseId) {
+                $query->where('product_id', $productId)
+                    ->where('company_id', $companyId)
+                    ->where('warehouse_id', $warehouseId);
+            })
+            ->where('transaction_date', '<=', $thresholdDate);
 
         return DB::table($queryStockRowNumber, "histories")
             ->select(

@@ -24,7 +24,7 @@ class SettingLogistic
         self::INFO_PRODUCT_CODE => true,
         self::INFO_PRODUCT_BATCH  => true,
         self::INFO_PRODUCT_EXPIRED_DATE => true,
-        self::INFO_PRODUCT_ATTACHMENT => true,
+        self::INFO_PRODUCT_ATTACHMENT => false,
         
         self::SUBSTRACT_STOCK_METHOD => StockHandler::SUBSTRACT_STOCK_METHOD_FIFO,
         self::PRICE_INTEGER_VALUE => true,

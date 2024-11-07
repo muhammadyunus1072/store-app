@@ -3,8 +3,6 @@
 namespace App\Livewire\Core;
 
 use App\Helpers\Core\UserStateHandler;
-use App\Repositories\Core\Company\CompanyRepository;
-use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
 use App\Settings\SettingCore;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
@@ -26,7 +24,7 @@ class UserState extends Component
 
         // User State
         $userState = UserStateHandler::get();
-
+        
         $this->companies = $userState['companies'];
         $this->companyId = $userState['company_id'];
         $this->warehouses = $userState['warehouses'];
