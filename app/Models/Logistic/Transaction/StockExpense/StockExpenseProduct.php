@@ -6,7 +6,7 @@ use App\Permissions\AccessLogistic;
 use App\Permissions\PermissionHelper;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
-use App\Helpers\General\NumberGenerator;
+use App\Helpers\Logistic\Stock\StockHandler;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
@@ -27,21 +27,33 @@ class StockExpenseProduct extends Model
 
     protected $guarded = ['id'];
 
-    CONST TRANSLATE_NAME = 'Pengeluaran';
+    const TRANSLATE_NAME = 'Pengeluaran';
 
     protected static function onBoot()
     {
         self::creating(function ($model) {
+            $model->saveConvertResult();
+
             $model = $model->product->saveInfo($model);
             $model = $model->unitDetail->saveInfo($model);
+            $model = $model->mainUnitDetail->saveInfo($model, 'main_unit_detail');
         });
 
         self::updating(function ($model) {
             if ($model->product_id != $model->getOriginal('product_id')) {
                 $model = $model->product->saveInfo($model);
             }
+
             if ($model->unit_detail_id != $model->getOriginal('unit_detail_id')) {
                 $model = $model->unitDetail->saveInfo($model);
+            }
+
+            if (
+                $model->unit_detail_id != $model->getOriginal('unit_detail_id')
+                || $model->quantity != $model->getOriginal('quantity')
+            ) {
+                $model->saveConvertResult();
+                $model = $model->mainUnitDetail->saveInfo($model, 'main_unit_detail');
             }
         });
     }
@@ -56,6 +68,14 @@ class StockExpenseProduct extends Model
         return true;
     }
 
+    public function saveConvertResult()
+    {
+        $convertResult = StockHandler::convertUnitPrice($this->quantity, 0, $this->unit_detail_id);
+
+        $this->converted_quantity = $convertResult['quantity'];
+        $this->main_unit_detail_id = $convertResult['unit_detail_id'];
+    }
+
     /*
     | PRODUCT DETAIL HISTORY
     */
@@ -64,7 +84,7 @@ class StockExpenseProduct extends Model
     {
         return $this->stockExpense();
     }
-    
+
     public function remarksTableInfo(): array
     {
         return [
@@ -86,6 +106,11 @@ class StockExpenseProduct extends Model
     public function unitDetail()
     {
         return $this->belongsTo(UnitDetail::class, 'unit_detail_id', 'id');
+    }
+
+    public function mainUnitDetail()
+    {
+        return $this->belongsTo(UnitDetail::class, 'main_unit_detail_id', 'id');
     }
 
     public function stockExpense()

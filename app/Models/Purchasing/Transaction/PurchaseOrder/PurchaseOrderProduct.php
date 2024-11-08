@@ -36,21 +36,34 @@ class PurchaseOrderProduct extends Model
 
     protected $guarded = ['id'];
 
-    CONST TRANSLATE_NAME = 'Pembelian';
+    const TRANSLATE_NAME = 'Pembelian';
 
     protected static function onBoot()
     {
         self::creating(function ($model) {
+            $model->saveConvertResult();
+
             $model = $model->product->saveInfo($model);
             $model = $model->unitDetail->saveInfo($model);
+            $model = $model->mainUnitDetail->saveInfo($model, 'main_unit_detail');
         });
 
         self::updating(function ($model) {
             if ($model->product_id != $model->getOriginal('product_id')) {
                 $model = $model->product->saveInfo($model);
             }
+            
             if ($model->unit_detail_id != $model->getOriginal('unit_detail_id')) {
                 $model = $model->unitDetail->saveInfo($model);
+            }
+
+            if (
+                $model->unit_detail_id != $model->getOriginal('unit_detail_id')
+                || $model->quantity != $model->getOriginal('quantity')
+                || $model->price != $model->getOriginal('price')
+            ) {
+                $model->saveConvertResult();
+                $model = $model->mainUnitDetail->saveInfo($model, 'main_unit_detail');
             }
         });
 
@@ -72,6 +85,15 @@ class PurchaseOrderProduct extends Model
     public function isEditable()
     {
         return true;
+    }
+
+    public function saveConvertResult()
+    {
+        $convertResult = StockHandler::convertUnitPrice($this->quantity, $this->price, $this->unit_detail_id);
+
+        $this->converted_quantity = $convertResult['quantity'];
+        $this->converted_price = $convertResult['price'];
+        $this->main_unit_detail_id = $convertResult['unit_detail_id'];
     }
 
     /*
@@ -96,7 +118,7 @@ class PurchaseOrderProduct extends Model
             "route_name" => "purchase_order.edit"
         ];
     }
-    
+
     /*
     | RELATIONSHIP
     */
@@ -114,6 +136,11 @@ class PurchaseOrderProduct extends Model
     public function unitDetail()
     {
         return $this->belongsTo(UnitDetail::class, 'unit_detail_id', 'id');
+    }
+
+    public function mainUnitDetail()
+    {
+        return $this->belongsTo(UnitDetail::class, 'main_unit_detail_id', 'id');
     }
 
     public function ppn(): HasOne

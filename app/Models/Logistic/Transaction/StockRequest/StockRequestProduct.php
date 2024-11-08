@@ -6,7 +6,7 @@ use App\Permissions\AccessLogistic;
 use App\Permissions\PermissionHelper;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
-use App\Helpers\General\NumberGenerator;
+use App\Helpers\Logistic\Stock\StockHandler;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
@@ -25,15 +25,18 @@ class StockRequestProduct extends Model
         'quantity',
     ];
 
-    CONST TRANSLATE_NAME = 'Permintaan';
+    const TRANSLATE_NAME = 'Permintaan';
 
     protected $guarded = ['id'];
 
     protected static function onBoot()
     {
         self::creating(function ($model) {
+            $model->saveConvertResult();
+
             $model = $model->product->saveInfo($model);
             $model = $model->unitDetail->saveInfo($model);
+            $model = $model->mainUnitDetail->saveInfo($model, 'main_unit_detail');
         });
 
         self::updating(function ($model) {
@@ -42,6 +45,14 @@ class StockRequestProduct extends Model
             }
             if ($model->unit_detail_id != $model->getOriginal('unit_detail_id')) {
                 $model = $model->unitDetail->saveInfo($model);
+            }
+
+            if (
+                $model->unit_detail_id != $model->getOriginal('unit_detail_id')
+                || $model->quantity != $model->getOriginal('quantity')
+            ) {
+                $model->saveConvertResult();
+                $model = $model->mainUnitDetail->saveInfo($model, 'main_unit_detail');
             }
         });
     }
@@ -54,6 +65,14 @@ class StockRequestProduct extends Model
     public function isEditable()
     {
         return true;
+    }
+
+    public function saveConvertResult()
+    {
+        $convertResult = StockHandler::convertUnitPrice($this->quantity, 0, $this->unit_detail_id);
+
+        $this->converted_quantity = $convertResult['quantity'];
+        $this->main_unit_detail_id = $convertResult['unit_detail_id'];
     }
 
     /*
@@ -82,10 +101,15 @@ class StockRequestProduct extends Model
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
-    
+
     public function unitDetail()
     {
         return $this->belongsTo(UnitDetail::class, 'unit_detail_id', 'id');
+    }
+
+    public function mainUnitDetail()
+    {
+        return $this->belongsTo(UnitDetail::class, 'main_unit_detail_id', 'id');
     }
 
     public function stockRequest()
