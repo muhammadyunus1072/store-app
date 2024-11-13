@@ -15,6 +15,6 @@ class StockRequestRepository extends MasterDataRepository
 
     public static function datatable()
     {
-        return StockRequest::query();
+        return StockRequest::with('transactionStock');
     }
 }

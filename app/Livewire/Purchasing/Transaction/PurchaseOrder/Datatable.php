@@ -151,6 +151,14 @@ class Datatable extends Component
                 'key' => 'warehouse_name',
                 'name' => 'Gudang',
             ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Status Proses Stok',
+                'render' => function ($item) {
+                    return $item->transactionStockStatus();
+                }
+            ],
         ];
     }
 

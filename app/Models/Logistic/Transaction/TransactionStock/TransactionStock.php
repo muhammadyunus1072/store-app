@@ -26,7 +26,6 @@ class TransactionStock extends Model
     const STATUS_DONE_PROCESSED = "Done Processed";
     const STATUS_DELETE = "Delete";
 
-
     protected $fillable = [
         'status',
         'status_message',
@@ -67,7 +66,7 @@ class TransactionStock extends Model
             $this->status_message = null;
             $this->save();
         } catch (\Exception $e) {
-            throw new \Exception($this->remarks->transactionInfo() . " | " . $e->getMessage());
+            throw new \Exception($this->remarks->transactionStockInfo() . " | " . $e->getMessage());
         }
     }
 

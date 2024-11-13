@@ -36,9 +36,34 @@ trait HasTransactionStock
         );
     }
 
-    public function transactionInfo()
+    public function transactionStockInfo()
     {
         return $this->number . " / " . Carbon::parse($this->transaction_date)->format('Y-m-d');
+    }
+
+    public function transactionStockStatus()
+    {
+        if (empty($this->transactionStock)) {
+            return "<div class='badge badge-secondary'>Belum Diproses</div>";
+        }
+
+        if ($this->transactionStock->status == TransactionStock::STATUS_NOT_PROCESSED) {
+            if ($this->transactionStock->status_message) {
+                return "<div class='badge badge-danger'>Terdapat Masalah Proses</div>";
+            } else {
+                return "<div class='badge badge-secondary'>Belum Diproses</div>";
+            }
+        } else if ($this->transactionStock->status == TransactionStock::STATUS_REPROCESSED) {
+            if ($this->transactionStock->status_message) {
+                return "<div class='badge badge-danger'>Terdapat Masalah Proses Ulang</div>";
+            } else {
+                return "<div class='badge badge-secondary'>Menunggu Proses Ulang</div>";
+            }
+        } else if ($this->transactionStock->status == TransactionStock::STATUS_DONE_PROCESSED) {
+            return "<div class='badge badge-success'>Berhasil Diproses</div>";
+        } else if ($this->transactionStock->status == TransactionStock::STATUS_DELETE) {
+            return "<div class='badge badge-warning'>Akan Dihapus</div>";
+        }
     }
 
     /*
