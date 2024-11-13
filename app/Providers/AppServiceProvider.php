@@ -49,6 +49,10 @@ class AppServiceProvider extends ServiceProvider
             return "<?php echo $expression ? Carbon\Carbon::parse($expression)->translatedFormat('d F Y, H:i') : $expression; ?>";
         });
 
+        Blade::directive('dateTime', function ($expression) {
+            return "<?php echo $expression ? Carbon\Carbon::parse($expression)->translatedFormat('d F Y') : $expression; ?>";
+        });
+
         Blade::directive('currency', function ($expression) {
             return "<?php echo App\Helpers\General\NumberFormatter::format($expression); ?>";
         });
