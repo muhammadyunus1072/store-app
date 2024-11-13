@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 
 Route::group([], __DIR__ . '/web/Core/Core.php');
 Route::group([], __DIR__ . '/web/Purchasing/Master.php');
+Route::group([], __DIR__ . '/web/Purchasing/Report.php');
 Route::group([], __DIR__ . '/web/Purchasing/Transaction.php');
 Route::group([], __DIR__ . '/web/Document/Master.php');
 Route::group([], __DIR__ . '/web/Document/Transaction.php');

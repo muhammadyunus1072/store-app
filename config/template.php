@@ -105,27 +105,37 @@ return [
                 ],
                 [
                     'text' => 'Stok Akhir Detail Gudang',
-                    'route'  => 'current_stock_warehouse_detail.index',
+                    'route'  => 'current_stock_detail_warehouse.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
                     'text' => 'Kartu Stok',
-                    'route'  => 'card_stock.index',
+                    'route'  => 'history_stock.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
                     'text' => 'Kartu Stok Detail',
-                    'route'  => 'card_stock_detail.index',
+                    'route'  => 'history_stock_detail.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
                     'text' => 'Kartu Stok Gudang',
-                    'route'  => 'card_stock_warehouse.index',
+                    'route'  => 'history_stock_warehouse.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
                     'text' => 'Kartu Stok Detail Gudang',
-                    'route'  => 'card_stock_warehouse_detail.index',
+                    'route'  => 'history_stock_detail_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Pengeluaran',
+                    'route'  => 'stock_expense_report.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Pengeluaran Gudang',
+                    'route'  => 'stock_expense_warehouse.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
             ],
@@ -164,6 +174,28 @@ return [
             'text' => 'Pengaturan',
             'route'  => 'setting_purchasing.index',
             'icon' => 'ki-duotone ki-setting-2',
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Laporan',
+            'icon' => 'ki-duotone ki-category',
+            'submenu' => [
+                [
+                    'text' => 'Pembelian',
+                    'route'  => 'purchase_order_report.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Pembelian Produk',
+                    'route'  => 'purchase_order_product_report.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Pembelian Produk Detail',
+                    'route'  => 'purchase_order_product_detail_report.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+            ],
         ],
 
         /*
