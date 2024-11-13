@@ -51,19 +51,24 @@ class TransactionStock extends Model
 
     public function process()
     {
-        $data = $this->prepareData();
+        try {
+            $data = $this->prepareData();
 
-        if ($this->transaction_type == self::TYPE_ADD) {
-            StockHandler::add($data);
-        } else if ($this->transaction_type == self::TYPE_TRANSFER) {
-            StockHandler::transfer($data);
-        } else {
-            StockHandler::substract($data);
+            if ($this->transaction_type == self::TYPE_ADD) {
+                StockHandler::add($data);
+            } else if ($this->transaction_type == self::TYPE_TRANSFER) {
+                StockHandler::transfer($data);
+            } else {
+                StockHandler::substract($data);
+            }
+
+            // Flag Processed
+            $this->status = self::STATUS_DONE_PROCESSED;
+            $this->status_message = null;
+            $this->save();
+        } catch (\Exception $e) {
+            throw new \Exception($this->remarks->transactionInfo() . " | " . $e->getMessage());
         }
-
-        // Flag Processed
-        $this->status = self::STATUS_DONE_PROCESSED;
-        $this->save();
     }
 
     public function cancel()
@@ -114,5 +119,10 @@ class TransactionStock extends Model
     public function products()
     {
         return $this->hasMany(TransactionStockProduct::class, 'transaction_stock_id', 'id');
+    }
+
+    public function remarks()
+    {
+        return $this->belongsTo($this->remarks_type, 'remarks_id', 'id');
     }
 }

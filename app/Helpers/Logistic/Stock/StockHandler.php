@@ -3,6 +3,7 @@
 namespace App\Helpers\Logistic\Stock;
 
 use App\Helpers\General\ErrorMessageHelper;
+use App\Helpers\General\NumberFormatter;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
@@ -117,13 +118,14 @@ class StockHandler
                 }
             }
 
+            // HANDLE: NOT ENOUGH STOCK
             if ($substractQty > 0) {
-                throw new \Exception(ErrorMessageHelper::stockNotAvailable(
-                    productName: $item['product_name'],
-                    unitName: $resultConvert['unit_detail_name'],
-                    stock: $resultConvert['quantity'] - $substractQty,
-                    quantity: $item['quantity']
-                ));
+                $productName = $item['product_name'];
+                $unitName = $resultConvert['unit_detail_name'];
+                $strStock = NumberFormatter::format($resultConvert['quantity'] - $substractQty);
+                $strQty = NumberFormatter::format($resultConvert['quantity']);
+                
+                throw new \Exception("Stock {$productName} Tidak Mencukupi. Tersedia {$strStock} {$unitName} dan yang dibutuhkan {$strQty} {$unitName}.");
             }
         }
 
@@ -163,8 +165,6 @@ class StockHandler
         if (count($data) == 0) {
             return;
         }
-
-        Log::debug("CANCEL | " . json_encode($data));
 
         foreach ($data as $item) {
             $whereClause = [

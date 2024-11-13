@@ -13,9 +13,13 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         return ProductDetailHistory::class;
     }
 
-    public static function datatable($remarksIds = [], $remarksType = null)
+    public static function datatableByRemarks($remarks)
     {
-        $query = ProductDetailHistory::select(
+        if (count($remarks) == 0) {
+            return ProductDetailHistory::where('id', 0);
+        }
+
+        return ProductDetailHistory::select(
             'product_detail_histories.id',
             'product_detail_histories.product_detail_id',
             'product_detail_histories.transaction_date',
@@ -50,14 +54,16 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             ->join('unit_details', function ($join) {
                 $join->on('units.id', '=', 'unit_details.unit_id')->where('is_main', 1);
             })
-            ->when(count($remarksIds) > 0, function ($query) use ($remarksIds) {
-                $query->whereIn("product_detail_histories.remarks_id", $remarksIds);
-            })
-            ->when($remarksType, function ($query) use ($remarksType) {
-                $query->where('product_detail_histories.remarks_type', $remarksType);
+            ->when(count($remarks) > 0, function ($query) use ($remarks) {
+                $query->where(function ($query) use ($remarks) {
+                    foreach ($remarks as $remark) {
+                        $query->orWhere(function ($query) use ($remark) {
+                            $query->where('product_detail_histories.remarks_id', $remark['id'])
+                                ->where('product_detail_histories.remarks_type', $remark['type']);
+                        });
+                    }
+                });
             });
-
-        return $query;
     }
 
     public static function findLastHistory(

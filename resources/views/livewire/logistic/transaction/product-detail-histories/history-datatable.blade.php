@@ -9,10 +9,22 @@
         <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
             data-bs-parent="#accordionExample" wire:ignore.self>
             <div class="accordion-body" wire:ignore.self>
-                <button class="btn btn-info mb-4" wire:click="$refresh">
-                    <i class='ki-solid ki-arrows-circle'></i>
-                    Refresh
-                </button>
+                <div class='row'>
+                    <div class='col-md-auto mb-4'>
+                        <button class="btn btn-info" wire:click="refreshRemarks">
+                            <i class='ki-solid ki-arrows-circle'></i>
+                            Refresh
+                        </button>
+                    </div>
+                    @if ($statusMessage)
+                        <div class='col-md mb-4'>
+                            <div class='alert alert-danger'>
+                                <div class='fw-bold'>TRANSAKSI TIDAK BERHASIL</div>
+                                {{ $statusMessage }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
 
                 @include('livewire.livewire-datatable')
             </div>

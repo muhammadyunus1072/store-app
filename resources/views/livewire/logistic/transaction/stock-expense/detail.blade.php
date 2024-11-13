@@ -72,7 +72,7 @@
 
         <table class='table gy-1 gx-2'>
             @foreach ($stockExpenseProducts as $index => $item)
-                <tr class="{{ $item['is_stock_available'] ? 'table-success' : 'table-danger' }}">
+                <tr class="{{ $item['row_color_class'] }}">
                     {{-- ACTION --}}
                     <td style="width: 2%" class='align-bottom'>
                         @if (!$isShow)
@@ -122,16 +122,18 @@
                     </td>
 
                     {{-- CURRENT STOCK --}}
-                    <td style="width: 25%">
-                        <label class='fw-bold'>Stok Sekarang</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control"
-                                wire:model="stockExpenseProducts.{{ $index }}.current_stock" disabled />
-                            <input type="text" class="form-control"
-                                wire:model="stockExpenseProducts.{{ $index }}.current_stock_unit_name"
-                                disabled />
-                        </div>
-                    </td>
+                    @if (!$isShow)
+                        <td style="width: 25%">
+                            <label class='fw-bold'>Stok Sekarang</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control"
+                                    wire:model="stockExpenseProducts.{{ $index }}.current_stock" disabled />
+                                <input type="text" class="form-control"
+                                    wire:model="stockExpenseProducts.{{ $index }}.current_stock_unit_name"
+                                    disabled />
+                            </div>
+                        </td>
+                    @endif
                 </tr>
 
                 {{-- LINE SEPARATOR --}}
@@ -148,11 +150,6 @@
             </button>
         @endif
     </form>
-
-    {{-- HISTORY DATATABLE --}}
-    @if ($objId)
-        <livewire:logistic.transaction.product-detail-history.history-datatable :remarksIds="$historyRemarksIds" :remarksType="$historyRemarksType" />
-    @endif
 </div>
 
 @push('css')

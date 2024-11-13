@@ -49,8 +49,12 @@ class Detail extends Component
     public $destinationCompanies = [];
     public $destinationWarehouses = [];
 
-    public $historyRemarksIds = []; // History Datatable
-    public $historyRemarksType = StockRequestProduct::class; // History Datatable
+    // Edit Validity Purposes
+    public $oldSourceCompanyId;
+    public $oldSourceWarehouseId;
+    public $oldDestinationCompanyId;
+    public $oldDestinationWarehouseId;
+    public $oldTransactionDate;
 
     public function render()
     {
@@ -81,6 +85,12 @@ class Detail extends Component
             $this->sourceWarehouseId = Crypt::encrypt($stockRequest->source_warehouse_id);
             $this->sourceWarehouseText = $stockRequest->source_warehouse_name;
 
+            $this->oldSourceCompanyId = $this->sourceCompanyId;
+            $this->oldSourceWarehouseId = $this->sourceWarehouseId;
+            $this->oldDestinationCompanyId = $this->destinationCompanyId;
+            $this->oldDestinationWarehouseId = $this->destinationWarehouseId;
+            $this->oldTransactionDate = $this->transactionDate;
+
             foreach ($stockRequest->stockRequestProducts as $stockRequestProduct) {
                 $unitDetailChoice = UnitDetailRepository::getOptions($stockRequestProduct->unit_detail_unit_id);
                 $unitDetailId = collect($unitDetailChoice)->filter(function ($obj) use ($stockRequestProduct) {
@@ -102,9 +112,6 @@ class Detail extends Component
                     "old_destination_company_id" => $this->destinationCompanyId,
                     "old_destination_warehouse_id" => $this->destinationWarehouseId,
                 ];
-
-                // History Datatable
-                $this->historyRemarksIds[] = $stockRequestProduct->id;
             }
 
             $this->refreshStock();
@@ -289,10 +296,6 @@ class Detail extends Component
 
             // Validity Purposes
             "old_quantity" => 0,
-            "old_source_company_id" => null,
-            "old_source_warehouse_id" => null,
-            "old_destination_company_id" => null,
-            "old_destination_warehouse_id" => null,
         ];
 
         $this->refreshStock(count($this->stockRequestProducts) - 1);
@@ -317,7 +320,19 @@ class Detail extends Component
         }
 
         foreach ($items as $index => $item) {
-            if ($item['old_source_company_id'] == $this->sourceCompanyId && $item['old_source_warehouse_id'] == $this->sourceWarehouseId) {
+            if ($this->isShow) {
+                $this->stockRequestProducts[$index]['current_stock'] = 0;
+                $this->stockRequestProducts[$index]['current_stock_unit_name'] = 0;
+                $this->stockRequestProducts[$index]['is_stock_available'] = 0;
+                $this->stockRequestProducts[$index]['row_color_class'] = "";
+                continue;
+            }
+
+            if (
+                $this->oldSourceCompanyId == $this->sourceCompanyId
+                && $this->oldSourceWarehouseId == $this->sourceWarehouseId
+                && $this->oldTransactionDate == $this->transactionDate
+            ) {
                 // Check By Quantity Change
                 $qtyToBeUsed = NumberFormatter::imaskToValue($item['quantity']) - $item['old_quantity'];
             } else {
@@ -337,6 +352,7 @@ class Detail extends Component
             $this->stockRequestProducts[$index]['current_stock'] = $stockAvailablity['current_stock'];
             $this->stockRequestProducts[$index]['current_stock_unit_name'] = $stockAvailablity['unit_detail_name'];
             $this->stockRequestProducts[$index]['is_stock_available'] = $stockAvailablity['is_stock_available'];
+            $this->stockRequestProducts[$index]['row_color_class'] = $qtyToBeUsed == 0 ? '' : ($stockAvailablity['is_stock_available'] ? 'table-success' : 'table-danger');
         }
     }
 }

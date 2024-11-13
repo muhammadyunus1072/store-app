@@ -65,9 +65,6 @@ class Detail extends Component
     public $companies = [];
     public $warehouses = [];
 
-    public $historyRemarksIds = []; // History Datatable
-    public $historyRemarksType = PurchaseOrderProduct::class; // History Datatable
-
     public function render()
     {
         return view('livewire.purchasing.transaction.purchase-order.detail');
@@ -151,9 +148,6 @@ class Detail extends Component
                     $this->taxPpnName = $purchaseOrderProduct->ppn->tax_name;
                     $this->taxPpnValue = $purchaseOrderProduct->ppn->tax_value;
                 }
-
-                // History Datatable
-                $this->historyRemarksIds[] = $purchaseOrderProduct->id;
             }
         }
     }

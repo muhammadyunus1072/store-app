@@ -8,7 +8,7 @@ class HistoryStockDetailRepository
 {
     public static function datatable($search, $date_start, $date_end, $products, $category_products)
     {
-        $query = ProductDetailHistory::select(
+        return ProductDetailHistory::select(
             'product_detail_histories.id',
             'product_detail_histories.remarks_id',
             'product_detail_histories.remarks_type',
@@ -60,7 +60,5 @@ class HistoryStockDetailRepository
                     $query->whereIn('category_product_id', $category_products);
                 });
             });
-
-        return $query;
     }
 }

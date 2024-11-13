@@ -5,6 +5,7 @@ namespace App\Traits\Logistic;
 use App\Jobs\Logistic\TransactionStock\CreateUpdateTransactionStockJob;
 use App\Jobs\Logistic\TransactionStock\DeleteTransactionStockJob;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
+use Carbon\Carbon;
 
 trait HasTransactionStock
 {
@@ -33,6 +34,11 @@ trait HasTransactionStock
             remarksId: $this->id,
             remarksType: self::class
         );
+    }
+
+    public function transactionInfo()
+    {
+        return $this->number . " / " . Carbon::parse($this->transaction_date)->format('Y-m-d');
     }
 
     /*

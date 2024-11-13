@@ -47,9 +47,6 @@ class ProcessTransactionStockJob implements ShouldQueue, ShouldBeUnique
                 // Cancel Newer Transactions
                 $transactions = TransactionStockRepository::getNewerTransactions($oldestTransaction);
                 foreach ($transactions as $newerTransaction) {
-                    if ($newerTransaction->transaction_type == TransactionStock::TYPE_ADD) {
-                        continue;
-                    }
                     $newerTransaction->cancel();
                 }
 
@@ -69,6 +66,9 @@ class ProcessTransactionStockJob implements ShouldQueue, ShouldBeUnique
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("ERROR PROCESS TRANSACTION JOB : " . $e->getMessage());
+
+            $oldestTransaction->status_message = $e->getMessage();
+            $oldestTransaction->save();
         }
     }
 

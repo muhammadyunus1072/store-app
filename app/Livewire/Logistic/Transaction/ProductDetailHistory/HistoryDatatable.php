@@ -5,17 +5,21 @@ namespace App\Livewire\Logistic\Transaction\ProductDetailHistory;
 use App\Helpers\General\NumberFormatter;
 use Livewire\Component;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
+use App\Repositories\Logistic\Transaction\TransactionStock\TransactionStockRepository;
 use App\Settings\SettingCore;
 use App\Settings\SettingLogistic;
 use App\Traits\Livewire\WithDatatable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
 
 class HistoryDatatable extends Component
 {
     use WithDatatable;
 
-    public $remarksIds = [];
-    public $remarksType;
+    public $transactionStockRemarksId;
+    public $transactionStockRemarksType;
+    public $statusMessage;
+    public $remarks = [];
 
     // Helper
     public $isMultipleCompany;
@@ -27,6 +31,30 @@ class HistoryDatatable extends Component
     public function mount()
     {
         $this->loadSetting();
+        $this->refreshRemarks();
+    }
+
+    public function refreshRemarks()
+    {
+        $this->remarks = [];
+
+        $transactionStock = TransactionStockRepository::findBy(
+            whereClause: [
+                ['remarks_id', Crypt::decrypt($this->transactionStockRemarksId)],
+                ['remarks_type', $this->transactionStockRemarksType],
+            ]
+        );
+
+        if ($transactionStock) {
+            foreach ($transactionStock->products as $product) {
+                $this->remarks[] = [
+                    'id' => $product->remarks_id,
+                    'type' => $product->remarks_type,
+                ];
+            }
+
+            $this->statusMessage = $transactionStock->status_message;
+        }
     }
 
     public function loadSetting()
@@ -168,10 +196,7 @@ class HistoryDatatable extends Component
 
     public function getQuery()
     {
-        return ProductDetailHistoryRepository::datatable(
-            $this->remarksIds,
-            $this->remarksType
-        );
+        return ProductDetailHistoryRepository::datatableByRemarks($this->remarks);
     }
 
     public function getView(): string

@@ -29,7 +29,7 @@ class Datatable extends Component
     public $isInputProductCode;
     public $isInputProductExpiredDate;
     public $isInputProductBatch;
-    
+
     public function onMount()
     {
         $this->date_start = Carbon::now()->startOfMonth()->format('Y-m-d');
@@ -49,17 +49,14 @@ class Datatable extends Component
     {
         $fileName = 'Data Kartu Stok Detail ' . Carbon::parse($this->date_start)->format('Y-m-d') . ' sd ' . Carbon::parse($this->date_end)->format('Y-m-d');
         $colspan = 0;
-        if($this->isInputProductCode)
-        {
-            $colspan ++;
+        if ($this->isInputProductCode) {
+            $colspan++;
         }
-        if($this->isInputProductExpiredDate)
-        {
-            $colspan ++;
+        if ($this->isInputProductExpiredDate) {
+            $colspan++;
         }
-        if($this->isInputProductBatch)
-        {
-            $colspan ++;
+        if ($this->isInputProductBatch) {
+            $colspan++;
         }
         $data = $this->datatableGetProcessedQuery()->get();
 
@@ -93,7 +90,7 @@ class Datatable extends Component
             ]
         );
     }
-    
+
     public function getColumns(): array
     {
         $columns = [
@@ -109,15 +106,13 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Harga',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->price);
                 }
             ],
         ];
 
-        if($this->isInputProductCode)
-        {
+        if ($this->isInputProductCode) {
             $columns[] =
                 [
                     'sortable' => false,
@@ -128,8 +123,7 @@ class Datatable extends Component
                     }
                 ];
         }
-        if($this->isInputProductBatch)
-        {
+        if ($this->isInputProductBatch) {
             $columns[] =
                 [
                     'sortable' => false,
@@ -140,8 +134,7 @@ class Datatable extends Component
                     }
                 ];
         }
-        if($this->isInputProductExpiredDate)
-        {
+        if ($this->isInputProductExpiredDate) {
             $columns[] =
                 [
                     'sortable' => false,
@@ -152,8 +145,9 @@ class Datatable extends Component
                     }
                 ];
         }
+
         array_push(
-            $columns,    
+            $columns,
             [
                 'key' => 'unit_detail_name',
                 'name' => 'Satuan',
@@ -166,8 +160,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format(abs($item->quantity));
                 }
             ],
@@ -179,8 +172,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Awal',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->start_stock * $item->price);
                 }
             ],
@@ -188,8 +180,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format(abs($item->quantity * $item->price));
                 }
             ],
@@ -197,8 +188,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Akhir',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->last_stock * $item->price);
                 }
             ],
@@ -206,21 +196,20 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Keterangan',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     $authUser = UserRepository::authenticatedUser();
                     $url = route($item->remarksTable->remarksTableInfo()['route_name'], Crypt::encrypt($item->remarksMasterTable->id));
-                    $button = $authUser->hasPermissionTo($item->remarksTable->remarksTableInfo()['access_name']) ? 
-                    " <a class='btn btn-primary btn-sm' href='$url' target='_BLANK'>
+                    $button = $authUser->hasPermissionTo($item->remarksTable->remarksTableInfo()['access_name']) ?
+                        " <a class='btn btn-primary btn-sm' href='$url' target='_BLANK'>
                                 <i class='ki-duotone ki-notepad-edit fs-1'>
                                     <span class='path1'></span>
                                     <span class='path2'></span>
                                 </i>
                                 Lihat
                             </a>" :
-                    NULL;
+                        NULL;
 
-                    return $item->remarksTable->remarksTableInfo()['translated_name']." ".$item->remarksMasterTable->number." ".$button;
+                    return $item->remarksTable->remarksTableInfo()['translated_name'] . " " . $item->remarksMasterTable->number . " " . $button;
                 }
             ],
         );
