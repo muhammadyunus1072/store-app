@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Document\Master\statusApproval;
+namespace App\Livewire\Document\Master\StatusApproval;
 
 use Exception;
 use App\Helpers\General\Alert;

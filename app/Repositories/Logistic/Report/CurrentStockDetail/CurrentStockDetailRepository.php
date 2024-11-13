@@ -3,12 +3,9 @@
 namespace App\Repositories\Logistic\Report\CurrentStockDetail;
 
 use Illuminate\Support\Facades\DB;
-use App\Repositories\MasterDataRepository;
-use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
-use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrder;
 use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 
 class CurrentStockDetailRepository
