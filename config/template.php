@@ -80,7 +80,7 @@ return [
         ],
         [
             // 'id' => 'menu_admin'
-            'text' => 'Laporan',
+            'text' => 'Laporan Keseluruhan',
             'icon' => 'ki-duotone ki-chart-simple',
             'submenu' => [
                 [
@@ -94,16 +94,6 @@ return [
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
-                    'text' => 'Stok Akhir Gudang',
-                    'route'  => 'current_stock_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Stok Akhir Detail Gudang',
-                    'route'  => 'current_stock_detail_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
                     'text' => 'Kartu Stok',
                     'route'  => 'history_stock.index',
                     'icon' => 'ki-duotone ki-element-11',
@@ -114,18 +104,35 @@ return [
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
-                    'text' => 'Kartu Stok Gudang',
+                    'text' => 'Pengeluaran',
+                    'route'  => 'stock_expense_report.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+            ],
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Laporan Per Gudang',
+            'icon' => 'ki-duotone ki-chart-simple',
+            'submenu' => [
+                [
+                    'text' => 'Stok Akhir',
+                    'route'  => 'current_stock_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Stok Akhir Detail',
+                    'route'  => 'current_stock_detail_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Kartu Stok',
                     'route'  => 'history_stock_warehouse.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
-                    'text' => 'Kartu Stok Detail Gudang',
+                    'text' => 'Kartu Stok Detail',
                     'route'  => 'history_stock_detail_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Pengeluaran',
-                    'route'  => 'stock_expense_report.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [

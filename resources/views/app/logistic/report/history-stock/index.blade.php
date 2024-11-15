@@ -22,7 +22,8 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <livewire:logistic.report.filter dispatchEvent="add-filter" :filterDateStart="true" :filterDateEnd="true" :filterProduct="true">
+            <livewire:logistic.report.filter :showExport="false" dispatchEvent="add-filter" :filterDateStart="true" :filterDateEnd="true"
+                :filterProduct="true">
         </div>
         <div class="card-body">
             <livewire:logistic.report.history-stock.index lazy>

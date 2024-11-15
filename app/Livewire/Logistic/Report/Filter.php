@@ -46,6 +46,7 @@ class Filter extends Component
     public $infoProductBatch;
     public $infoProductAttachment;
     public $isMultipleCompany = false;
+    public $showExport = true;
 
     // Helpers
     public $companies = [];
