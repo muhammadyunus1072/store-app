@@ -14,7 +14,7 @@
             <label class='fw-bold'>Penghubung</label>
             <select class="form-select form-select-sm" wire:key="key_logic_{{ $index }}"
                 wire:model="config.{{ $index }}.logic">
-                @foreach ($config_logic_choice as $configLogicKey => $configLogicValue)
+                @foreach ($configLogicChoice as $configLogicKey => $configLogicValue)
                     <option value="{{ $configLogicKey }}">{{ $configLogicValue }}</option>
                 @endforeach
             </select>
@@ -24,7 +24,7 @@
         <label class='fw-bold'>Tipe</label>
         <select class="form-select form-select-sm" wire:key="key_type_{{ $index }}"
             wire:model.live="config.{{ $index }}.type">
-            @foreach ($config_type_choice as $configTypeKey => $configTypeValue)
+            @foreach ($configTypeChoice as $configTypeKey => $configTypeValue)
                 <option value="{{ $configTypeKey }}">{{ $configTypeValue }}</option>
             @endforeach
         </select>
@@ -46,7 +46,7 @@
             <label class='fw-bold'>Operator</label>
             <select class="form-select form-select-sm" wire:key="key_operator_{{ $index }}"
                 wire:model="config.{{ $index }}.operator">
-                @foreach ($config_operator_choice as $configOperatorKey => $configOperatorValue)
+                @foreach ($configOperatorChoice as $configOperatorKey => $configOperatorValue)
                     <option value="{{ $configOperatorKey }}">{{ $configOperatorValue }}</option>
                 @endforeach
             </select>

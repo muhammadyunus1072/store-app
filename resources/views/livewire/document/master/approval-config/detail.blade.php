@@ -25,9 +25,9 @@
 
         <div class="col-md-4 mb-4 row align-items-end">
             <div class="form-check m-2">
-                <input class="form-check-input" type="checkbox" wire:model="is_sequentially">
+                <input class="form-check-input" type="checkbox" wire:model="isSequentially">
                 <label class="form-label ms-2 mb-2">
-                    Harus Berurutan
+                    Persetujuan Harus Berurutan
                 </label>
             </div>
         </div>
@@ -76,17 +76,31 @@
                     </button>
                 </div>
                 <div class="col-md-4 mb-2">
-                    @if (!$index)
-                        <label class='fw-bold'>Nama</label>
-                    @endif
+                    <label class='fw-bold'>Nama</label>
                     <input class="form-control" value='{{ $approvalConfigUsers[$index]['user_text'] }}' disabled>
                 </div>
                 <div class="col-md-2 mb-2">
-                    @if (!$index)
-                        <label class='fw-bold'>Posisi</label>
-                    @endif
+                    <label class='fw-bold'>Posisi</label>
                     <input type="text" class="form-control currency"
                         wire:model.live="approvalConfigUsers.{{ $index }}.position" min="1" />
+                </div>
+                <div class="col-md-auto mb-2">
+                    <div class="form-check m-2">
+                        <input class="form-check-input" type="checkbox"
+                            wire:model="approvalConfigUsers.{{ $index }}.is_trigger_done">
+                        <label class="form-label ms-2 mb-2">
+                            Persetujuan Selesai
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-auto mb-2">
+                    <div class="form-check m-2">
+                        <input class="form-check-input" type="checkbox"
+                            wire:model="approvalConfigUsers.{{ $index }}.is_can_cancel">
+                        <label class="form-label ms-2 mb-2">
+                            Dapat Membatalkan
+                        </label>
+                    </div>
                 </div>
             </div>
         @endforeach
@@ -152,10 +166,11 @@
 
             $('#select2-user').on('select2:select', function(e) {
                 var selectedOption = e.params.data;
-                @this.call('selectUser', {
-                    selectedOption
-                })
-                $('#select2-user').val('').trigger('change')
+
+                if (selectedOption) {
+                    @this.call('addApprover', selectedOption);
+                    $('#select2-user').val('').trigger('change');
+                }
             });
         }
     </script>

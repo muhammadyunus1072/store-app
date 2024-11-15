@@ -13,7 +13,9 @@ class StatusApproval extends Model
     use HasFactory, SoftDeletes, HasTrackHistory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'is_trigger_done',
+        'is_trigger_cancel',
     ];
 
     protected $guarded = ['id'];
@@ -31,8 +33,8 @@ class StatusApproval extends Model
     /*
     | RELATIONSHIP
     */
-    public function approvalUsers()
+    public function approvalConfigUserStatusApprovals()
     {
-        return $this->belongsTo(ApprovalUser::class, 'status_approval_id', 'id');
+        return $this->hasMany(ApprovalConfigUserStatusApproval::class, 'status_approval_id', 'id');
     }
 }

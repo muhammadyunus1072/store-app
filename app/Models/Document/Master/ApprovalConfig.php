@@ -7,7 +7,6 @@ use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Master\ApprovalConfigUser;
-use App\Models\Document\Transaction\Approval;
 use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigRepository;
 use App\Repositories\Document\Transaction\ApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalUserRepository;

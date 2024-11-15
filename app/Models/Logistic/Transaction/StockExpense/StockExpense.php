@@ -70,8 +70,9 @@ class StockExpense extends Model
 
     public function onCreated()
     {
-        if (SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE)) {
+        if (empty(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE))) {
             $this->transactionStockProcess();
+            return;
         }
 
         $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE), $this);
@@ -124,7 +125,8 @@ class StockExpense extends Model
     /*
     | APPROVAL
     */
-    public function approvalViewShow() {
+    public function approvalViewShow()
+    {
         return [
             'component' => 'logistic.master.product.datatable',
             'data' => [],

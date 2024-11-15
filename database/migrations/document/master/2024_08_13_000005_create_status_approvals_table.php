@@ -37,6 +37,8 @@ return new class extends Migration
         }
 
         $table->string('name')->nullable();
+        $table->boolean('is_trigger_done')->default(false)->comment('Menyebabkan Selesainya Persetujuan');
+        $table->boolean('is_trigger_cancel')->default(false)->comment('Menyebabkan Batalnya Persetujuan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();
