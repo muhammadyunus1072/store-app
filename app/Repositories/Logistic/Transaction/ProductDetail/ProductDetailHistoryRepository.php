@@ -71,7 +71,7 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         $thresholdDate,
     ) {
         return ProductDetailHistory::where('product_detail_id', $productDetailId)
-            ->where('transaction_date', '<=', $thresholdDate)
+            ->where('transaction_date', '<=', "$thresholdDate 23:59:59")
             ->orderBy('transaction_date', 'DESC')
             ->orderBy('id', 'DESC')
             ->first();
@@ -79,29 +79,102 @@ class ProductDetailHistoryRepository extends MasterDataRepository
 
     public static function getLastHistories(
         $productId,
-        $companyId,
-        $warehouseId,
         $thresholdDate,
+        $companyId = null,
+        $warehouseId = null,
     ) {
         $queryStockRowNumber = ProductDetailHistory::select(
             'product_detail_id',
             'last_stock',
             DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_id ORDER BY id DESC) as rn'),
         )
+            ->where('transaction_date', '<=', "$thresholdDate 23:59:59")
             ->whereHas('productDetail', function ($query) use ($productId, $companyId, $warehouseId) {
                 $query->where('product_id', $productId)
-                    ->where('company_id', $companyId)
-                    ->where('warehouse_id', $warehouseId);
-            })
-            ->where('transaction_date', '<=', $thresholdDate);
+                    ->when($companyId != null, function ($query) use ($companyId) {
+                        $query->where('company_id', $companyId);
+                    })
+                    ->when($warehouseId != null, function ($query) use ($warehouseId) {
+                        $query->where('warehouse_id', $warehouseId);
+                    });
+            });
 
         return DB::table($queryStockRowNumber, "histories")
             ->select(
                 'product_detail_id',
                 'last_stock',
             )
-            ->where('last_stock', '>', 0)
             ->where('rn', '=', 1)
             ->get();
+    }
+
+    public static function queryLastStock($thresholdDate, $groupBy, $whereClause = [])
+    {
+        // Query Row Number
+        $query = ProductDetailHistory::select(
+            'product_detail_histories.last_stock',
+            'product_details.price',
+            DB::raw('ROW_NUMBER() OVER (PARTITION BY product_detail_id ORDER BY product_detail_histories.transaction_date DESC, product_detail_histories.id DESC) as rn')
+        )
+            ->join('product_details', function ($join) {
+                $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id')
+                    ->whereNull('product_details.deleted_at');
+            })
+            ->where('transaction_date', '<=', "$thresholdDate 23:59:59");
+
+        foreach ($whereClause as $col) {
+            $query->where($col[0], $col[1], $col[2]);
+        }
+
+        foreach ($groupBy as $column) {
+            if ($column == 'price' || $column == 'last_stock') {
+                continue;
+            }
+
+            $query->addSelect($column);
+        }
+
+        // Query Last Row Number
+        $query = DB::table($query, "stocks")
+            ->select(
+                DB::raw('SUM(last_stock) as quantity'),
+                DB::raw('SUM(last_stock * price) as value')
+            )
+            ->where('rn', '=', 1);
+
+        foreach ($groupBy as $column) {
+            $query->addSelect($column)->groupBy($column);
+        }
+
+        return $query;
+    }
+
+    public static function querySumTransactions($dateStart, $dateEnd, $remarksTypes, $groupBy, $whereClause = [])
+    {
+        $query = ProductDetailHistory::whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"]);
+
+        // Handle Where Clause
+        foreach ($whereClause as $col) {
+            $query->where($col[0], $col[1], $col[2]);
+        }
+
+        // Handle Remarks Type
+        foreach ($remarksTypes as $key => $columns) {
+            $filter = "";
+            foreach ($columns as $col) {
+                $filter .= "{$col[0]} {$col[1]} '{$col[2]}'";
+            }
+
+            $query->addSelect(
+                DB::raw("SUM(quantity) FILTER (WHERE $filter) AS quantity_$key")
+            );
+        }
+
+        // Handle Group By
+        foreach ($groupBy as $column) {
+            $query->addSelect($column)->groupBy($column);
+        }
+
+        return $query;
     }
 }

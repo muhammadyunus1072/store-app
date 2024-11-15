@@ -13,6 +13,7 @@ use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Traits\Logistic\HasProductDetailHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockRequest\StockRequest;
+use Illuminate\Support\Facades\Crypt;
 
 class StockRequestProduct extends Model
 {
@@ -24,8 +25,6 @@ class StockRequestProduct extends Model
         'unit_detail_id',
         'quantity',
     ];
-
-    const TRANSLATE_NAME = 'Permintaan';
 
     protected $guarded = ['id'];
 
@@ -76,20 +75,14 @@ class StockRequestProduct extends Model
     }
 
     /*
-    | PRODUCT DETAIL HISTORY
+    | HAS PRODUCT DETAIL HISTORY
     */
-
-    public function masterTable()
-    {
-        return $this->stockRequest();
-    }
-
-    public function remarksTableInfo(): array
+    public function productDetailHistoryRemarksInfo(): array
     {
         return [
-            "translated_name" => self::TRANSLATE_NAME,
-            "access_name" => PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_READ),
-            "route_name" => "stock_request.edit"
+            "text" => "Permintaan - " . $this->stockRequest->number,
+            "access" => PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_READ),
+            "url" => route("stock_request.show", Crypt::encrypt($this->stock_request_id))
         ];
     }
 

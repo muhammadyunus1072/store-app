@@ -13,6 +13,7 @@ use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Traits\Logistic\HasProductDetailHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockExpense\StockExpense;
+use Illuminate\Support\Facades\Crypt;
 
 class StockExpenseProduct extends Model
 {
@@ -26,8 +27,6 @@ class StockExpenseProduct extends Model
     ];
 
     protected $guarded = ['id'];
-
-    const TRANSLATE_NAME = 'Pengeluaran';
 
     protected static function onBoot()
     {
@@ -77,20 +76,14 @@ class StockExpenseProduct extends Model
     }
 
     /*
-    | PRODUCT DETAIL HISTORY
+    | HAS PRODUCT DETAIL HISTORY
     */
-
-    public function masterTable()
-    {
-        return $this->stockExpense();
-    }
-
-    public function remarksTableInfo(): array
+    public function productDetailHistoryRemarksInfo(): array
     {
         return [
-            "translated_name" => self::TRANSLATE_NAME,
-            "access_name" => PermissionHelper::transform(AccessLogistic::STOCK_EXPENSE, PermissionHelper::TYPE_READ),
-            "route_name" => "stock_expense.edit"
+            "text" => "Pengeluaran - " . $this->stockExpense->number,
+            "access" => PermissionHelper::transform(AccessLogistic::STOCK_EXPENSE, PermissionHelper::TYPE_READ),
+            "url" => route("stock_expense.show", Crypt::encrypt($this->stock_expense_id))
         ];
     }
 

@@ -71,7 +71,7 @@
                 @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>@dateTime($item->transaction_date)</td>
+                    <td>@date($item->transaction_date)</td>
                     <td>{{ $item->number }}</td>
                     <td>{{ $item->supplier_name }}</td>
                     <td>{{ $isNumberFormat ? number_format($item->value, 0, '.', '.') : $item->value }}</td>

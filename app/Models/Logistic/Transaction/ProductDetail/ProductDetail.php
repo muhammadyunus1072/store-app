@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Logistic\Transaction\ProductStock\ProductStockDetail;
-use App\Models\Logistic\Transaction\ProductStock\ProductStockWarehouse;
 
 class ProductDetail extends Model
 {
@@ -67,16 +65,5 @@ class ProductDetail extends Model
     public function attachments()
     {
         return $this->hasMany(ProductDetailAttachment::class, 'product_detail_id', 'id');
-    }
-
-    public function productStockDetail()
-    {
-        return $this->hasOne(ProductStockDetail::class, 'product_detail_id');
-    }
-
-    public function productStockWarehouse()
-    {
-        return $this->hasOne(ProductStockWarehouse::class, 'product_id', 'product_id')
-            ->where('warehouse_id', $this->warehouse_id);
     }
 }

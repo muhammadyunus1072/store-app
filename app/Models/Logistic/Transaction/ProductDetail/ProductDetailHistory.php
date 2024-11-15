@@ -3,9 +3,9 @@
 namespace App\Models\Logistic\Transaction\ProductDetail;
 
 use Sis\TrackHistory\HasTrackHistory;
-use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetail;
+use App\Repositories\Core\User\UserRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,18 +55,31 @@ class ProductDetailHistory extends Model
         });
     }
 
+    public function remarksUrlButton()
+    {
+        if (empty($this->remarks)) {
+            return "";
+        }
+
+        $authUser = UserRepository::authenticatedUser();
+        $remarksInfo = $this->remarks->productDetailHistoryRemarksInfo();
+
+        if (!$authUser->hasPermissionTo($remarksInfo['access'])) {
+            return "";
+        }
+
+        return "<a target='_blank' class='btn btn-info btn-sm' href='{$remarksInfo['url']}'>
+            <i class='ki-solid ki-eye fs-1'></i>
+            {$remarksInfo['text']}
+        </a>";
+    }
+
     /*
     | RELATIONSHIP
     */
-
-    public function remarksTable()
+    public function remarks()
     {
         return $this->belongsTo($this->remarks_type, 'remarks_id', 'id');
-    }
-
-    public function remarksMasterTable()
-    {
-        return $this->remarksTable->masterTable();
     }
 
     public function product()

@@ -124,7 +124,7 @@ class StockHandler
                 $unitName = $resultConvert['unit_detail_name'];
                 $strStock = NumberFormatter::format($resultConvert['quantity'] - $substractQty);
                 $strQty = NumberFormatter::format($resultConvert['quantity']);
-                
+
                 throw new \Exception("Stock {$productName} Tidak Mencukupi. Tersedia {$strStock} {$unitName} dan yang dibutuhkan {$strQty} {$unitName}.");
             }
         }
@@ -215,7 +215,7 @@ class StockHandler
             return $productDetails->sum('last_stock');
         } else {
             // Last Stock Based On Date (Source : Product Detail Histories)
-            $histories = ProductDetailHistoryRepository::getLastHistories($productId, $companyId, $warehouseId, $transactionDate);
+            $histories = ProductDetailHistoryRepository::getLastHistories($productId, $transactionDate, $companyId, $warehouseId);
             return $histories->sum('last_stock');
         }
     }

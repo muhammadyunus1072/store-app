@@ -41,13 +41,13 @@
                 <td colspan="3" style="font-weight: bold;">
                     Produk :
                     @foreach ($request['products'] as $index => $product)
-                     {{ $index ? ", ".$product : $product }}
+                        {{ $index ? ', ' . $product : $product }}
                     @endforeach
                 </td>
                 <td colspan="3" style="font-weight: bold;">
                     Kategori Produk :
                     @foreach ($request['category_products'] as $index => $category_product)
-                     {{ $index ? ", ".$category_product : $category_product }}
+                        {{ $index ? ', ' . $category_product : $category_product }}
                     @endforeach
                 </td>
                 <td colspan="5" style="font-weight: bold;">
@@ -103,14 +103,21 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $item->name }}</td>
                     <td>{{ $item->unit_detail_name }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->last_stock - $item->expense_quantity - $item->purchase_quantity, 0, '.', '.') : $item->last_stock - $item->expense_quantity - $item->purchase_quantity }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->purchase_quantity, 0, '.', '.') : $item->purchase_quantity }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->expense_quantity * -1, 0, '.', '.') : $item->expense_quantity * -1 }}</td>
+                    <td>{{ $isNumberFormat ? number_format($item->last_stock - $item->expense_quantity - $item->purchase_quantity, 0, '.', '.') : $item->last_stock - $item->expense_quantity - $item->purchase_quantity }}
+                    </td>
+                    <td>{{ $isNumberFormat ? number_format($item->purchase_quantity, 0, '.', '.') : $item->purchase_quantity }}
+                    </td>
+                    <td>{{ $isNumberFormat ? number_format($item->expense_quantity * -1, 0, '.', '.') : $item->expense_quantity * -1 }}
+                    </td>
                     <td>{{ $isNumberFormat ? number_format($item->last_stock, 0, '.', '.') : $item->last_stock }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->last_stock_value - $item->expense_value - $item->purchase_value, 0, '.', '.') : $item->last_stock_value - $item->expense_value - $item->purchase_value }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->purchase_value, 0, '.', '.') : $item->purchase_value }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->expense_value * -1, 0, '.', '.') : $item->expense_value * -1 }}</td>
-                    <td>{{ $isNumberFormat ? number_format($item->last_stock_value, 0, '.', '.') : $item->last_stock_value }}</td>
+                    <td>{{ $isNumberFormat ? number_format($item->last_stock_value - $item->expense_value - $item->purchase_value, 0, '.', '.') : $item->last_stock_value - $item->expense_value - $item->purchase_value }}
+                    </td>
+                    <td>{{ $isNumberFormat ? number_format($item->purchase_value, 0, '.', '.') : $item->purchase_value }}
+                    </td>
+                    <td>{{ $isNumberFormat ? number_format($item->expense_value * -1, 0, '.', '.') : $item->expense_value * -1 }}
+                    </td>
+                    <td>{{ $isNumberFormat ? number_format($item->last_stock_value, 0, '.', '.') : $item->last_stock_value }}
+                    </td>
                 </tr>
             @endforeach
             <thead>
@@ -118,11 +125,13 @@
                     <th colspan="3">Total</th>
                     <th>{{ $isNumberFormat ? number_format($first_stock, 0, '.', '.') : $first_stock }}</th>
                     <th>{{ $isNumberFormat ? number_format($purchase_stock, 0, '.', '.') : $purchase_stock }}</th>
-                    <th>{{ $isNumberFormat ? number_format($expense_stock * -1, 0, '.', '.') : $expense_stock * -1 }}</th>
+                    <th>{{ $isNumberFormat ? number_format($expense_stock * -1, 0, '.', '.') : $expense_stock * -1 }}
+                    </th>
                     <th>{{ $isNumberFormat ? number_format($last_stock, 0, '.', '.') : $last_stock }}</th>
                     <th>{{ $isNumberFormat ? number_format($first_value, 0, '.', '.') : $first_value }}</th>
                     <th>{{ $isNumberFormat ? number_format($purchase_value, 0, '.', '.') : $purchase_value }}</th>
-                    <th>{{ $isNumberFormat ? number_format($expense_value * -1, 0, '.', '.') : $expense_value * -1 }}</th>
+                    <th>{{ $isNumberFormat ? number_format($expense_value * -1, 0, '.', '.') : $expense_value * -1 }}
+                    </th>
                     <th>{{ $isNumberFormat ? number_format($last_stock_value, 0, '.', '.') : $last_stock_value }}</th>
                 </tr>
             </thead>
