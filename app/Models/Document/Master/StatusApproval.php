@@ -20,6 +20,14 @@ class StatusApproval extends Model
 
     protected $guarded = ['id'];
 
+    public function saveInfo($object, $prefix = "status_approval")
+    {
+        $object[$prefix . "_is_trigger_done"] = $this->name;
+        $object[$prefix . "_is_trigger_cancel"] = $this->type;
+
+        return $object;
+    }
+
     public function isDeletable()
     {
         return count($this->approvalUsers) == 0;

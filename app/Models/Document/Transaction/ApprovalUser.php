@@ -17,11 +17,7 @@ class ApprovalUser extends Model
     protected $fillable = [
         'approval_id',
         'user_id',
-        'status_approval_id',
         'position',
-        'is_trigger_done',
-        'is_can_cancel',
-
         'approval_config_user_id'
     ];
 
@@ -30,8 +26,8 @@ class ApprovalUser extends Model
     protected static function onBoot()
     {
         self::deleted(function ($model) {
-            foreach ($model->approvalUserHistories as $item) {
-                $item->delete();
+            if ($model->approvalStatus) {
+                $model->approvalStatus->delete();
             }
         });
     }
@@ -44,18 +40,13 @@ class ApprovalUser extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function statusApproval()
-    {
-        return $this->belongsTo(StatusApproval::class, 'status_approval_id', 'id');
-    }
-
     public function approval()
     {
         return $this->belongsTo(Approval::class, 'approval_id', 'id');
     }
 
-    public function approvalUserHistories()
+    public function approvalStatus()
     {
-        return $this->hasMany(ApprovalUserHistory::class, 'approval_user_id', 'id');
+        return $this->hasOne(ApprovalStatus::class, 'approval_user_id', 'id');
     }
 }

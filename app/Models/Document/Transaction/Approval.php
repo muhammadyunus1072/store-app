@@ -39,61 +39,70 @@ class Approval extends Model
             $model->number = NumberGenerator::generate(get_class($model), 'APP');
         });
 
-        self::updating(function ($model) {
-            if (!empty($model->remarks_id) && !empty($model->remarks_type) && !empty($model->remarks)) {
-                if ($model->done_at != $model->getOriginal('done_at')) {
-                    if (empty($model->done_at)) {
-                        $model->remarks->onApprovalRevertDone();
-                    } else {
-                        $model->remarks->onApprovalDone();
-                    }
-                }
-
-                if ($model->cancel_at != $model->getOriginal('cancel_at')) {
-                    if (empty($model->cancel_at)) {
-                        $model->remarks->onApprovalRevertCancel();
-                    } else {
-                        $model->remarks->onApprovalCanceled();
-                    }
-                }
-            }
-        });
-
         self::deleted(function ($model) {
             foreach ($model->approvalUsers as $item) {
+                $item->delete();
+            }
+            foreach ($model->approvalStatuses as $item) {
                 $item->delete();
             }
         });
     }
 
-    public function onApprovalUserHistoryCreated($approvalUserHistory)
+    public function done($approvalStatus)
     {
-        if ($approvalUserHistory->approvalUser->is_trigger_done || $this->isAllApproved()) {
-            ApprovalRepository::update($this->id, [
-                'done_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'done_by' => $approvalUserHistory->approvalUser->user_id,
-            ]);
+        $this->done_at = $approvalStatus->created_at;
+        $this->done_by_id = $approvalStatus->user_id;
+        $this->save();
+
+        if ($this->remarks) {
+            $this->remarks->onApprovalDone();
         }
     }
 
-    public function onApprovalUserHistoryDeleted($approvalUserHistory)
+    public function revertDone()
     {
-        if ($approvalUserHistory->approvalUser->is_trigger_done || !$this->isAllApproved()) {
-            ApprovalRepository::update($this->id, [
-                'done_at' => null,
-                'done_by' => null,
-            ]);
+        $this->done_at = null;
+        $this->done_by_id = null;
+        $this->save();
+
+        if ($this->remarks) {
+            $this->remarks->onApprovalRevertDone();
+        }
+    }
+
+    public function cancel($approvalStatus)
+    {
+        $this->cancel_at = $approvalStatus->created_at;
+        $this->cancel_by_id = $approvalStatus->user_id;
+        $this->cancel_reason = $approvalStatus->note;
+        $this->save();
+
+        if ($this->remarks) {
+            $this->remarks->onApprovalCanceled();
+        }
+    }
+
+    public function revertCancel()
+    {
+        $this->cancel_at = null;
+        $this->cancel_by_id = null;
+        $this->cancel_reason = null;
+        $this->save();
+
+        if ($this->remarks) {
+            $this->remarks->onApprovalRevertCancel();
         }
     }
 
     public function isDeletable()
     {
-        return count($this->approvalUserHistories) == 0;
+        return count($this->approvalStatuses) == 0;
     }
 
     public function isEditable()
     {
-        return count($this->approvalUserHistories) == 0;
+        return count($this->approvalStatuses) == 0;
     }
 
     public function isDone()
@@ -104,16 +113,6 @@ class Approval extends Model
     public function isCanceled()
     {
         return !empty($this->cancel_at);
-    }
-
-    public function is_enabled()
-    {
-        return true;
-    }
-
-    public function isAllApproved()
-    {
-        return $this->approvalUsers()->count() == $this->approvalUserHistories()->count();
     }
 
     /*
@@ -130,9 +129,9 @@ class Approval extends Model
         return $this->hasMany(ApprovalUser::class, 'approval_id', 'id');
     }
 
-    public function approvalUserHistories()
+    public function approvalStatuses()
     {
-        return $this->belongsToMany(ApprovalUserHistory::class, 'approval_users', 'approval_id', 'user_id')->whereNull('approval_users.deleted_at');
+        return $this->hasMany(ApprovalStatus::class, 'approval_id', 'id');
     }
 
     public function remarks()
