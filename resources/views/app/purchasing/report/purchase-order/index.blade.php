@@ -29,6 +29,7 @@
             >
         </div>
         <div class="card-body">
+            <livewire:purchasing.report.purchase-order.datatable-header lazy>
             <livewire:purchasing.report.purchase-order.datatable lazy>
         </div>
     </div>

@@ -36,28 +36,27 @@ class Datatable extends Component
     #[On('export')]
     public function export($type)
     {
-        $fileName = 'Data Pembelian ' . Carbon::parse($this->date_start)->format('Y-m-d') . ' sd ' . Carbon::parse($this->date_end)->format('Y-m-d');
-
-        $data = $this->datatableGetProcessedQuery()->get();
-
-        return ExportHelper::export(
-            $type,
-            $fileName,
-            $data,
-            "app.purchasing.report.purchase-order.export",
-            [
-                'date_start' => $this->date_start,
-                'date_end' => $this->date_end,
-                'supplier' => $this->supplier_id ? SupplierRepository::find(Crypt::decrypt($this->supplier_id))->name : null,
-                'keyword' => $this->search,
-                'type' => $type,
-                'title' => 'Data Pembelian',
-            ],
-            [
-                'size' => 'legal',
-                'orientation' => 'portrait',
-            ]
-        );
+        // dd("OWE");
+        // $data = $this->datatableGetProcessedQuery()->get(); 
+        // $columns = [
+        //     'name' => 'No',
+        //     'render' => function($item, $index)
+        //     {
+        //         dd('OKE');
+        //         // return $index + 1;
+        //     }
+        // ];
+        $this->dispatch('consoleLog', 'WIO');
+        // $this->dispatch('datatable-export-handler'
+        //     // $columns,
+        //     // $type, 
+        //     // [
+        //     //     'date_start' => $this->date_start,
+        //     //     'date_end' => $this->date_end,
+        //     //     'supplier' => $this->supplier_id ? SupplierRepository::find(Crypt::decrypt($this->supplier_id))->name : null,
+        //     //     'keyword' => $this->search,
+        //     // ]
+        // );
     }
     
     public function getColumns(): array
@@ -116,28 +115,9 @@ class Datatable extends Component
         return PurchaseOrderRepository::datatable($this->search, $this->date_start, $this->date_end, $this->supplier_id ? Crypt::decrypt($this->supplier_id) : null);
     }
 
-    private function setHeader()
-    {
-        $data = $this->datatableGetProcessedQuery()->get();
-        $total_qty = $data->count();
-        $total_value = $data->sum('value');
-        $this->header = [
-            [
-                "col" => 3,
-                "name" => "Jumlah Transaksi",
-                "value" => $total_qty
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Nilai",
-                "value" => $total_value
-            ],
-        ];
-    }
-
     public function getView(): string
     {
-        $this->setHeader();
+        $this->dispatch('datatable-header-handler', $this->datatableGetProcessedQuery()->get());
         return 'livewire.purchasing.report.purchase-order.datatable';
     }
 }

@@ -4,15 +4,17 @@ namespace App\Livewire\Logistic\Report\CurrentStock;
 
 use Carbon\Carbon;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use App\Helpers\General\ExportHelper;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
-use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
-use App\Repositories\Logistic\Master\Product\ProductRepository;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Attributes\On;
+use App\Traits\Livewire\WithDatatableHeader;
+use Laravel\SerializableClosure\SerializableClosure;
+use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Report\CurrentStock\CurrentStockRepository;
+use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
 
 class Datatable extends Component
 {
@@ -23,9 +25,6 @@ class Datatable extends Component
     public $products = [];
     public $category_products = [];
 
-    public $header = [];
-    public $show_header = true;
-
     public function onMount()
     {
         $this->date_start = Carbon::now()->startOfMonth()->format('Y-m-d');
@@ -35,34 +34,123 @@ class Datatable extends Component
     #[On('export')]
     public function export($type)
     {
-        $fileName = 'Data Stok Akhir ' . Carbon::parse($this->date_start)->format('Y-m-d') . ' sd ' . Carbon::parse($this->date_end)->format('Y-m-d');
-
-        $data = $this->datatableGetProcessedQuery()->get();
+        $data = $this->datatableGetProcessedQuery()->get(); 
+        $columns = [
+            [
+                'name' => 'No',
+                'render' => function ($item, $index) {
+                    return $index + 1;
+                }
+            ],
+            [
+                'name' => 'Nama Produk',
+                'render' => function ($item)
+                {
+                    return $item['name'];
+                }
+            ],
+            [
+                'name' => 'Satuan',
+                'withFooter' => true,
+                'footer' => 'Total',
+                'footerColspan' => 3,
+                'render' => function ($item)
+                {
+                    return $item['unit_detail_name'];
+                }
+            ],
+            [
+                'name' => 'Stok Awal',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['last_stock'] - $item['expense_quantity'] - $item['purchase_quantity'];
+                }
+            ],
+            [
+                'name' => 'Jumlah Pembelian',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['purchase_quantity'];
+                }
+            ],
+            [
+                'name' => 'Jumlah Pengeluaran',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['expense_quantity'] * -1;
+                }
+            ],
+            [
+                'name' => 'Stok Akhir',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['last_stock'];
+                }
+            ],
+            [
+                'name' => 'Nilai Awal',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['last_stock_value'] - $item['expense_value'] - $item['purchase_value'];
+                }
+            ],
+            [
+                'name' => 'Nilai Pembelian',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['purchase_value'];
+                }
+            ],
+            [
+                'name' => 'Nilai Pengeluaran',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['expense_value'] * -1;
+                }
+            ],
+            [
+                'name' => 'Nilai Akhir',
+                'withFooter' => true,
+                'render' => function ($item)
+                {
+                    return $item['last_stock_value'];
+                }
+            ],
+        ];
 
         $products = collect($this->products)->map(function ($id) {
             return ProductRepository::find($id)->name;
-        });
+        })->toArray();
         $category_products = collect($this->category_products)->map(function ($id) {
             return CategoryProductRepository::find($id)->name;
-        });
-        return ExportHelper::export(
-            $type,
-            $fileName,
+        })->toArray();
+
+        $columns = serialize(collect($columns)->map(function ($column) {
+            if (isset($column['render']) && is_callable($column['render'])) {
+                $column['render'] = new SerializableClosure($column['render']);
+            }
+            return $column;
+        })->toArray());
+        $this->dispatch('datatable-export-handler', 
             $data,
-            "app.logistic.report.current-stock.export",
+            $columns,
+            $type, 
+            'Data Stok Akhir', 
             [
-                'date_start' => $this->date_start,
-                'date_end' => $this->date_end,
-                'products' => $products,
-                'category_products' => $category_products,
-                'keyword' => $this->search,
-                'type' => $type,
-                'title' => 'Data Stok Akhir',
+                'Tanggal Mulai' => $this->date_start,
+                'Tanggal Akhir' => $this->date_end,
+                'Produk' => implode(" , ", $products),
+                'Kategori Produk' => implode(" , ", $category_products),
+                'Kata Kunci' => $this->search,
             ],
-            [
-                'size' => 'legal',
-                'orientation' => 'portrait',
-            ]
+            'Data Stok Akhir ' . Carbon::parse($this->date_start)->format('Y-m-d') . ' sd ' . Carbon::parse($this->date_end)->format('Y-m-d')
         );
     }
     
@@ -70,6 +158,8 @@ class Datatable extends Component
     {
         return [
             [
+                'sortable' => false,
+                'searchable' => false,
                 'key' => 'name',
                 'name' => 'Nama Produk',
             ],
@@ -162,64 +252,9 @@ class Datatable extends Component
         return CurrentStockRepository::datatable($this->search, $this->date_start, $this->date_end, $this->products, $this->category_products);
     }
 
-    private function setHeader()
-    {
-        $data = $this->datatableGetProcessedQuery()->get();
-        $last_stock = $data->sum('last_stock');
-        $purchase_quantity = $data->sum('purchase_quantity');
-        $expense_quantity = $data->sum('expense_quantity');
-        $first_stock = $last_stock - $purchase_quantity - $expense_quantity;
-        $last_stock_value = $data->sum('last_stock_value');
-        $purchase_value = $data->sum('purchase_value');
-        $expense_value = $data->sum('expense_value');
-        $first_stock_value = $last_stock_value - $purchase_value - $expense_value;
-        $this->header = [
-            [
-                "col" => 3,
-                "name" => "Total Stok Awal",
-                "value" => $first_stock
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Jumlah Pembelian",
-                "value" => $purchase_quantity
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Jumlah Pengeluaran",
-                "value" => $expense_quantity * -1
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Stok Akhir",
-                "value" => $last_stock
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Nilai Awal",
-                "value" => $first_stock_value
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Nilai Pembelian",
-                "value" => $purchase_value
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Nilai Pengeluaran",
-                "value" => $expense_value * -1
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Nilai Akhir",
-                "value" => $last_stock_value
-            ],
-        ];
-    }
-
     public function getView(): string
     {
-        $this->setHeader();
+        $this->dispatch('datatable-header-handler', $this->datatableGetProcessedQuery()->get());
         return 'livewire.logistic.report.current-stock.datatable';
     }
 }

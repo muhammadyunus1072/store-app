@@ -256,34 +256,9 @@ class Datatable extends Component
         return PurchaseOrderProductDetailRepository::datatable($this->search, $this->date_start, $this->date_end, $this->products, $this->category_products, $this->supplier_id ? Crypt::decrypt($this->supplier_id) : null);
     }
 
-    private function setHeader()
-    {
-        $data = $this->datatableGetProcessedQuery()->get();
-        $total_purchase_order = collect($data)->unique('purchase_order_id')->count();
-        $total_qty = $data->sum('converted_quantity');
-        $total_value = $data->sum('value');
-        $this->header = [
-            [
-                "col" => 3,
-                "name" => "Jumlah Transaksi",
-                "value" => $total_purchase_order
-            ],
-            [
-                "col" => 3,
-                "name" => "Jumlah Quantity",
-                "value" => $total_qty
-            ],
-            [
-                "col" => 3,
-                "name" => "Total Nilai",
-                "value" => $total_value
-            ],
-        ];
-    }
-
     public function getView(): string
     {
-        $this->setHeader();
+        $this->dispatch('datatable-header-handler', $this->datatableGetProcessedQuery()->get());
         return 'livewire.purchasing.report.purchase-order-product-detail.datatable';
     }
 }

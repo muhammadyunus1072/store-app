@@ -180,22 +180,9 @@ class Datatable extends Component
         return StockExpenseWarehouseRepository::datatable($this->search, $this->date_start, $this->date_end, $this->products, $this->category_products, $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null);
     }
 
-    private function setHeader()
-    {
-        $data = $this->datatableGetProcessedQuery()->get();
-        $total = $data->sum('converted_quantity');
-        $this->header = [
-            [
-                "col" => 3,
-                "name" => "Total Jumlah Pengeluaran",
-                "value" => $total
-            ],
-        ];
-    }
-
     public function getView(): string
     {
-        $this->setHeader();
+        $this->dispatch('datatable-header-handler', $this->datatableGetProcessedQuery()->get());
         return 'livewire.logistic.report.stock-expense-warehouse.datatable';
     }
 }

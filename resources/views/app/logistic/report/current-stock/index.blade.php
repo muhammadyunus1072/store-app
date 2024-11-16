@@ -30,6 +30,8 @@
             >
         </div>
         <div class="card-body">
+            <livewire:logistic.report.current-stock.datatable-export>
+            <livewire:logistic.report.current-stock.datatable-header>
             <livewire:logistic.report.current-stock.datatable lazy>
         </div>
     </div>

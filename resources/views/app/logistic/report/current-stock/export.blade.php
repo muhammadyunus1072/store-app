@@ -76,19 +76,23 @@
         <tbody>
             @php
                 $isNumberFormat = $request['type'] == App\Helpers\General\ExportHelper::TYPE_PDF;
-                $first_stock = 0;
-                $purchase_stock = 0;
-                $expense_stock = 0;
-                $last_stock = 0;
 
-                $first_value = 0;
-                $purchase_value = 0;
-                $expense_value = 0;
-                $last_stock_value = 0;
+                $withFooter = false;
+                $footerData = [];
+                foreach ($columns as $col) {
+                    if (isset($col['withFooter']) && $col['withFooter']) {
+                        $withFooter = true;
+                        $footerData['name'] = 0;
+                    }
+                }
             @endphp
 
             @foreach ($collection as $index => $item)
                 @php
+                    if($withFooter)
+                    {
+                        $
+                    }
                     $first_stock += $item->last_stock - $item->expense_quantity - $item->purchase_quantity;
                     $purchase_stock += $item->purchase_quantity;
                     $expense_stock += $item->expense_quantity;
@@ -113,20 +117,23 @@
                     <td>{{ $isNumberFormat ? number_format($item->last_stock_value, 0, '.', '.') : $item->last_stock_value }}</td>
                 </tr>
             @endforeach
-            <thead>
-                <tr>
-                    <th colspan="3">Total</th>
-                    <th>{{ $isNumberFormat ? number_format($first_stock, 0, '.', '.') : $first_stock }}</th>
-                    <th>{{ $isNumberFormat ? number_format($purchase_stock, 0, '.', '.') : $purchase_stock }}</th>
-                    <th>{{ $isNumberFormat ? number_format($expense_stock * -1, 0, '.', '.') : $expense_stock * -1 }}</th>
-                    <th>{{ $isNumberFormat ? number_format($last_stock, 0, '.', '.') : $last_stock }}</th>
-                    <th>{{ $isNumberFormat ? number_format($first_value, 0, '.', '.') : $first_value }}</th>
-                    <th>{{ $isNumberFormat ? number_format($purchase_value, 0, '.', '.') : $purchase_value }}</th>
-                    <th>{{ $isNumberFormat ? number_format($expense_value * -1, 0, '.', '.') : $expense_value * -1 }}</th>
-                    <th>{{ $isNumberFormat ? number_format($last_stock_value, 0, '.', '.') : $last_stock_value }}</th>
-                </tr>
-            </thead>
         </tbody>
+
+        @if ($withFooter)
+        <thead>
+            <tr>
+                <th colspan="3">Total</th>
+                <th>{{ $isNumberFormat ? number_format($first_stock, 0, '.', '.') : $first_stock }}</th>
+                <th>{{ $isNumberFormat ? number_format($purchase_stock, 0, '.', '.') : $purchase_stock }}</th>
+                <th>{{ $isNumberFormat ? number_format($expense_stock * -1, 0, '.', '.') : $expense_stock * -1 }}</th>
+                <th>{{ $isNumberFormat ? number_format($last_stock, 0, '.', '.') : $last_stock }}</th>
+                <th>{{ $isNumberFormat ? number_format($first_value, 0, '.', '.') : $first_value }}</th>
+                <th>{{ $isNumberFormat ? number_format($purchase_value, 0, '.', '.') : $purchase_value }}</th>
+                <th>{{ $isNumberFormat ? number_format($expense_value * -1, 0, '.', '.') : $expense_value * -1 }}</th>
+                <th>{{ $isNumberFormat ? number_format($last_stock_value, 0, '.', '.') : $last_stock_value }}</th>
+            </tr>
+        </thead>
+    @endif
     </table>
 </body>
 

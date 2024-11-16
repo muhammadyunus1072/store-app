@@ -31,6 +31,7 @@
             >
         </div>
         <div class="card-body">
+            <livewire:logistic.report.stock-expense-warehouse.datatable-header lazy>
             <livewire:logistic.report.stock-expense-warehouse.datatable lazy>
         </div>
     </div>
