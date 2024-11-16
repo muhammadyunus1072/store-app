@@ -352,12 +352,8 @@
             </button>
         @endif
     </form>
-
-    {{-- HISTORY DATATABLE --}}
-    @if ($objId)
-        <livewire:logistic.transaction.product-detail-history.history-datatable :remarksIds="$historyRemarksIds" :remarksType="$historyRemarksType" />
-    @endif
 </div>
+
 @push('css')
     <style>
         input[type=checkbox] {

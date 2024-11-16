@@ -14,6 +14,6 @@ class PurchaseOrderRepository extends MasterDataRepository
 
     public static function datatable()
     {
-        return PurchaseOrder::query();
+        return PurchaseOrder::with('transactionStock');
     }
 }

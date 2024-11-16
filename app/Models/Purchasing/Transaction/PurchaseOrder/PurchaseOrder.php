@@ -82,8 +82,9 @@ class PurchaseOrder extends Model
 
     public function onCreated()
     {
-        if (!empty(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER))) {
+        if (empty(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER))) {
             $this->transactionStockProcess();
+            return;
         }
 
         $approval = ApprovalConfig::createApprovalIfMatch(SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER), $this);

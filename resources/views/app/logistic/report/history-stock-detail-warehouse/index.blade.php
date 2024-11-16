@@ -5,7 +5,8 @@
 @section('header')
     <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
         <!--begin::Title-->
-        <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">Kartu Stok Detail Gudang</h1>
+        <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">Kartu Stok Detail
+            Gudang</h1>
         <!--end::Title-->
         <!--begin::Breadcrumb-->
         <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -22,17 +23,10 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <livewire:logistic.report.filter 
-            :show_input_date_start="true"
-            :show_input_date_end="true"
-            :show_input_product="true"
-            :show_input_category_product="true"
-            :show_input_warehouse="true"
-            >
+            <livewire:logistic.report.filter dispatchEvent="add-filter" :showExport="false" :filterDateStart="true" :filterDateEnd="true" :filterProduct="true" :filterWarehouse="true">
         </div>
         <div class="card-body">
-            <livewire:logistic.report.history-stock-detail-warehouse.datatable lazy>
+            <livewire:logistic.report.history-stock-detail-warehouse.index lazy>
         </div>
     </div>
 @stop
-

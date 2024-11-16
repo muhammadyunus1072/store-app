@@ -15,6 +15,6 @@ class StockExpenseRepository extends MasterDataRepository
 
     public static function datatable()
     {
-        return StockExpense::query();
+        return StockExpense::with('transactionStock');
     }
 }

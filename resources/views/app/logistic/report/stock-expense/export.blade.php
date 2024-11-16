@@ -83,7 +83,7 @@
                 @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>@dateTime($item->transaction_date)</td>
+                    <td>@date($item->transaction_date)</td>
                     <td>{{ $item->number }}</td>
                     <td>{{ $item->warehouse_name }}</td>
                     <td>{{ $item->product_name }}</td>

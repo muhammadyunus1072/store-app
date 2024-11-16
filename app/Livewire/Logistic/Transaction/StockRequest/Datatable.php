@@ -138,6 +138,14 @@ class Datatable extends Component
                 'key' => 'note',
                 'name' => 'Catatan',
             ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Status Proses Stok',
+                'render' => function ($item) {
+                    return $item->transactionStockStatus();
+                }
+            ],
         ];
     }
 

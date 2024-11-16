@@ -65,6 +65,7 @@ class ProductDetailRepository extends MasterDataRepository
             'id',
             'last_stock'
         )
+            ->lockForUpdate()
             ->where('product_id', $productId)
             ->where('company_id', $companyId)
             ->where('warehouse_id', $warehouseId)

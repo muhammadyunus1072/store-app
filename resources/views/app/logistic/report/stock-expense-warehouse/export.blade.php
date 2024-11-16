@@ -88,7 +88,7 @@
                 @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>@dateTime($item->transaction_date)</td>
+                    <td>@date($item->transaction_date)</td>
                     <td>{{ $item->number }}</td>
                     <td>{{ $item->product_name }}</td>
                     <td>{{ $isNumberFormat ? \App\Helpers\General\NumberFormatter::format($item->quantity) : $item->quantity }}</td>

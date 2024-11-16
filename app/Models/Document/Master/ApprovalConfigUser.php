@@ -16,11 +16,7 @@ class ApprovalConfigUser extends Model
     protected $fillable = [
         'approval_config_id',
         'user_id',
-        'status_approval_id',
-
         'position',
-        'is_trigger_done',
-        'is_can_cancel',
     ];
 
     protected $guarded = ['id'];
@@ -36,5 +32,16 @@ class ApprovalConfigUser extends Model
     public function approvalConfig()
     {
         return $this->belongsTo(ApprovalConfig::class, 'approval_config_id', 'id');
+    }
+
+    public function approvalConfigStatusApprovals()
+    {
+        return $this->hasMany(ApprovalConfigUserStatusApproval::class, 'approval_config_user_id', 'id');
+    }
+
+    public function statusApprovals()
+    {
+        return $this->belongsToMany(StatusApproval::class, 'approval_config_user_status_approvals', 'approval_config_user_id', 'status_approval_id')
+            ->whereNull('approval_config_user_status_approvals.deleted_at');
     }
 }

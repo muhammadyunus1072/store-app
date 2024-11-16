@@ -6,9 +6,7 @@ use App\Helpers\Core\UserStateHandler;
 use App\Helpers\General\Alert;
 use App\Helpers\General\FileHelper;
 use App\Helpers\General\NumberFormatter;
-use App\Helpers\General\ImageLocationHelper;
 use App\Models\Finance\Master\Tax;
-use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -64,9 +62,6 @@ class Detail extends Component
     public $taxPpnValue;
     public $companies = [];
     public $warehouses = [];
-
-    public $historyRemarksIds = []; // History Datatable
-    public $historyRemarksType = PurchaseOrderProduct::class; // History Datatable
 
     public function render()
     {
@@ -151,9 +146,6 @@ class Detail extends Component
                     $this->taxPpnName = $purchaseOrderProduct->ppn->tax_name;
                     $this->taxPpnValue = $purchaseOrderProduct->ppn->tax_value;
                 }
-
-                // History Datatable
-                $this->historyRemarksIds[] = $purchaseOrderProduct->id;
             }
         }
     }

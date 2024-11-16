@@ -48,7 +48,7 @@ class UserRepository extends MasterDataRepository
 
     public static function authenticatedUser(): User
     {
-        return self::find(Auth::id());
+        return Auth::user();
     }
 
     public static function getByRole($roleId)

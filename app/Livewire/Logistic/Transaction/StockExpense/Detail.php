@@ -27,8 +27,8 @@ class Detail extends Component
 
     public $number;
     #[Validate('required', message: 'Tanggal Pengeluaran Harus Diisi', onUpdate: false)]
-    public $transactionDate;
     public $note;
+    public $transactionDate;
 
     public $companyId;
     public $companyText;
@@ -44,8 +44,10 @@ class Detail extends Component
     public $companies = [];
     public $warehouses = [];
 
-    public $historyRemarksIds = []; // History Datatable
-    public $historyRemarksType = StockExpenseProduct::class; // History Datatable
+    // Edit Validity Purposes
+    public $oldCompanyId;
+    public $oldWarehouseId;
+    public $oldTransactionDate;
 
     public function render()
     {
@@ -72,6 +74,10 @@ class Detail extends Component
             $this->warehouseId = Crypt::encrypt($stockExpense->warehouse_id);
             $this->warehouseText = $stockExpense->warehouse_name;
 
+            $this->oldCompanyId = $this->companyId;
+            $this->oldWarehouseId = $this->warehouseId;
+            $this->oldTransactionDate = $this->transactionDate;
+
             foreach ($stockExpense->stockExpenseProducts as $stockExpenseProduct) {
                 $unitDetailChoice = UnitDetailRepository::getOptions($stockExpenseProduct->unit_detail_unit_id);
                 $unitDetailId = collect($unitDetailChoice)->filter(function ($obj) use ($stockExpenseProduct) {
@@ -88,12 +94,7 @@ class Detail extends Component
 
                     // Validity Purposes
                     "old_quantity" => $stockExpenseProduct->quantity,
-                    "old_company_id" => $this->companyId,
-                    "old_warehouse_id" => $this->warehouseId,
                 ];
-
-                // History Datatable
-                $this->historyRemarksIds[] = $stockExpenseProduct->id;
             }
 
             $this->refreshStock();
@@ -264,8 +265,6 @@ class Detail extends Component
 
             // Validity Purposes
             "old_quantity" => 0,
-            "old_company_id" => null,
-            "old_warehouse_id" => null,
         ];
 
         $this->refreshStock(count($this->stockExpenseProducts) - 1);
@@ -290,7 +289,19 @@ class Detail extends Component
         }
 
         foreach ($items as $index => $item) {
-            if ($item['old_company_id'] == $this->companyId && $item['old_warehouse_id'] == $this->warehouseId) {
+            if ($this->isShow) {
+                $this->stockExpenseProducts[$index]['current_stock'] = 0;
+                $this->stockExpenseProducts[$index]['current_stock_unit_name'] = 0;
+                $this->stockExpenseProducts[$index]['is_stock_available'] = 0;
+                $this->stockExpenseProducts[$index]['row_color_class'] = "";
+                continue;
+            }
+
+            if (
+                $this->oldCompanyId == $this->companyId
+                && $this->oldWarehouseId == $this->warehouseId
+                && $this->oldTransactionDate == $this->transactionDate
+            ) {
                 // Check By Quantity Change
                 $qtyToBeUsed = NumberFormatter::imaskToValue($item['quantity']) - $item['old_quantity'];
             } else {
@@ -310,6 +321,7 @@ class Detail extends Component
             $this->stockExpenseProducts[$index]['current_stock'] = $stockAvailablity['current_stock'];
             $this->stockExpenseProducts[$index]['current_stock_unit_name'] = $stockAvailablity['unit_detail_name'];
             $this->stockExpenseProducts[$index]['is_stock_available'] = $stockAvailablity['is_stock_available'];
+            $this->stockExpenseProducts[$index]['row_color_class'] = $qtyToBeUsed == 0 ? '' : ($stockAvailablity['is_stock_available'] ? 'table-success' : 'table-danger');
         }
     }
 }

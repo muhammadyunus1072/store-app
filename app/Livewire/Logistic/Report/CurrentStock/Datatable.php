@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Helpers\General\ExportHelper;
-use Illuminate\Support\Facades\Crypt;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
 use Illuminate\Database\Eloquent\Builder;
@@ -153,7 +152,7 @@ class Datatable extends Component
             'Data Stok Akhir ' . Carbon::parse($this->date_start)->format('Y-m-d') . ' sd ' . Carbon::parse($this->date_end)->format('Y-m-d')
         );
     }
-    
+
     public function getColumns(): array
     {
         return [
@@ -167,8 +166,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Satuan',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return $item->unit_detail_name;
                 }
             ],
@@ -176,8 +174,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Stok Awal',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->last_stock - $item->expense_quantity - $item->purchase_quantity);
                 }
             ],
@@ -185,8 +182,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Pembelian',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->purchase_quantity);
                 }
             ],
@@ -194,8 +190,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Pengeluaran',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->expense_quantity * -1);
                 }
             ],
@@ -203,8 +198,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Stok Akhir',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->last_stock);
                 }
             ],
@@ -212,8 +206,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Awal',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->last_stock_value - $item->expense_value - $item->purchase_value);
                 }
             ],
@@ -221,8 +214,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Pembelian',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->purchase_value);
                 }
             ],
@@ -230,8 +222,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Pengeluaran',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->expense_value * -1);
                 }
             ],
@@ -239,8 +230,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Akhir',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->last_stock_value);
                 }
             ],

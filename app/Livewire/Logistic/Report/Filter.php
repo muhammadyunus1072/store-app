@@ -4,71 +4,65 @@ namespace App\Livewire\Logistic\Report;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use App\Models\Core\Setting\Setting;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\Core\UserStateHandler;
-use App\Repositories\Core\Setting\SettingRepository;
+use App\Settings\SettingCore;
+use App\Settings\SettingLogistic;
 
 class Filter extends Component
 {
-    // Setting Filter
-    public $show_input_product;
-    public $show_input_category_product;
-    public $show_input_warehouse;
-    public $show_input_supplier;
-    public $show_input_entry_date_start;
-    public $show_input_entry_date_end;
-    public $show_input_expired_date_start;
-    public $show_input_expired_date_end;
-    public $show_input_date_start;
-    public $show_input_date_end;
+    public $dispatchEvent = 'datatable-add-filter';
 
-    public $products = [];
-    public $category_products = [];
-    public $warehouse_id;
-    public $supplier_id;
-    public $entry_date_start;
-    public $entry_date_end;
-    public $expired_date_start;
-    public $expired_date_end;
-    public $date_start;
-    public $date_end;
+    // Filter
+    public $dateStart;
+    public $dateEnd;
+    public $entryDateStart;
+    public $entryDateEnd;
+    public $expiredDateStart;
+    public $expiredDateEnd;
+    public $productId;
+    public $productIds = [];
+    public $categoryProductIds = [];
+    public $companyId;
+    public $warehouseId;
+
+    // Setting Filter
+    public $filterWarehouse;
+    public $filterCompany;
+    public $filterProduct;
+    public $filterProductMultiple;
+    public $filterCategoryProductMultiple;
+    public $filterSupplierMultiple;
+    public $filterEntryDateStart;
+    public $filterEntryDateEnd;
+    public $filterExpiredDateStart;
+    public $filterExpiredDateEnd;
+    public $filterDateStart;
+    public $filterDateEnd;
 
     // Setting
-    public $setting_product_code;
-    public $setting_product_expired_date;
-    public $setting_product_attachment;
-    public $setting_product_batch;
+    public $infoProductCode;
+    public $infoProductExpiredDate;
+    public $infoProductBatch;
+    public $infoProductAttachment;
+    public $isMultipleCompany = false;
+    public $showExport = true;
 
     // Helpers
-    public $isMultipleCompany = false;
-
     public $companies = [];
     public $warehouses = [];
 
-    public $warehouseId;
-    public $warehouseText;
-
-    public $companyId;
-    public $companyText;
-    
     public function mount()
     {
-        $this->date_start = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->date_end = Carbon::now()->endOfMonth()->format('Y-m-d');
-
-        // $setting = SettingRepository::findByName(Setting::NAME_LOGISTIC);
-        // $settings = json_decode($setting->setting);
-        // $this->setting_product_code = $settings->product_code;
-        // $this->setting_product_expired_date = $settings->product_expired_date;
-        // $this->setting_product_attachment = $settings->product_attachment;
-        // $this->setting_product_batch = $settings->product_batch;
         $this->loadUserState();
-    }
+        $this->loadSetting();
 
-    public function updated()
-    {
-        $this->filterHandle();
+        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
+
+        $this->filterCompany = $this->isMultipleCompany ? $this->filterCompany : false;
+        $this->filterExpiredDateStart = $this->infoProductExpiredDate ? $this->filterExpiredDateStart : false;
+        $this->filterExpiredDateEnd = $this->infoProductExpiredDate ? $this->filterExpiredDateEnd : false;
     }
 
     public function loadUserState()
@@ -86,88 +80,76 @@ class Filter extends Component
         }
     }
 
-    private function filterHandle()
+    public function loadSetting()
     {
-        $this->dispatch('datatable-add-filter', [
-            'products' => collect($this->products)
-            ->pluck('id')
-            ->map(function ($id) {
-                return Crypt::decrypt($id);
-            }),
-            'category_products' => collect($this->category_products)
-            ->pluck('id')
-            ->map(function ($id) {
-                return Crypt::decrypt($id);
-            }),
-            'warehouse_id' => $this->warehouse_id,
-            'supplier_id' => $this->supplier_id,
-            'expired_date_start' => $this->expired_date_start,
-            'expired_date_end' => $this->expired_date_end,
-            'entry_date_start' => $this->entry_date_start,
-            'entry_date_end' => $this->entry_date_end,
-            'date_start' => $this->date_start,
-            'date_end' => $this->date_end,
+        $this->isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
 
-            'companyId' => $this->companyId,
-            'warehouseId' => $this->warehouseId,
+        $this->infoProductCode = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_CODE);
+        $this->infoProductExpiredDate = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_EXPIRED_DATE);
+        $this->infoProductBatch = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_BATCH);
+        $this->infoProductAttachment = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_ATTACHMENT);
+    }
+
+    public function updated()
+    {
+        $this->dispatchFilter();
+    }
+
+    private function dispatchFilter()
+    {
+        $this->dispatch($this->dispatchEvent, [
+            'productIds' => collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            }),
+            'categoryProductIds' => collect($this->categoryProductIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            }),
+            'productId' => $this->productId ? Crypt::decrypt($this->productId) : null,
+            'companyId' => $this->companyId ? Crypt::decrypt($this->companyId) : null,
+            'warehouseId' => $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null,
+            'dateStart' => $this->dateStart,
+            'dateEnd' => $this->dateEnd,
+            'expiredDateStart' => $this->expiredDateStart,
+            'expiredDateEnd' => $this->expiredDateEnd,
+            'entryDateStart' => $this->entryDateStart,
+            'entryDateEnd' => $this->entryDateEnd,
         ]);
     }
-    public function resetEntryDateStart()
+
+    /* 
+    | SELECT2 CATEGORY PRODUCT MULTIPLE
+    */
+    public function onSelectCategoryProduct($id)
     {
-        $this->entry_date_start = null;
-        $this->filterHandle();
-    }
-    public function resetEntryDateEnd()
-    {
-        $this->entry_date_end = null;
-        $this->filterHandle();
-    }
-    public function resetExpiredDateStart()
-    {
-        $this->expired_date_start = null;
-        $this->filterHandle();
-    }
-    public function resetExpiredDateEnd()
-    {
-        $this->expired_date_end = null;
-        $this->filterHandle();
+        $this->categoryProductIds[] = $id;
+        $this->dispatchFilter();
     }
 
-
-    public function selectCategoryProducts($data)
+    public function onUnselectCategoryProduct($id)
     {
-        $this->category_products[] = [
-            'id' => $data['id'],
-            'text' => $data['text'],
-        ];
-        $this->filterHandle();
-    }
-
-    public function unselectCategoryProducts($data)
-    {
-        $index = array_search($data['id'], array_column($this->category_products, 'id'));
+        $index = array_search($id['id'], $this->categoryProductIds);
         if ($index !== false) {
-            unset($this->category_products[$index]);
+            unset($this->categoryProductIds[$index]);
+            $this->dispatchFilter();
         }
-        $this->filterHandle();
     }
 
-    public function selectProducts($data)
+    /* 
+    | SELECT2 PRODUCT MULTIPLE
+    */
+    public function onSelectProduct($id)
     {
-        $this->products[] = [
-            'id' => $data['id'],
-            'text' => $data['text'],
-        ];
-        $this->filterHandle();
+        $this->productIds[] = $id;
+        $this->dispatchFilter();
     }
 
-    public function unselectProducts($data)
+    public function onUnselectProduct($id)
     {
-        $index = array_search($data['id'], array_column($this->products, 'id'));
+        $index = array_search($id, $this->productIds);
         if ($index !== false) {
-            unset($this->products[$index]);
+            unset($this->productIds[$index]);
+            $this->dispatchFilter();
         }
-        $this->filterHandle();
     }
 
     public function render()

@@ -80,13 +80,12 @@ class StockRequest extends Model
 
     public function onCreated()
     {
-        Log::info(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST));
-        if (SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST)) {
+        if (empty(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST))) {
             $this->transactionStockProcess();
+            return;
         }
 
         $approval = ApprovalConfig::createApprovalIfMatch(SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST), $this);
-        Log::info($approval);
         if (!$approval) {
             $this->transactionStockProcess();
         }

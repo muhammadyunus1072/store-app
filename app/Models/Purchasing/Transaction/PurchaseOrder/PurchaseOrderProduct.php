@@ -18,6 +18,7 @@ use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrder;
 use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductTax;
 use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductAttachment;
 use App\Permissions\AccessPurchasing;
+use Illuminate\Support\Facades\Crypt;
 
 class PurchaseOrderProduct extends Model
 {
@@ -36,8 +37,6 @@ class PurchaseOrderProduct extends Model
 
     protected $guarded = ['id'];
 
-    const TRANSLATE_NAME = 'Pembelian';
-
     protected static function onBoot()
     {
         self::creating(function ($model) {
@@ -52,7 +51,7 @@ class PurchaseOrderProduct extends Model
             if ($model->product_id != $model->getOriginal('product_id')) {
                 $model = $model->product->saveInfo($model);
             }
-            
+
             if ($model->unit_detail_id != $model->getOriginal('unit_detail_id')) {
                 $model = $model->unitDetail->saveInfo($model);
             }
@@ -97,25 +96,14 @@ class PurchaseOrderProduct extends Model
     }
 
     /*
-    | PRODUCT DETAIL HISTORY
+    | HAS PRODUCT DETAIL HISTORY
     */
-
-    public function masterTable()
-    {
-        return $this->purchaseOrder();
-    }
-
-    public function translatedName(): string
-    {
-        return self::TRANSLATE_NAME;
-    }
-
-    public function remarksTableInfo(): array
+    public function productDetailHistoryRemarksInfo(): array
     {
         return [
-            "translated_name" => self::TRANSLATE_NAME,
-            "access_name" => PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_READ),
-            "route_name" => "purchase_order.edit"
+            "text" => "Pembelian - " . $this->purchaseOrder->number,
+            "access" => PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_READ),
+            "url" => route("purchase_order.show", Crypt::encrypt($this->purchase_order_id))
         ];
     }
 

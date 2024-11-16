@@ -51,4 +51,9 @@
             <livewire:logistic.transaction.stock-request.detail :objId="$objId" :isShow="$isShow">
         </div>
     </div>
+
+    {{-- HISTORY DATATABLE --}}
+    @if ($objId)
+        <livewire:logistic.transaction.product-detail-history.history-datatable :transactionStockRemarksId="$objId" :transactionStockRemarksType="$objClass" />
+    @endif
 @stop

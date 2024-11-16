@@ -14,9 +14,20 @@ class StatusApprovalSeeder extends Seeder
     {
         StatusApproval::create([
             'name' => 'Setuju',
+            'is_trigger_done' => false,
+            'is_trigger_cancel' => false,
         ]);
+
+        StatusApproval::create([
+            'name' => 'Selesai',
+            'is_trigger_done' => true,
+            'is_trigger_cancel' => false,
+        ]);
+
         StatusApproval::create([
             'name' => 'Batal',
+            'is_trigger_done' => false,
+            'is_trigger_cancel' => true,
         ]);
     }
 }

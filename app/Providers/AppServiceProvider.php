@@ -45,11 +45,11 @@ class AppServiceProvider extends ServiceProvider
             database_path('migrations/finance/*'),
         ]);
 
-        Blade::directive('dateTimeFull', function ($expression) {
+        Blade::directive('dateTime', function ($expression) {
             return "<?php echo $expression ? Carbon\Carbon::parse($expression)->translatedFormat('d F Y, H:i') : $expression; ?>";
         });
 
-        Blade::directive('dateTime', function ($expression) {
+        Blade::directive('date', function ($expression) {
             return "<?php echo $expression ? Carbon\Carbon::parse($expression)->translatedFormat('d F Y') : $expression; ?>";
         });
 
