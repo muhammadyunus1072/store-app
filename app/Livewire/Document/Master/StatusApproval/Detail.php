@@ -18,16 +18,17 @@ class Detail extends Component
 
     #[Validate('required', message: 'Nama Harus Diisi', onUpdate: false)]
     public $name;
+    public $isTriggerDone = false;
+    public $isTriggerCancel = false;
 
     public function mount()
     {
-
         if ($this->objId) {
-
-            $id = Crypt::decrypt($this->objId);
-            $statusApproval = StatusApprovalRepository::find($id);
+            $statusApproval = StatusApprovalRepository::find(Crypt::decrypt($this->objId));
 
             $this->name = $statusApproval->name;
+            $this->isTriggerDone = $statusApproval->is_trigger_done;
+            $this->isTriggerCancel = $statusApproval->is_trigger_cancel;
         }
     }
 
@@ -53,7 +54,10 @@ class Detail extends Component
 
         $validatedData = [
             'name' => $this->name,
+            'is_trigger_done' => $this->isTriggerDone,
+            'is_trigger_cancel' => $this->isTriggerCancel,
         ];
+        
         try {
             DB::beginTransaction();
 

@@ -10,6 +10,24 @@
                 </div>
             @enderror
         </div>
+
+        <div class="col-md-auto mb-4 row align-items-end">
+            <div class="form-check m-2">
+                <input class="form-check-input" type="checkbox" wire:model="isTriggerDone">
+                <label class="form-label ms-2 mb-2">
+                    Penanda Selesai
+                </label>
+            </div>
+        </div>
+        <div class="col-md-auto mb-4 row align-items-end">
+            <div class="form-check m-2">
+                <input class="form-check-input" type="checkbox" wire:model="isTriggerCancel">
+                <label class="form-label ms-2 mb-2">
+                    Penanda Batal
+                </label>
+            </div>
+        </div>
+
     </div>
 
     <button type="submit" class="btn btn-success mt-3">
@@ -17,3 +35,20 @@
         Simpan
     </button>
 </form>
+
+@push('css')
+    <style>
+        input[type=checkbox] {
+            /* Double-sized Checkboxes */
+            -ms-transform: scale(1.2);
+            /* IE */
+            -moz-transform: scale(1.2);
+            /* FF */
+            -webkit-transform: scale(1.2);
+            /* Safari and Chrome */
+            -o-transform: scale(1.2);
+            /* Opera */
+            padding: 8px;
+        }
+    </style>
+@endpush

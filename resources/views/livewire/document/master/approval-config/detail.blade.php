@@ -84,23 +84,16 @@
                     <input type="text" class="form-control currency"
                         wire:model.live="approvalConfigUsers.{{ $index }}.position" min="1" />
                 </div>
-                <div class="col-md-auto mb-2">
-                    <div class="form-check m-2">
-                        <input class="form-check-input" type="checkbox"
-                            wire:model="approvalConfigUsers.{{ $index }}.is_trigger_done">
-                        <label class="form-label ms-2 mb-2">
-                            Persetujuan Selesai
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-auto mb-2">
-                    <div class="form-check m-2">
-                        <input class="form-check-input" type="checkbox"
-                            wire:model="approvalConfigUsers.{{ $index }}.is_can_cancel">
-                        <label class="form-label ms-2 mb-2">
-                            Dapat Membatalkan
-                        </label>
-                    </div>
+                <div class="col-md mb-2" wire:ignore>
+                    <label class='fw-bold'>Status</label>
+                    <select data-index="{{ $index }}" class="form-select select2-status-approval" multiple>
+                        @foreach ($statusApprovalChoices as $choice)
+                            <option {{ in_array($choice['id'], $item['status_approvals']) ? 'selected' : '' }}
+                                value="{{ $choice['id'] }}">
+                                {{ $choice['text'] }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         @endforeach
@@ -135,6 +128,7 @@
     <script>
         $(document).ready(function() {
             initSelect2();
+            initSelect2StatusApproval();
         });
 
         function initSelect2() {
@@ -173,5 +167,29 @@
                 }
             });
         }
+
+        function initSelect2StatusApproval() {
+            $('.select2-status-approval').each(function(index, element) {
+                $(element).select2({
+                    placeholder: "Pilih Status"
+                });
+            });
+
+            $('.select2-status-approval').on('select2:select', function(e) {
+                let index = $(e.target).attr('data-index');
+                @this.call('addApproverStatusApproval', index, e.params.data.id);
+            });
+
+            $('.select2-status-approval').on('select2:unselect', function(e) {
+                let index = $(e.target).attr('data-index');
+                @this.call('removeApproverStatusApproval', index, e.params.data.id)
+            });
+        }
+
+        Livewire.on("init-select2-status-approval", (event) => {
+            setTimeout(function() {
+                initSelect2StatusApproval();
+            }, 50);
+        });
     </script>
 @endpush

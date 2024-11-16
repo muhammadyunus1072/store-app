@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigRepository;
 use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigUserRepository;
+use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigUserStatusApprovalRepository;
+use App\Repositories\Document\Master\StatusApproval\StatusApprovalRepository;
 
 class Detail extends Component
 {
@@ -70,6 +72,14 @@ class Detail extends Component
         $this->configOperatorChoice = ApprovalConfig::OPERATOR_CHOICE;
         $this->configDefaultOperatorChoice = ApprovalConfig::OPERATOR_ASSIGNMENT;
 
+        $statusApprovals = StatusApprovalRepository::all();
+        foreach ($statusApprovals as $item) {
+            $this->statusApprovalChoices[] = [
+                'id' => $item->id,
+                'text' => $item->name
+            ];
+        }
+
         if ($this->objId) {
             $approvalConfig = ApprovalConfigRepository::findWithDetails(Crypt::decrypt($this->objId));
 
@@ -78,15 +88,14 @@ class Detail extends Component
             $this->isSequentially = $approvalConfig->is_sequentially;
             $this->config = json_decode($approvalConfig->config, true);
 
-            foreach ($approvalConfig->approvalConfigUsers as $approvalConfigUser) {
-                $this->approvalConfigUsers[] = [
+            foreach ($approvalConfig->approvalConfigUsers as $index => $approvalConfigUser) {
+                $this->approvalConfigUsers[$index] = [
                     'id' => Crypt::encrypt($approvalConfigUser->id),
+                    'key' => Str::random(30),
                     'user_id' => Crypt::encrypt($approvalConfigUser->user_id),
                     'user_text' => $approvalConfigUser->user->name,
-                    'key' => Str::random(30),
                     "position" => NumberFormatter::valueToImask($approvalConfigUser->position),
-                    'is_trigger_done' => $approvalConfigUser->is_trigger_done,
-                    'is_can_cancel' => $approvalConfigUser->is_can_cancel,
+                    "status_approvals" => $approvalConfigUser->approvalConfigUserStatusApprovals()->pluck('status_approval_id')->toArray(),
                 ];
             }
         } else {
@@ -116,25 +125,36 @@ class Detail extends Component
                 $objId = $obj->id;
             }
 
+            // Handle Approval Config User
             foreach ($this->approvalConfigUsers as $approvalConfigUser) {
                 $validatedData = [
                     'approval_config_id' => $objId,
                     'user_id' => Crypt::decrypt($approvalConfigUser['user_id']),
                     'position' => NumberFormatter::imaskToValue($approvalConfigUser['position']),
-                    'is_can_cancel' => $approvalConfigUser['is_can_cancel'],
-                    'is_trigger_done' => $approvalConfigUser['is_trigger_done'],
                 ];
 
                 if (!$approvalConfigUser['id']) {
-                    ApprovalConfigUserRepository::create($validatedData);
+                    $approvalUser = ApprovalConfigUserRepository::create($validatedData);
+                    $approvalConfigUserId = $approvalUser->id;
                 } else {
                     ApprovalConfigUserRepository::update(Crypt::decrypt($approvalConfigUser['id']), $validatedData);
+                    $approvalConfigUserId = Crypt::decrypt($approvalConfigUser['id']);
                 }
+
+                // Handle Approval Config User Status Approval
+                foreach ($approvalConfigUser['status_approvals'] as $id) {
+                    ApprovalConfigUserStatusApprovalRepository::createIfNotExist([
+                        'approval_config_user_id' => $approvalConfigUserId,
+                        'status_approval_id' => $id,
+                    ]);
+                }
+                ApprovalConfigUserStatusApprovalRepository::deleteExcept($approvalConfigUserId, $approvalConfigUser['status_approvals']);
             }
 
             foreach ($this->approvalConfigUserRemoves as $item) {
                 ApprovalConfigUserRepository::delete(Crypt::decrypt($item));
             }
+
             DB::commit();
 
             Alert::confirmation(
@@ -263,10 +283,11 @@ class Detail extends Component
                 'user_text' => $data['text'],
                 'key' => Str::random(30),
                 "position" => count($this->approvalConfigUsers) + 1,
-                'is_trigger_done' => false,
-                'is_can_cancel' => false,
+                "status_approvals" => [],
             ];
         }
+
+        $this->dispatch("init-select2-status-approval");
     }
 
     public function removeApprover($index)
@@ -276,6 +297,8 @@ class Detail extends Component
         }
 
         unset($this->approvalConfigUsers[$index]);
+        
+        $this->dispatch("init-select2-status-approval");
     }
 
     public function updatedApprovalConfigUsers()
@@ -283,5 +306,20 @@ class Detail extends Component
         usort($this->approvalConfigUsers, function ($a, $b) {
             return $a['position'] > $b['position'];
         });
+    }
+
+    // HANDLE APPROVER STATUS APPROVAL
+    public function addApproverStatusApproval($indexUser, $statusApprovalId)
+    {
+        $this->approvalConfigUsers[$indexUser]['status_approvals'][] = $statusApprovalId;
+    }
+
+    public function removeApproverStatusApproval($indexUser, $statusApprovalId)
+    {
+        $index = array_search($statusApprovalId, $this->approvalConfigUsers[$indexUser]['status_approvals']);
+
+        if ($index !== false) {
+            unset($this->approvalConfigUsers[$indexUser]['status_approvals'][$index]);
+        }
     }
 }

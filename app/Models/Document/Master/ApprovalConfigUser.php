@@ -34,7 +34,7 @@ class ApprovalConfigUser extends Model
         return $this->belongsTo(ApprovalConfig::class, 'approval_config_id', 'id');
     }
 
-    public function approvalConfigStatusApprovals()
+    public function approvalConfigUserStatusApprovals()
     {
         return $this->hasMany(ApprovalConfigUserStatusApproval::class, 'approval_config_user_id', 'id');
     }

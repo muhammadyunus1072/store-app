@@ -119,6 +119,22 @@ class Datatable extends Component
                     return $item->name;
                 }
             ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Penanda Selesai',
+                'render' => function ($item) {
+                    return $item->is_trigger_done ? "<div class='badge badge-success'>Iya</div>" : "<div class='badge badge-secondary'>Tidak</div>";
+                }
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Penanda Batal',
+                'render' => function ($item) {
+                    return $item->is_trigger_cancel ? "<div class='badge badge-success'>Iya</div>" : "<div class='badge badge-secondary'>Tidak</div>";
+                }
+            ],
         ];
     }
 
