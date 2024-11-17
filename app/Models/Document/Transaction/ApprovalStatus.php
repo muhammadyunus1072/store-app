@@ -31,9 +31,9 @@ class ApprovalStatus extends Model
 
         self::created(function ($model) {
             if ($model->status_approval_is_trigger_done) {
-                $model->approval->done();
+                $model->approval->done($model);
             } elseif ($model->status_approval_is_trigger_cancel) {
-                $model->approval->cancel();
+                $model->approval->cancel($model);
             }
         });
 

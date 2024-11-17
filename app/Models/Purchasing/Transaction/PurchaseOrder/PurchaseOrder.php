@@ -12,6 +12,8 @@ use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
 use App\Models\Purchasing\Master\Supplier\Supplier;
+use App\Permissions\AccessPurchasing;
+use App\Permissions\PermissionHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -154,14 +156,26 @@ class PurchaseOrder extends Model
             ],
         ];
     }
+
+    public function approvalInfo()
+    {
+        return [
+            "text" => "Pembelian - " . $this->number,
+            "access" => PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_READ),
+            "url" => route("purchase_order.show", Crypt::encrypt($this->id))
+        ];
+    }
+
     public function onApprovalDone()
     {
         $this->transactionStockProcess();
     }
+
     public function onApprovalRevertDone()
     {
         $this->transactionStockCancel();
     }
+
     public function onApprovalCanceled() {}
     public function onApprovalRevertCancel() {}
 

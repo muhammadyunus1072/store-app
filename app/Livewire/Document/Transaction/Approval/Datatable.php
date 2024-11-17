@@ -25,6 +25,7 @@ class Datatable extends Component
 
     public function onMount()
     {
+        $this->sortDirection = 'desc';
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL, PermissionHelper::TYPE_DELETE));
@@ -36,7 +37,7 @@ class Datatable extends Component
         if (!$this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
-        
+
         ApprovalRepository::delete(Crypt::decrypt($this->targetDeleteId));
         Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
     }
@@ -71,82 +72,50 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'render' => function ($item) {
-
-                    $editHtml = "";
                     $id = Crypt::encrypt($item->id);
-                    if ($this->isCanUpdate) {
-                        $editUrl = route('approval.edit', $id);
-                        $editHtml = "<div class='col-auto mb-2'>
-                            <a class='btn btn-primary btn-sm' href='$editUrl'>
-                                <i class='ki-duotone ki-notepad-edit fs-1'>
-                                    <span class='path1'></span>
-                                    <span class='path2'></span>
-                                </i>
-                                Lihat
-                            </a>
-                        </div>";
-                    }
 
-                    $destroyHtml = "";
-                    if ($this->isCanDelete) {
-                        $destroyHtml = "<div class='col-auto mb-2'>
-                            <button class='btn btn-danger btn-sm m-0' 
-                                wire:click=\"showDeleteDialog('$id')\">
-                                <i class='ki-duotone ki-trash fs-1'>
-                                    <span class='path1'></span>
-                                    <span class='path2'></span>
-                                    <span class='path3'></span>
-                                    <span class='path4'></span>
-                                    <span class='path5'></span>
-                                </i>
-                                Hapus
-                            </button>
-                        </div>";
-                    }
-
-                    $html = "<div class='row'>
-                        $editHtml $destroyHtml 
+                    $showUrl = route('approval.show', $id);
+                    $showHtml = "<div class='col-auto mb-2'>
+                        <a class='btn btn-info btn-sm' href='$showUrl'>
+                            <i class='ki-solid ki-eye fs-1'></i>
+                            Lihat
+                        </a>
                     </div>";
 
-                    return $html;
+                    return "<div class='row'>
+                        $showHtml 
+                    </div>";
                 },
             ],
             [
-                'sortable' => false,
                 'searchable' => false,
-                'name' => 'Nomor',
-                'render' => function($item)
-                {
-                    return $item->remarks->number;
+                'key' => 'created_at',
+                'name' => 'Tanggal',
+                'render' => function ($item) {
+                    return $item->created_at->translatedFormat('d F Y, H:i');
                 }
             ],
             [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Keterangan',
-                'render' => function($item)
-                {
-                    return $item->remarks->note;
+                'key' => 'number',
+                'name' => 'Nomor',
+                'render' => function ($item) {
+                    return $item->number;
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Status',
-                'render' => function($item)
-                {
-                    $html = "";
-                    if($item->remarks->approved_date)
-                    {
-                        $html = "<p class='badge text-white bg-success'>Disetujui</p>";
-                    }elseif($item->remarks->cancel_date)
-                    {
-                        $html = "<p class='badge text-white bg-warning'>Cancel</p>";
-                    }else{
-                        $html = "<p class='badge text-white bg-warning'>Proses Persetujuan</p>";
-                    }
-
-                    return $html;
+                'render' => function ($item) {
+                    return $item->beautifyStatus();
+                }
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Sumber',
+                'render' => function ($item) {
+                    return $item->remarksUrlButton();
                 }
             ],
         ];

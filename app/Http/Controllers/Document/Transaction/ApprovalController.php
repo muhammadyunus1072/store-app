@@ -17,7 +17,7 @@ class ApprovalController extends Controller
         return view('app.document.transaction.approval.detail', ["objId" => null]);
     }
 
-    public function edit(Request $request)
+    public function show(Request $request)
     {
         return view('app.document.transaction.approval.detail', ["objId" => $request->id]);
     }

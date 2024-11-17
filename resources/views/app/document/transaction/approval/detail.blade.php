@@ -18,13 +18,13 @@
 
         <div class='row'>
             <div class="col-md-auto mt-2">
-                <a class="btn btn-info" href="{{ route('approval.index') }}">
+                <button class="btn btn-info" onclick="history.back();">
                     <i class="ki-duotone ki-arrow-left fs-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                     Kembali
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -32,22 +32,10 @@
 
 @section('content')
     <div class='row'>
-        <div class="col-md-auto mt-2">
-            <button class="btn btn-info" onclick="history.back();">
-                <i class="ki-duotone ki-arrow-left fs-1">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                </i>
-                Kembali
-            </button>
-        </div>
-    </div>
-
-    <div class='row'>
         <div class='col-md-7'>
             <div class="card">
                 <div class="card-header">
-                    <h4>Dokumen Persetujuan</h4>
+                    <h4 class='card-title'>Dokumen Persetujuan</h4>
                 </div>
                 <div class="card-body">
                     <livewire:document.transaction.approval.remarks-document :approvalId="$objId" />
@@ -56,12 +44,20 @@
         </div>
 
         <div class='col-md-5'>
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h4>Riwayat Persetujuan</h4>
+                    <h4 class='card-title'>Riwayat Persetujuan</h4>
                 </div>
                 <div class="card-body">
                     <livewire:document.transaction.approval-status.datatable :approvalId="$objId" />
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class='card-title'>Tindak Lanjut Persetujuan</h4>
+                </div>
+                <div class="card-body">
                     <livewire:document.transaction.approval-status.create :approvalId="$objId" />
                 </div>
             </div>

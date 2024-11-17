@@ -65,7 +65,7 @@ class ProductDetailHistory extends Model
         $remarksInfo = $this->remarks->productDetailHistoryRemarksInfo();
 
         if (!$authUser->hasPermissionTo($remarksInfo['access'])) {
-            return "";
+            return $remarksInfo['text'];
         }
 
         return "<a target='_blank' class='btn btn-info btn-sm' href='{$remarksInfo['url']}'>

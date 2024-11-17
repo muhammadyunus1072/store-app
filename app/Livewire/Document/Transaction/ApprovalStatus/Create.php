@@ -1,20 +1,15 @@
 <?php
 
-namespace App\Livewire\Document\Master\StatusApproval;
+namespace App\Livewire\Document\Transaction\ApprovalStatus;
 
-use Exception;
 use App\Helpers\General\Alert;
 use App\Permissions\AccessDocument;
 use App\Permissions\PermissionHelper;
 use App\Repositories\Core\User\UserRepository;
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
-use App\Repositories\Document\Master\StatusApproval\StatusApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalStatusRepository;
-use App\Repositories\Document\Transaction\ApprovalUserRepository;
-use App\Repositories\Document\Transaction\ApprovalUserStatusApprovalRepository;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 

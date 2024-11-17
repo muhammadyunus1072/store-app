@@ -18,6 +18,8 @@ use App\Models\Logistic\Master\Warehouse\Warehouse;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
+use App\Permissions\AccessLogistic;
+use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 
 class StockRequest extends Model
@@ -147,14 +149,26 @@ class StockRequest extends Model
             ],
         ];
     }
+
+    public function approvalInfo()
+    {
+        return [
+            "text" => "Permintaan - " . $this->number,
+            "access" => PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_READ),
+            "url" => route("stock_request.show", Crypt::encrypt($this->id))
+        ];
+    }
+
     public function onApprovalDone()
     {
         $this->transactionStockProcess();
     }
+
     public function onApprovalRevertDone()
     {
         $this->transactionStockCancel();
     }
+
     public function onApprovalCanceled() {}
     public function onApprovalRevertCancel() {}
 

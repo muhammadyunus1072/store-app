@@ -7,6 +7,8 @@ use App\Models\Document\Transaction\Approval;
 trait HasApproval
 {
     abstract public function approvalView();
+    abstract public function approvalInfo();
+
     abstract public function onApprovalDone();
     abstract public function onApprovalRevertDone();
     abstract public function onApprovalCanceled();

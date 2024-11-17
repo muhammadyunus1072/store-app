@@ -36,12 +36,11 @@ class ApprovalRepository extends MasterDataRepository
 
     public static function datatable()
     {
-        return Approval::with('approvalUsers', 'approvalUserHistories')
-            ->whereHas(
-                'approvalUsers',
-                function ($query) {
-                    $query->where('user_id', Auth::id());
-                }
-            );
+        return Approval::whereHas(
+            'approvalUsers',
+            function ($query) {
+                $query->where('user_id', Auth::id());
+            }
+        );
     }
 }

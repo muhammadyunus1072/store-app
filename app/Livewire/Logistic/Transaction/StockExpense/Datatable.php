@@ -145,6 +145,14 @@ class Datatable extends Component
                     return $item->transactionStockStatus();
                 }
             ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Status Persetujuan',
+                'render' => function ($item) {
+                    return $item->transactionStockStatus();
+                }
+            ],
         ];
     }
 

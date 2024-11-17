@@ -19,20 +19,18 @@ class Datatable extends Component
 {
     use WithDatatable;
 
-    protected $listeners = ['on-submit-status-approval' => '$refresh'];
-
     public $approvalId;
 
     public $isCanDelete;
-    public $showSelectPageLength = false;
-    public $showKeywordFilter = false;
-
 
     // Delete Dialog
     public $targetDeleteId;
 
     public function onMount()
     {
+        $this->showSelectPageLength = false;
+        $this->showKeywordFilter = false;
+
         $authUser = UserRepository::authenticatedUser();
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL_STATUS, PermissionHelper::TYPE_DELETE));
     }

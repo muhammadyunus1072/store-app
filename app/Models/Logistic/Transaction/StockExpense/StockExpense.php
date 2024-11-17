@@ -3,21 +3,22 @@
 namespace App\Models\Logistic\Transaction\StockExpense;
 
 use App\Settings\SettingLogistic;
-use Illuminate\Support\Facades\Log;
-use App\Models\Core\Company\Company;
 use App\Traits\Document\HasApproval;
-use Sis\TrackHistory\HasTrackHistory;
-use Illuminate\Database\Eloquent\Model;
-use App\Helpers\General\NumberGenerator;
 use App\Traits\Logistic\HasTransactionStock;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Helpers\General\NumberGenerator;
+use App\Models\Core\Company\Company;
 use App\Models\Document\Master\ApprovalConfig;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
+use App\Permissions\AccessLogistic;
+use App\Permissions\PermissionHelper;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
+use Sis\TrackHistory\HasTrackHistory;
 
 class StockExpense extends Model
 {
@@ -136,14 +137,26 @@ class StockExpense extends Model
             ],
         ];
     }
+
+    public function approvalInfo()
+    {
+        return [
+            "text" => "Pengeluaran - " . $this->number,
+            "access" => PermissionHelper::transform(AccessLogistic::STOCK_EXPENSE, PermissionHelper::TYPE_READ),
+            "url" => route("stock_expense.show", Crypt::encrypt($this->id))
+        ];
+    }
+
     public function onApprovalDone()
     {
         $this->transactionStockProcess();
     }
+
     public function onApprovalRevertDone()
     {
         $this->transactionStockCancel();
     }
+
     public function onApprovalCanceled() {}
     public function onApprovalRevertCancel() {}
 

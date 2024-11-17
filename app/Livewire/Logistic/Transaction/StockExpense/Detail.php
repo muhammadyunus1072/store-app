@@ -178,8 +178,6 @@ class Detail extends Component
             }
         }
 
-        $this->validate();
-
         $validatedData = [
             'company_id' => Crypt::decrypt($this->companyId),
             'warehouse_id' => Crypt::decrypt($this->warehouseId),

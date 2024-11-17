@@ -10,6 +10,7 @@ use App\Models\Core\User\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Transaction\ApprovalUser;
 use App\Models\Document\Transaction\ApprovalHistory;
+use App\Repositories\Core\User\UserRepository;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Repositories\Document\Transaction\ApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalUserRepository;
@@ -122,7 +123,37 @@ class Approval extends Model
             $approvalUser = ApprovalUserRepository::findNotSubmitted($this->id, $userId);
         }
 
-        return $approvalUser->user_id == $userId ? $approvalUser : null;
+        return $approvalUser && $approvalUser->user_id == $userId ? $approvalUser : null;
+    }
+
+    public function beautifyStatus()
+    {
+        if ($this->done_at) {
+            return "<div class='badge badge-success'>Selesai</div>";
+        } else if ($this->cancel_at) {
+            return "<div class='badge badge-danger'>Batal</div>";
+        } else {
+            return "<div class='badge badge-primary'>Dalam Proses</div>";
+        }
+    }
+
+    public function remarksUrlButton()
+    {
+        if (empty($this->remarks)) {
+            return "";
+        }
+
+        $authUser = UserRepository::authenticatedUser();
+        $remarksInfo = $this->remarks->approvalInfo();
+
+        if (!$authUser->hasPermissionTo($remarksInfo['access'])) {
+            return $remarksInfo['text'];
+        }
+
+        return "<a target='_blank' class='btn btn-info btn-sm' href='{$remarksInfo['url']}'>
+            <i class='ki-solid ki-eye fs-1'></i>
+            {$remarksInfo['text']}
+        </a>";
     }
 
     /*
