@@ -40,8 +40,6 @@ return new class extends Migration
             $table->index('cancel_by_id', 'approvals_cancel_by_id_idx');
             $table->index('remarks_id', 'approvals_remarks_id_idx');
             $table->index('remarks_type', 'approvals_remarks_type_idx');
-
-            $table->index('approval_config_id', 'approvals_approval_config_id_idx');
         }
 
         $table->string('number')->nullable()->comment('Nomor');
@@ -58,9 +56,6 @@ return new class extends Migration
         // Source
         $table->unsignedBigInteger("remarks_id")->nullable()->comment('FK Polimorfik');
         $table->string('remarks_type')->nullable()->comment('Jenis Polimorfik');
-
-        // Auto Create By Config
-        $table->unsignedBigInteger("approval_config_id")->nullable()->comment('FK Approval Config');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

@@ -22,8 +22,9 @@ class StatusApproval extends Model
 
     public function saveInfo($object, $prefix = "status_approval")
     {
-        $object[$prefix . "_is_trigger_done"] = $this->name;
-        $object[$prefix . "_is_trigger_cancel"] = $this->type;
+        $object[$prefix . "_name"] = $this->name;
+        $object[$prefix . "_is_trigger_done"] = $this->is_trigger_done;
+        $object[$prefix . "_is_trigger_cancel"] = $this->is_trigger_cancel;
 
         return $object;
     }

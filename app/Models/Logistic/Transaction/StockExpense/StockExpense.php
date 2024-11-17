@@ -17,6 +17,7 @@ use App\Models\Logistic\Master\Warehouse\Warehouse;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
+use Illuminate\Support\Facades\Crypt;
 
 class StockExpense extends Model
 {
@@ -125,11 +126,14 @@ class StockExpense extends Model
     /*
     | APPROVAL
     */
-    public function approvalViewShow()
+    public function approvalView()
     {
         return [
-            'component' => 'logistic.master.product.datatable',
-            'data' => [],
+            'component' => 'logistic.transaction.stock-expense.detail',
+            'data' => [
+                'objId' => Crypt::encrypt($this->id),
+                'isShow' => true,
+            ],
         ];
     }
     public function onApprovalDone()

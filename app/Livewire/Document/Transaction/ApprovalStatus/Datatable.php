@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Document\Transaction\ApprovalHistory;
+namespace App\Livewire\Document\Transaction\ApprovalStatus;
 
 use Carbon\Carbon;
 use Livewire\Component;
@@ -13,27 +13,34 @@ use Illuminate\Support\Facades\Crypt;
 use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
-use App\Repositories\Document\Transaction\ApprovalHistoryRepository;
+use App\Repositories\Document\Transaction\ApprovalStatusRepository;
 
 class Datatable extends Component
 {
     use WithDatatable;
+
+    protected $listeners = ['on-submit-status-approval' => '$refresh'];
+
     public $approvalId;
-    
-    public $isCanUpdate;
+
     public $isCanDelete;
-    public $show_filter = false;
-    public $keyword_filter = false;
+    public $showSelectPageLength = false;
+    public $showKeywordFilter = false;
+
 
     // Delete Dialog
     public $targetDeleteId;
 
     public function onMount()
     {
-        $this->length = 5;
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL, PermissionHelper::TYPE_DELETE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL_STATUS, PermissionHelper::TYPE_DELETE));
+    }
+
+    #[On('on-submit-status-approval')]
+    public function onSubmitStatusApproval()
+    {
+        $this->refresh();
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -42,10 +49,11 @@ class Datatable extends Component
         if (!$this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
-        
-        ApprovalHistoryRepository::delete(Crypt::decrypt($this->targetDeleteId));
+
+        ApprovalStatusRepository::delete(Crypt::decrypt($this->targetDeleteId));
         Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
-        $this->dispatch('refreshApproval');
+
+        $this->dispatch('on-delete-status-approval');
     }
 
     #[On('on-delete-dialog-cancel')]
@@ -74,61 +82,55 @@ class Datatable extends Component
     {
         return [
             [
+                'sortable' => false,
                 'key' => 'created_at',
-                'searchable' => false,
                 'name' => 'Tanggal',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i');
                 }
             ],
             [
                 'sortable' => false,
-                'searchable' => false,
-                'name' => 'Oleh',
-                'render' => function($item)
-                {
-                    return $item->user->name;
+                'name' => 'Status',
+                'render' => function ($item) {
+                    return $item->status_approval_name;
                 }
             ],
             [
+                'sortable' => false,
                 'key' => 'note',
-                'searchable' => false,
-                'name' => 'Keterangan',
-                'render' => function($item)
-                {
+                'name' => 'Catatan',
+                'render' => function ($item) {
                     return $item->note;
                 }
             ],
             [
-                'key' => 'note',
-                'searchable' => false,
-                'name' => 'Catatan Status',
-                'render' => function($item)
-                {
-                    return $item->statusApproval->name;
+                'sortable' => false,
+                'name' => 'Oleh',
+                'render' => function ($item) {
+                    return $item->user->name;
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Aksi',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     $html = "";
                     $id = Crypt::encrypt($item->id);
-                    if(Auth::id() == $item->user_id){
+
+                    if ($this->isCanDelete && Auth::id() == $item->user_id) {
                         $html = "<div class='btn-group'>
-                        <button class='btn p-0 m-0' wire:click=\"showDeleteDialog('$id')\">
-                            <i class='ki-duotone ki-trash fs-1 text-danger'>
-                                <span class='path1'></span>
-                                <span class='path2'></span>
-                                <span class='path3'></span>
-                                <span class='path4'></span>
-                                <span class='path5'></span>
-                            </i>
-                        </button>
-                    </div>";
+                            <button class='btn p-0 m-0' wire:click=\"showDeleteDialog('$id')\">
+                                <i class='ki-duotone ki-trash fs-1 text-danger'>
+                                    <span class='path1'></span>
+                                    <span class='path2'></span>
+                                    <span class='path3'></span>
+                                    <span class='path4'></span>
+                                    <span class='path5'></span>
+                                </i>
+                            </button>
+                        </div>";
                     };
                     return $html;
                 }
@@ -138,11 +140,11 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return ApprovalHistoryRepository::datatable(Crypt::decrypt($this->approvalId));
+        return ApprovalStatusRepository::datatable(Crypt::decrypt($this->approvalId));
     }
 
     public function getView(): string
     {
-        return 'livewire.document.transaction.approval-history.datatable';
+        return 'livewire.document.transaction.approval-status.datatable';
     }
 }

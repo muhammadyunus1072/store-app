@@ -31,5 +31,40 @@
 @stop
 
 @section('content')
-    <livewire:document.transaction.approval.detail :objId="$objId">
+    <div class='row'>
+        <div class="col-md-auto mt-2">
+            <button class="btn btn-info" onclick="history.back();">
+                <i class="ki-duotone ki-arrow-left fs-1">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+                </i>
+                Kembali
+            </button>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-md-7'>
+            <div class="card">
+                <div class="card-header">
+                    <h4>Dokumen Persetujuan</h4>
+                </div>
+                <div class="card-body">
+                    <livewire:document.transaction.approval.remarks-document :approvalId="$objId" />
+                </div>
+            </div>
+        </div>
+
+        <div class='col-md-5'>
+            <div class="card">
+                <div class="card-header">
+                    <h4>Riwayat Persetujuan</h4>
+                </div>
+                <div class="card-body">
+                    <livewire:document.transaction.approval-status.datatable :approvalId="$objId" />
+                    <livewire:document.transaction.approval-status.create :approvalId="$objId" />
+                </div>
+            </div>
+        </div>
+    </div>
 @stop

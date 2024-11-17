@@ -12,10 +12,19 @@ class ApprovalUserRepository extends MasterDataRepository
         return ApprovalUser::class;
     }
 
-    public static function findByUser($approval_id, $user_id)
+    public static function findNextSubmission($approvalId)
     {
-        return ApprovalUser::where('approval_id', $approval_id)
-        ->where('user_id', $user_id)
-        ->first();
+        return ApprovalUser::where('approval_id', $approvalId)
+            ->whereDoesntHave('approvalStatus')
+            ->orderBy('position', 'ASC')
+            ->first();
+    }
+
+    public static function findNotSubmitted($approvalId, $userId)
+    {
+        return ApprovalUser::where('approval_id', $approvalId)
+            ->where('user_id', $userId)
+            ->whereDoesntHave('approvalStatus')
+            ->first();
     }
 }

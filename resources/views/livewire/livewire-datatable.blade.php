@@ -19,7 +19,7 @@
 
     {{-- DATATABLE --}}
     <div class="row justify-content-between mb-3">
-        <div class="col-auto mb-2 {{ !isset($show_filter) || $show_filter == true ? '' : 'd-none' }}">
+        <div class="col-auto mb-2 {{ !isset($showSelectPageLength) || $showSelectPageLength == true ? '' : 'd-none' }}">
             <label>Show</label>
             <select wire:model.change="length" class="form-select">
                 @foreach ($lengthOptions as $item)
@@ -27,7 +27,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-sm-6 mb-2 {{ !isset($keyword_filter) || $keyword_filter == true ? '' : 'd-none' }}">
+        <div class="col-sm-6 mb-2 {{ !isset($showKeywordFilter) || $showKeywordFilter == true ? '' : 'd-none' }}">
             <label>Kata Kunci</label>
             <input wire:model.live.debounce.300ms="search" type="text" class="form-control">
         </div>

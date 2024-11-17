@@ -12,6 +12,7 @@ use App\Models\Document\Transaction\ApprovalUser;
 use App\Models\Document\Transaction\ApprovalHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Repositories\Document\Transaction\ApprovalRepository;
+use App\Repositories\Document\Transaction\ApprovalUserRepository;
 
 class Approval extends Model
 {
@@ -27,8 +28,6 @@ class Approval extends Model
         'is_sequentially',
         'remarks_id',
         'remarks_type',
-
-        'approval_config_id',
     ];
 
     protected $guarded = ['id'];
@@ -113,6 +112,17 @@ class Approval extends Model
     public function isCanceled()
     {
         return !empty($this->cancel_at);
+    }
+
+    public function findCurrentApprovalUser($userId)
+    {
+        if ($this->is_sequentially) {
+            $approvalUser = ApprovalUserRepository::findNextSubmission($this->id);
+        } else {
+            $approvalUser = ApprovalUserRepository::findNotSubmitted($this->id, $userId);
+        }
+
+        return $approvalUser->user_id == $userId ? $approvalUser : null;
     }
 
     /*

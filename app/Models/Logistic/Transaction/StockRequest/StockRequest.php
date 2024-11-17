@@ -18,6 +18,7 @@ use App\Models\Logistic\Master\Warehouse\Warehouse;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Models\Logistic\Transaction\TransactionStock\TransactionStock;
+use Illuminate\Support\Facades\Crypt;
 
 class StockRequest extends Model
 {
@@ -136,7 +137,16 @@ class StockRequest extends Model
     /*
     | APPROVAL
     */
-    public function approvalViewShow() {}
+    public function approvalView()
+    {
+        return [
+            'component' => 'logistic.transaction.stock-request.detail',
+            'data' => [
+                'objId' => Crypt::encrypt($this->id),
+                'isShow' => true,
+            ],
+        ];
+    }
     public function onApprovalDone()
     {
         $this->transactionStockProcess();

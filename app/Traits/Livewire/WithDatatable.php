@@ -17,6 +17,8 @@ trait WithDatatable
     public $sortBy = '';
     public $sortDirection = 'asc';
     public $loading = false;
+    public $showKeywordFilter = true;
+    public $showSelectPageLength = true;
 
     abstract public function getColumns(): array;
     abstract public function getQuery();

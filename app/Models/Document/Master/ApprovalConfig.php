@@ -10,6 +10,7 @@ use App\Models\Document\Master\ApprovalConfigUser;
 use App\Repositories\Document\Master\ApprovalConfig\ApprovalConfigRepository;
 use App\Repositories\Document\Transaction\ApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalUserRepository;
+use App\Repositories\Document\Transaction\ApprovalUserStatusApprovalRepository;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ApprovalConfig extends Model
@@ -67,21 +68,23 @@ class ApprovalConfig extends Model
                     'is_sequentially' => $approvalConfig->is_sequentially,
                     'remarks_id' => $object->id,
                     'remarks_type' => get_class($object),
-
-                    'approval_config_id' => $approvalConfig->id,
                 ]);
 
+                // Handle : Approval User
                 foreach ($approvalConfig->approvalConfigUsers as $approvalConfigUser) {
-                    ApprovalUserRepository::create([
+                    $approvalUser = ApprovalUserRepository::create([
                         'approval_id' => $approval->id,
                         'user_id' => $approvalConfigUser->user_id,
-                        'status_approval_id' => $approvalConfigUser->status_approval_id,
                         'position' => $approvalConfigUser->position,
-                        'is_trigger_done' => $approvalConfigUser->is_trigger_done,
-                        'is_can_cancel' => $approvalConfigUser->is_can_cancel,
-
-                        'approval_config_user_id' => $approvalConfigUser->id,
                     ]);
+
+                    // Handle: Approval User Status Approval
+                    foreach ($approvalConfigUser->approvalConfigUserStatusApprovals as $approvalConfigUserStatus) {
+                        ApprovalUserStatusApprovalRepository::create([
+                            'approval_user_id' => $approvalUser->id,
+                            'status_approval_id' => $approvalConfigUserStatus->status_approval_id,
+                        ]);
+                    }
                 }
 
                 return $approval;

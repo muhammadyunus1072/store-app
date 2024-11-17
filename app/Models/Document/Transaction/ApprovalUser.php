@@ -18,7 +18,6 @@ class ApprovalUser extends Model
         'approval_id',
         'user_id',
         'position',
-        'approval_config_user_id'
     ];
 
     protected $guarded = ['id'];
@@ -26,6 +25,10 @@ class ApprovalUser extends Model
     protected static function onBoot()
     {
         self::deleted(function ($model) {
+            foreach ($model->approvalUserStatuses as $item) {
+                $item->delete();
+            }
+
             if ($model->approvalStatus) {
                 $model->approvalStatus->delete();
             }
@@ -48,5 +51,16 @@ class ApprovalUser extends Model
     public function approvalStatus()
     {
         return $this->hasOne(ApprovalStatus::class, 'approval_user_id', 'id');
+    }
+
+    public function approvalUserStatusApprovals()
+    {
+        return $this->hasMany(ApprovalUserStatusApproval::class, 'approval_user_id', 'id');
+    }
+
+    public function statusApprovals()
+    {
+        return $this->belongsToMany(StatusApproval::class, 'approval_user_status_approvals', 'approval_user_id', 'status_approval_id')
+            ->whereNull('approval_user_status_approvals.deleted_at');
     }
 }

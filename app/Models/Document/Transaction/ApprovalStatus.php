@@ -15,9 +15,9 @@ class ApprovalStatus extends Model
 
     protected $fillable = [
         'approval_id',
-        'approval_user_id',
         'user_id',
         'status_approval_id',
+        'approval_user_id',
         'note',
     ];
 

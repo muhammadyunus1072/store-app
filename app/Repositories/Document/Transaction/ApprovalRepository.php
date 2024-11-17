@@ -16,12 +16,13 @@ class ApprovalRepository extends MasterDataRepository
 
     public static function findWithDetails($id)
     {
-        return Approval::with([
-            'creator',    
-            'approvalUsers',    
-            'approvalUsers.user',
-            'approvalUserHistories.user',
-        ]
+        return Approval::with(
+            [
+                'creator',
+                'approvalUsers',
+                'approvalUsers.user',
+                'approvalUserHistories.user',
+            ]
         )->where('id', $id)->first();
     }
 
@@ -35,10 +36,12 @@ class ApprovalRepository extends MasterDataRepository
 
     public static function datatable()
     {
-        return Approval::with('approvalUsers', 'approvalUserHistories')->whereHas('approvalUsers', function($query)
-            {
-                $query->where('user_id', Auth::id());
-            }
-        );
+        return Approval::with('approvalUsers', 'approvalUserHistories')
+            ->whereHas(
+                'approvalUsers',
+                function ($query) {
+                    $query->where('user_id', Auth::id());
+                }
+            );
     }
 }

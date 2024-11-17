@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('approval_users', function (Blueprint $table) {
+        Schema::create('approval_user_status_approvals', function (Blueprint $table) {
             $this->scheme($table, false);
         });
 
-        Schema::create('_history_approval_users', function (Blueprint $table) {
+        Schema::create('_history_approval_user_status_approvals', function (Blueprint $table) {
             $this->scheme($table, true);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('approval_users');
-        Schema::dropIfExists('_history_approval_users');
+        Schema::dropIfExists('approval_user_status_approvals');
+        Schema::dropIfExists('_history_approval_user_status_approvals');
     }
 
     private function scheme(Blueprint $table, $is_history = false)
@@ -33,13 +33,12 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
-            $table->index('approval_id', 'approval_users_approval_id_idx');
-            $table->index('user_id', 'approval_users_user_id_idx');
+            $table->index('approval_user_id', 'approval_user_status_approvals_approval_user_id_idx');
+            $table->index('status_approval_id', 'approval_user_status_approvals_status_approval_id_idx');
         }
 
-        $table->unsignedBigInteger("approval_id")->comment('Approval ID');
-        $table->unsignedBigInteger("user_id")->comment('User ID');
-        $table->double('position')->comment('Urutan Persetujuan');
+        $table->unsignedBigInteger("approval_user_id")->comment('Approval User ID');
+        $table->unsignedBigInteger("status_approval_id")->comment('Status Approval ID');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

@@ -15,6 +15,7 @@ use App\Models\Purchasing\Master\Supplier\Supplier;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Crypt;
 use Sis\TrackHistory\HasTrackHistory;
 
 class PurchaseOrder extends Model
@@ -143,7 +144,16 @@ class PurchaseOrder extends Model
     /*
     | APPROVAL
     */
-    public function approvalViewShow() {}
+    public function approvalView()
+    {
+        return [
+            'component' => 'purchasing.transaction.purchase-order.detail',
+            'data' => [
+                'objId' => Crypt::encrypt($this->id),
+                'isShow' => true,
+            ],
+        ];
+    }
     public function onApprovalDone()
     {
         $this->transactionStockProcess();
