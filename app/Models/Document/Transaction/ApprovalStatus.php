@@ -30,11 +30,7 @@ class ApprovalStatus extends Model
         });
 
         self::created(function ($model) {
-            if ($model->status_approval_is_trigger_done) {
-                $model->approval->done($model);
-            } elseif ($model->status_approval_is_trigger_cancel) {
-                $model->approval->cancel($model);
-            }
+            $model->approval->handleStatusCreated($model);
         });
 
         self::updating(function ($model) {
@@ -44,12 +40,13 @@ class ApprovalStatus extends Model
         });
 
         self::deleted(function ($model) {
-            if ($model->status_approval_is_trigger_done) {
-                $model->approval->revertDone();
-            } elseif ($model->status_approval_is_trigger_cancel) {
-                $model->approval->revertCancel();
-            }
+            $model->approval->handleStatusDeleted($model);
         });
+    }
+
+    public function beautifyStatus()
+    {
+        return "<div class='badge' style='background-color:{$this->status_approval_color}; color:{$this->status_approval_text_color}'>{$this->status_approval_name}</div>";
     }
 
     /*

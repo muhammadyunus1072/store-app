@@ -122,6 +122,16 @@ class Datatable extends Component
             [
                 'sortable' => false,
                 'searchable' => false,
+                'name' => 'Warna',
+                'render' => function ($item) {
+                    $html = "Warna Background: <input type='color' value='$item->color' disabled>";
+                    $html .= "<br>Warna Tulisan: <input type='color' value='$item->text_color' disabled>";
+                    return $html;
+                }
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
                 'name' => 'Penanda Selesai',
                 'render' => function ($item) {
                     return $item->is_trigger_done ? "<div class='badge badge-success'>Iya</div>" : "<div class='badge badge-secondary'>Tidak</div>";

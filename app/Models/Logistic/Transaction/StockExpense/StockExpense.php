@@ -127,7 +127,7 @@ class StockExpense extends Model
     /*
     | APPROVAL
     */
-    public function approvalView()
+    public function approvalRemarksView()
     {
         return [
             'component' => 'logistic.transaction.stock-expense.detail',
@@ -138,7 +138,7 @@ class StockExpense extends Model
         ];
     }
 
-    public function approvalInfo()
+    public function approvalRemarksInfo()
     {
         return [
             "text" => "Pengeluaran - " . $this->number,

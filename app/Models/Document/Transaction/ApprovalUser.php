@@ -35,6 +35,20 @@ class ApprovalUser extends Model
         });
     }
 
+    public function isStatusSubmitted()
+    {
+        return !empty($this->approvalStatus);
+    }
+
+    public function beautifyStatusSubmitted()
+    {
+        if ($this->isStatusSubmitted()) {
+            return "<div class='badge badge-success'>Sudah Respon</div>";
+        } else {
+            return "<div class='badge badge-secondary'>Belum Respon</div>";
+        }
+    }
+
     /*
     | RELATIONSHIP
     */

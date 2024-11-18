@@ -22,11 +22,14 @@ class Detail extends Component
     public $objId;
     public $object;
 
+    #[Validate('required', message: 'Judul Harus Diisi', onUpdate: false)]
+    public $title;
     #[Validate('required', message: 'Kunci Harus Diisi', onUpdate: false)]
     public $key;
     #[Validate('required', message: 'Priority Harus Diisi', onUpdate: false)]
     public $priority = 1;
     public $isSequentially = false;
+    public $isDoneWhenAllSubmitted = false;
     public $config = [];
 
     public $approvalConfigUsers = [];
@@ -83,9 +86,11 @@ class Detail extends Component
         if ($this->objId) {
             $approvalConfig = ApprovalConfigRepository::findWithDetails(Crypt::decrypt($this->objId));
 
+            $this->title = $approvalConfig->title;
             $this->key = $approvalConfig->key;
             $this->priority = $approvalConfig->priority;
             $this->isSequentially = $approvalConfig->is_sequentially;
+            $this->isDoneWhenAllSubmitted = $approvalConfig->is_done_when_all_submitted;
             $this->config = json_decode($approvalConfig->config, true);
 
             foreach ($approvalConfig->approvalConfigUsers as $index => $approvalConfigUser) {
@@ -98,8 +103,6 @@ class Detail extends Component
                     "status_approvals" => $approvalConfigUser->approvalConfigUserStatusApprovals()->pluck('status_approval_id')->toArray(),
                 ];
             }
-        } else {
-            $this->addConfig();
         }
     }
 
@@ -108,9 +111,11 @@ class Detail extends Component
         $this->validate();
 
         $validatedData = [
+            'title' => $this->title,
             'key' => $this->key,
             'priority' => NumberFormatter::imaskToValue($this->priority),
             'is_sequentially' => $this->isSequentially,
+            'is_done_when_all_submitted' => $this->isDoneWhenAllSubmitted,
             'config' => json_encode($this->config),
         ];
 
@@ -161,7 +166,7 @@ class Detail extends Component
                 $this,
                 Alert::ICON_SUCCESS,
                 "Berhasil",
-                "Akses Berhasil Diperbarui",
+                "Data Berhasil Diperbarui",
                 "on-dialog-confirm",
                 "on-dialog-cancel",
                 "Oke",
@@ -297,7 +302,7 @@ class Detail extends Component
         }
 
         unset($this->approvalConfigUsers[$index]);
-        
+
         $this->dispatch("init-select2-status-approval");
     }
 

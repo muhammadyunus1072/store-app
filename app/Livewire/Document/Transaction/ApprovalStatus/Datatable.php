@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
+use App\Repositories\Document\Transaction\ApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalStatusRepository;
 
 class Datatable extends Component
@@ -22,6 +23,7 @@ class Datatable extends Component
     public $approvalId;
 
     public $isCanDelete;
+    public $isSequentially;
 
     // Delete Dialog
     public $targetDeleteId;
@@ -33,13 +35,13 @@ class Datatable extends Component
 
         $authUser = UserRepository::authenticatedUser();
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL_STATUS, PermissionHelper::TYPE_DELETE));
+
+        $approval = ApprovalRepository::find(Crypt::decrypt($this->approvalId));
+        $this->isSequentially = $approval->is_sequentially;
     }
 
     #[On('on-submit-status-approval')]
-    public function onSubmitStatusApproval()
-    {
-        $this->refresh();
-    }
+    public function onSubmitStatusApproval() {}
 
     #[On('on-delete-dialog-confirm')]
     public function onDialogDeleteConfirm()
@@ -91,7 +93,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'name' => 'Status',
                 'render' => function ($item) {
-                    return $item->status_approval_name;
+                    return $item->beautifyStatus();
                 }
             ],
             [
@@ -113,23 +115,26 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Aksi',
-                'render' => function ($item) {
+                'render' => function ($item, $index) {
                     $html = "";
-                    $id = Crypt::encrypt($item->id);
 
                     if ($this->isCanDelete && Auth::id() == $item->user_id) {
-                        $html = "<div class='btn-group'>
-                            <button class='btn p-0 m-0' wire:click=\"showDeleteDialog('$id')\">
-                                <i class='ki-duotone ki-trash fs-1 text-danger'>
-                                    <span class='path1'></span>
-                                    <span class='path2'></span>
-                                    <span class='path3'></span>
-                                    <span class='path4'></span>
-                                    <span class='path5'></span>
-                                </i>
-                            </button>
-                        </div>";
+                        if (!$this->isSequentially || ($this->isSequentially && $index == 0)) {
+                            $id = Crypt::encrypt($item->id);
+                            $html = "<div class='btn-group'>
+                                <button class='btn p-0 m-0' wire:click=\"showDeleteDialog('$id')\">
+                                    <i class='ki-duotone ki-trash fs-1 text-danger'>
+                                        <span class='path1'></span>
+                                        <span class='path2'></span>
+                                        <span class='path3'></span>
+                                        <span class='path4'></span>
+                                        <span class='path5'></span>
+                                    </i>
+                                </button>
+                            </div>";
+                        }
                     };
+
                     return $html;
                 }
             ],

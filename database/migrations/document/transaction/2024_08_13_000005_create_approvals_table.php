@@ -45,6 +45,7 @@ return new class extends Migration
         $table->string('number')->nullable()->comment('Nomor');
         $table->text('note')->nullable()->comment('Catatan');
         $table->boolean('is_sequentially')->default(false)->comment('Penentu harus berurutan');
+        $table->boolean('is_done_when_all_submitted')->default(false)->comment('Selesai Jika Seluruh Submit Status');
 
         $table->timestamp('done_at')->nullable()->comment('Timestamp Done');
         $table->unsignedBigInteger('done_by_id')->nullable()->comment('User Done');

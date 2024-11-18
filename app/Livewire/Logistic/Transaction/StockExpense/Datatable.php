@@ -150,7 +150,7 @@ class Datatable extends Component
                 'searchable' => false,
                 'name' => 'Status Persetujuan',
                 'render' => function ($item) {
-                    return $item->transactionStockStatus();
+                    return $item->approvalUrlButton();
                 }
             ],
         ];

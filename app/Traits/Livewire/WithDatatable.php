@@ -56,10 +56,7 @@ trait WithDatatable
     }
 
     #[On('datatable-refresh')]
-    public function datatableRefresh()
-    {
-        $this->refresh();
-    }
+    public function datatableRefresh() {}
 
     public function datatablePaginate($query)
     {

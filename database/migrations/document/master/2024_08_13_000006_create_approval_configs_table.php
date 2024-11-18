@@ -36,10 +36,12 @@ return new class extends Migration
             $table->index('key', 'approval_configs_key_idx');
         }
 
+        $table->string('title')->comment('Judul');
         $table->string('key')->comment('Kunci');
-        $table->boolean('is_sequentially')->default(false)->comment('Penentu harus berurutan');
         $table->integer('priority')->comment('Prioritas');
-        $table->json('config')->comment('Konfigurasi Aturan');
+        $table->boolean('is_sequentially')->default(false)->comment('Penentu harus berurutan');
+        $table->boolean('is_done_when_all_submitted')->default(false)->comment('Selesai Jika Seluruh Submit Status');
+        $table->json('config')->nullable()->comment('Konfigurasi Aturan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

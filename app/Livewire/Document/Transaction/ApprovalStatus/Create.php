@@ -58,6 +58,8 @@ class Create extends Component
                 $this->statusApprovals[] = [
                     'id' => Crypt::encrypt($item->id),
                     'text' => $item->name,
+                    'color' => $item->color,
+                    'text_color' => $item->text_color,
                 ];
             }
         }
@@ -96,13 +98,13 @@ class Create extends Component
 
         Alert::confirmation(
             $this,
-            Alert::ICON_SUCCESS,
-            "Berhasil",
-            "Akses Berhasil Diperbarui",
+            Alert::ICON_QUESTION,
+            "Konfirmasi",
+            "Apakah Anda Yakin?",
             "on-dialog-request-submit-confirm",
             "on-dialog-request-submit-cancel",
-            "Oke",
-            "Tutup",
+            "Iya",
+            "Tidak",
         );
     }
 }

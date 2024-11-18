@@ -11,6 +11,30 @@
             @enderror
         </div>
 
+        <div class="col-md-2 mb-4">
+            <label>Warna Background</label>
+            <input type="color" class="form-control form-control-color w-100 @error('color') is-invalid @enderror"
+                wire:model="color" />
+
+            @error('color')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <div class="col-md-2 mb-4">
+            <label>Warna Tulisan</label>
+            <input type="color" class="form-control form-control-color w-100 @error('textColor') is-invalid @enderror"
+                wire:model="textColor" />
+
+            @error('textColor')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
         <div class="col-md-auto mb-4 row align-items-end">
             <div class="form-check m-2">
                 <input class="form-check-input" type="checkbox" wire:model="isTriggerDone">

@@ -11,6 +11,7 @@ class RemarksDocument extends Component
 {
     public $approvalId;
     public $approvalView;
+    public $approvalTitle;
 
     public function render()
     {
@@ -20,6 +21,10 @@ class RemarksDocument extends Component
     public function mount()
     {
         $approval = ApprovalRepository::find(Crypt::decrypt($this->approvalId));
-        $this->approvalView = $approval->remarks->approvalView();
+
+        $this->approvalView = $approval->remarks->approvalRemarksView();
+
+        $approvalRemarksInfo = $approval->remarks->approvalRemarksInfo();
+        $this->approvalTitle = $approvalRemarksInfo['text'];
     }
 }

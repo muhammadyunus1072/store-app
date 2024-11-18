@@ -13,10 +13,13 @@ class WarehouseSeeder extends Seeder
     public function run(): void
     {
         Warehouse::create([
-            'name' => 'Gudang Utama',
+            'name' => 'Gudang 1',
         ]);
         Warehouse::create([
-            'name' => 'Gudang Luar',
+            'name' => 'Gudang 2',
+        ]);
+        Warehouse::create([
+            'name' => 'Gudang 3',
         ]);
     }
 }

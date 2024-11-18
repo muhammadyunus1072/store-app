@@ -45,8 +45,11 @@ return new class extends Migration
 
         $table->unsignedBigInteger("status_approval_id")->comment('Status Approval ID');
         $table->string('status_approval_name')->nullable();
-        $table->boolean('status_approval_is_trigger_done')->comment('Menyebabkan Selesainya Persetujuan');
-        $table->boolean('status_approval_is_trigger_cancel')->comment('Menyebabkan Batalnya Persetujuan');
+        $table->string('status_approval_color')->nullable();
+        $table->string('status_approval_text_color')->nullable();
+        $table->boolean('status_approval_is_trigger_done')->nullable();
+        $table->boolean('status_approval_is_trigger_cancel')->nullable();
+
         $table->text('note')->nullable()->comment('Catatan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();

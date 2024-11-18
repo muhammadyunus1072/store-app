@@ -2,18 +2,16 @@
 
 namespace App\Models\Document\Transaction;
 
-use Carbon\Carbon;
 use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\General\NumberGenerator;
 use App\Models\Core\User\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Document\Transaction\ApprovalUser;
-use App\Models\Document\Transaction\ApprovalHistory;
 use App\Repositories\Core\User\UserRepository;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Repositories\Document\Transaction\ApprovalRepository;
 use App\Repositories\Document\Transaction\ApprovalUserRepository;
+use Carbon\Carbon;
 
 class Approval extends Model
 {
@@ -27,6 +25,7 @@ class Approval extends Model
         'cancel_at',
         'cancel_by',
         'is_sequentially',
+        'is_done_when_all_submitted',
         'remarks_id',
         'remarks_type',
     ];
@@ -47,6 +46,118 @@ class Approval extends Model
                 $item->delete();
             }
         });
+    }
+
+    public function isDeletable()
+    {
+        return count($this->approvalStatuses) == 0;
+    }
+
+    public function isEditable()
+    {
+        return count($this->approvalStatuses) == 0;
+    }
+
+    public function isDone()
+    {
+        return !empty($this->done_at);
+    }
+
+    public function isCanceled()
+    {
+        return !empty($this->cancel_at);
+    }
+
+    public function isAllUserSubmitStatus()
+    {
+        foreach ($this->approvalUsers as $approvalUser) {
+            if (!$approvalUser->isStatusSubmitted()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function checkCompleteness($lastSubmittedStatus)
+    {
+        if ($this->is_done_when_all_submitted) {
+            $isAllUserSubmitStatus = $this->isAllUserSubmitStatus();
+
+            if (empty($this->done_at) && empty($this->cancel_at) && $isAllUserSubmitStatus) {
+                $this->done($lastSubmittedStatus);
+            } else if (!empty($this->done_at) && !$isAllUserSubmitStatus) {
+                $this->revertDone();
+            }
+        }
+    }
+
+    public function findCurrentApprovalUser($userId)
+    {
+        if ($this->is_sequentially) {
+            $approvalUser = ApprovalUserRepository::findNextSubmission($this->id);
+        } else {
+            $approvalUser = ApprovalUserRepository::findNotSubmitted($this->id, $userId);
+        }
+
+        return $approvalUser && $approvalUser->user_id == $userId ? $approvalUser : null;
+    }
+
+    public function beautifyStatus($class = "")
+    {
+        if ($this->done_at) {
+            $doneAt = Carbon::parse($this->done_at)->format('d F Y, H:i');
+            return "<div class='badge badge-success {$class}'>Selesai ($doneAt)</div>";
+        } else if ($this->cancel_at) {
+            $cancelAt = Carbon::parse($this->done_at)->format('d F Y, H:i');
+            return "<div class='badge badge-danger {$class}'>Batal ($cancelAt)</div>";
+        } else {
+            return "<div class='badge badge-primary {$class}'>Dalam Proses</div>";
+        }
+    }
+
+    public function remarksUrlButton()
+    {
+        if (empty($this->remarks)) {
+            return "";
+        }
+
+        $authUser = UserRepository::authenticatedUser();
+        $remarksInfo = $this->remarks->approvalRemarksInfo();
+
+        if (!$authUser->hasPermissionTo($remarksInfo['access'])) {
+            return $remarksInfo['text'];
+        }
+
+        return "<a target='_blank' class='btn btn-info btn-sm' href='{$remarksInfo['url']}'>
+            <i class='ki-solid ki-eye fs-1'></i>
+            {$remarksInfo['text']}
+        </a>";
+    }
+
+    /*
+    | HANDLE: STATUS
+    */
+    public function handleStatusCreated($approvalStatus)
+    {
+        if ($approvalStatus->status_approval_is_trigger_done) {
+            $this->done($approvalStatus);
+        } elseif ($approvalStatus->status_approval_is_trigger_cancel) {
+            $this->cancel($approvalStatus);
+        }
+
+        $this->checkCompleteness($approvalStatus);
+    }
+
+    public function handleStatusDeleted($approvalStatus)
+    {
+        if ($approvalStatus->status_approval_is_trigger_done) {
+            $this->revertDone();
+        } elseif ($approvalStatus->status_approval_is_trigger_cancel) {
+            $this->revertCancel();
+        }
+
+        $this->checkCompleteness($approvalStatus);
     }
 
     public function done($approvalStatus)
@@ -95,71 +206,9 @@ class Approval extends Model
         }
     }
 
-    public function isDeletable()
-    {
-        return count($this->approvalStatuses) == 0;
-    }
-
-    public function isEditable()
-    {
-        return count($this->approvalStatuses) == 0;
-    }
-
-    public function isDone()
-    {
-        return !empty($this->done_at);
-    }
-
-    public function isCanceled()
-    {
-        return !empty($this->cancel_at);
-    }
-
-    public function findCurrentApprovalUser($userId)
-    {
-        if ($this->is_sequentially) {
-            $approvalUser = ApprovalUserRepository::findNextSubmission($this->id);
-        } else {
-            $approvalUser = ApprovalUserRepository::findNotSubmitted($this->id, $userId);
-        }
-
-        return $approvalUser && $approvalUser->user_id == $userId ? $approvalUser : null;
-    }
-
-    public function beautifyStatus()
-    {
-        if ($this->done_at) {
-            return "<div class='badge badge-success'>Selesai</div>";
-        } else if ($this->cancel_at) {
-            return "<div class='badge badge-danger'>Batal</div>";
-        } else {
-            return "<div class='badge badge-primary'>Dalam Proses</div>";
-        }
-    }
-
-    public function remarksUrlButton()
-    {
-        if (empty($this->remarks)) {
-            return "";
-        }
-
-        $authUser = UserRepository::authenticatedUser();
-        $remarksInfo = $this->remarks->approvalInfo();
-
-        if (!$authUser->hasPermissionTo($remarksInfo['access'])) {
-            return $remarksInfo['text'];
-        }
-
-        return "<a target='_blank' class='btn btn-info btn-sm' href='{$remarksInfo['url']}'>
-            <i class='ki-solid ki-eye fs-1'></i>
-            {$remarksInfo['text']}
-        </a>";
-    }
-
     /*
     | RELATIONSHIP
     */
-
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');

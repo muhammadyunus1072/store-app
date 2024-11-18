@@ -33,14 +33,7 @@
 @section('content')
     <div class='row'>
         <div class='col-md-7'>
-            <div class="card">
-                <div class="card-header">
-                    <h4 class='card-title'>Dokumen Persetujuan</h4>
-                </div>
-                <div class="card-body">
-                    <livewire:document.transaction.approval.remarks-document :approvalId="$objId" />
-                </div>
-            </div>
+            <livewire:document.transaction.approval.remarks-document :approvalId="$objId" />
         </div>
 
         <div class='col-md-5'>
@@ -53,14 +46,8 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h4 class='card-title'>Tindak Lanjut Persetujuan</h4>
-                </div>
-                <div class="card-body">
-                    <livewire:document.transaction.approval-status.create :approvalId="$objId" />
-                </div>
-            </div>
+            <livewire:document.transaction.approval-status.create :approvalId="$objId" />
+            <livewire:document.transaction.approval.info :approvalId="$objId" />
         </div>
     </div>
 @stop

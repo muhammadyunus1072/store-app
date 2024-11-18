@@ -112,12 +112,16 @@ class Datatable extends Component
                 },
             ],
             [
-                'sortable' => false,
-                'searchable' => false,
+                'key' => 'title',
+                'name' => 'Judul',
+            ],
+            [
+                'key' => 'key',
                 'name' => 'Kunci',
-                'render' => function ($item) {
-                    return $item->key;
-                }
+            ],
+            [
+                'key' => 'priority',
+                'name' => 'Prioritas',
             ],
         ];
     }

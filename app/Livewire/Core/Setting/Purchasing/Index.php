@@ -87,7 +87,7 @@ class Index extends Component
                 $this,
                 Alert::ICON_SUCCESS,
                 "Berhasil",
-                "Akses Berhasil Diperbarui",
+                "Data Berhasil Diperbarui",
                 "on-dialog-confirm",
                 "on-dialog-cancel",
                 "Oke",

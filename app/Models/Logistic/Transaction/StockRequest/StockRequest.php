@@ -139,7 +139,7 @@ class StockRequest extends Model
     /*
     | APPROVAL
     */
-    public function approvalView()
+    public function approvalRemarksView()
     {
         return [
             'component' => 'logistic.transaction.stock-request.detail',
@@ -150,7 +150,7 @@ class StockRequest extends Model
         ];
     }
 
-    public function approvalInfo()
+    public function approvalRemarksInfo()
     {
         return [
             "text" => "Permintaan - " . $this->number,

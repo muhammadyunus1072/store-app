@@ -50,9 +50,11 @@ class ApprovalConfig extends Model
     ];
 
     protected $fillable = [
+        'title',
         'key',
         'priority',
         'is_sequentially',
+        'is_done_when_all_submitted',
         'config',
     ];
 
@@ -66,6 +68,7 @@ class ApprovalConfig extends Model
             if (self::isMatch(json_decode($approvalConfig->config, true), $object)) {
                 $approval = ApprovalRepository::create([
                     'is_sequentially' => $approvalConfig->is_sequentially,
+                    'is_done_when_all_submitted' => $approvalConfig->is_done_when_all_submitted,
                     'remarks_id' => $object->id,
                     'remarks_type' => get_class($object),
                 ]);
@@ -169,7 +172,7 @@ class ApprovalConfig extends Model
             }
         }
 
-        return $result ?? false;
+        return $result ?? true;
     }
 
     public function isDeletable()

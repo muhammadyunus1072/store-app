@@ -1,6 +1,17 @@
 <form wire:submit="store">
     <div class='row'>
         <div class="col-md-4 mb-4">
+            <label>Judul</label>
+            <input type="text" class="form-control @error('title') is-invalid @enderror" wire:model="title" />
+
+            @error('title')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <div class="col-md-4 mb-4">
             <label>Kunci</label>
             <input type="text" class="form-control @error('key') is-invalid @enderror" wire:model="key" />
 
@@ -11,7 +22,7 @@
             @enderror
         </div>
 
-        <div class="col-md-4 mb-4">
+        <div class="col-md-2 mb-4">
             <label>Prioritas</label>
             <input type="text" class="form-control currency @error('priority') is-invalid @enderror"
                 wire:model="priority" />
@@ -22,12 +33,23 @@
                 </div>
             @enderror
         </div>
+    </div>
 
-        <div class="col-md-4 mb-4 row align-items-end">
+    <div class='row'>
+        <div class="col-md-auto mb-4 row align-items-end">
             <div class="form-check m-2">
                 <input class="form-check-input" type="checkbox" wire:model="isSequentially">
                 <label class="form-label ms-2 mb-2">
                     Persetujuan Harus Berurutan
+                </label>
+            </div>
+        </div>
+
+        <div class="col-md-auto mb-4 row align-items-end">
+            <div class="form-check m-2">
+                <input class="form-check-input" type="checkbox" wire:model="isDoneWhenAllSubmitted">
+                <label class="form-label ms-2 mb-2">
+                    Persetujuan Selesai Jika Seluruh Memberikan Respon
                 </label>
             </div>
         </div>
@@ -37,7 +59,7 @@
     <hr>
     <div class="row my-4">
         <div class="col-md-12 mb-3">
-            <label class='fs-4 fw-bold'>List Aturan</label>
+            <label class='fs-4 fw-bold'>Daftar Aturan</label>
             <button type="button" class="btn btn-primary btn-sm" wire:click="addConfig()">
                 <i class='fa fa-plus'></i>
                 Tambah Aturan
@@ -58,7 +80,7 @@
     <hr>
     <div class="row">
         <div class="col-md-12 mb-3">
-            <label class='fs-4 fw-bold'>List Pengguna Penyetuju</label>
+            <label class='fs-4 fw-bold'>Daftar Penyetuju</label>
         </div>
 
         <div class="col-md-12 mb-3">

@@ -18,6 +18,8 @@ class Detail extends Component
 
     #[Validate('required', message: 'Nama Harus Diisi', onUpdate: false)]
     public $name;
+    public $color = "#3d98fc";
+    public $textColor = "#ffffff";
     public $isTriggerDone = false;
     public $isTriggerCancel = false;
 
@@ -27,6 +29,8 @@ class Detail extends Component
             $statusApproval = StatusApprovalRepository::find(Crypt::decrypt($this->objId));
 
             $this->name = $statusApproval->name;
+            $this->color = $statusApproval->color;
+            $this->textColor = $statusApproval->text_color;
             $this->isTriggerDone = $statusApproval->is_trigger_done;
             $this->isTriggerCancel = $statusApproval->is_trigger_cancel;
         }
@@ -54,10 +58,12 @@ class Detail extends Component
 
         $validatedData = [
             'name' => $this->name,
+            'color' => $this->color,
+            'text_color' => $this->textColor,
             'is_trigger_done' => $this->isTriggerDone,
             'is_trigger_cancel' => $this->isTriggerCancel,
         ];
-        
+
         try {
             DB::beginTransaction();
 
@@ -74,7 +80,7 @@ class Detail extends Component
                 $this,
                 Alert::ICON_SUCCESS,
                 "Berhasil",
-                "Akses Berhasil Diperbarui",
+                "Data Berhasil Diperbarui",
                 "on-dialog-confirm",
                 "on-dialog-cancel",
                 "Oke",

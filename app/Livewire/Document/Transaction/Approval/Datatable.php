@@ -3,22 +3,16 @@
 namespace App\Livewire\Document\Transaction\Approval;
 
 use App\Helpers\General\Alert;
-use App\Permissions\AccessDocument;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
-use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
-use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Document\Transaction\ApprovalRepository;
 
 class Datatable extends Component
 {
     use WithDatatable;
-
-    public $isCanUpdate;
-    public $isCanDelete;
 
     // Delete Dialog
     public $targetDeleteId;
@@ -26,9 +20,6 @@ class Datatable extends Component
     public function onMount()
     {
         $this->sortDirection = 'desc';
-        $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessDocument::APPROVAL, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]

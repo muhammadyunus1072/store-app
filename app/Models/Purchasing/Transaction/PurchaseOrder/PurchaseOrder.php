@@ -146,7 +146,7 @@ class PurchaseOrder extends Model
     /*
     | APPROVAL
     */
-    public function approvalView()
+    public function approvalRemarksView()
     {
         return [
             'component' => 'purchasing.transaction.purchase-order.detail',
@@ -157,7 +157,7 @@ class PurchaseOrder extends Model
         ];
     }
 
-    public function approvalInfo()
+    public function approvalRemarksInfo()
     {
         return [
             "text" => "Pembelian - " . $this->number,
