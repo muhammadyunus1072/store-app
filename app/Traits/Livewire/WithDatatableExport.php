@@ -12,67 +12,74 @@ use PhpOffice\PhpWord\TemplateProcessor;
 
 trait WithDatatableExport
 {
-    public $data;
     public const TYPE_EXCEL = 'excel';
-
     public const TYPE_PDF = 'pdf';
-    public const TYPE_PDF_DOWNLOAD = 'pdf-download';
-    public const TYPE_WORD = 'word';
-
-    private static function export(
-        $type,
-        $fileName,
-        $data,
-        $view,
-        $request,
-        $paperOption = null,
-        $columns = null,
-        $title = null
-    ) {
-        if (self::TYPE_EXCEL == $type) {
-            return Excel::download(new DatatableExport($request, $data, $view, $type, $columns, $title), "$fileName.xlsx");
-        } 
-        elseif (self::TYPE_WORD == $type) {
-            $publicPath = $view;
-            $template = new TemplateProcessor($publicPath);
-
-            $template->setValues($data['normal_replacement']); 
-            if(isset($data['block_replacement']))
-            {
-                foreach($data['block_replacement'] as $block_name => $block_replacement)
-                {
-                    $template->cloneBlock($block_name, 0, true, false, $block_replacement);
-
-                }
-            }          
-
-            if(isset($data['table_replacement']))
-            {
-                foreach ($data['table_replacement'] as $key => $value) {
-                    $template->cloneRowAndSetValues($key, $value);
-                }
-            }
-
-            $tempPath = storage_path('app/temp');
-            if (!file_exists($tempPath)) {
-                mkdir($tempPath, 0777, true);
-            }
-
-            $filePath = $tempPath . '/' . $fileName .'.docx';
     
-            $template->saveAs($filePath);
-            return response()->download($filePath)->deleteFileAfterSend(false);
+    abstract public function datatableExportFileName(): string;
+    abstract public function datatableExportFilter(): array;
+
+    public function datatableExportPaperOption()
+    {
+        return [
+            'size' => 'legal',
+            'orientation' => 'portrait',
+        ];
+    }
+
+    public function datatableExportEnableFooterTotal()
+    {
+        return [];
+    }
+
+    function calculateColspans() 
+    {
+        $columns = $this->getColumns();
+        $footerIndexes = $this->datatableExportEnableFooterTotal();
+
+        $colspans = [];
+        $totalColumns = count($columns);
+    
+        foreach ($footerIndexes as $key => $footerIndex) {
+            $nextIndex = isset($footerIndexes[$key + 1]) ? $footerIndexes[$key + 1] : $totalColumns;
+            
+            $colspan = $nextIndex - $footerIndex + ((!$key) ? $footerIndex : 0);
+            
+            $colspans[$footerIndex] = [
+                'colspan' => $colspan,
+                'value' => 0
+            ];
+        }
+
+        return $colspans;
+    }
+
+
+
+    #[On('datatable-export')]
+    public function datatableExport(
+        $type
+    ) {
+        $columns = $this->getColumns();
+        $data = $this->datatableGetProcessedQuery()->get();
+        $filters = $this->datatableExportFilter();
+        $fileName = $this->datatableExportFileName();
+        $paperOption = $this->datatableExportPaperOption();
+        $footerTotal = $this->calculateColspans();
+        
+        $view = "app.layouts.export";
+        if (self::TYPE_EXCEL == $type) {
+            return Excel::download(new DatatableExport($view, $columns, $data, $filters, $type, $footerTotal, $fileName), "$fileName.xlsx");
         } 
-        else {
+        elseif (self::TYPE_PDF == $type) {
             $pdf = Pdf::loadview(
                 $view,
                 [
-                    'request' => $request,
-                    'collection' => $data,
                     'columns' => $columns,
-                    'title' => $title,
+                    'data' => $data,
+                    'filters' => $filters,
                     'type' => $type,
-                    'number_format' => true,
+                    'footerTotal' => $footerTotal,
+                    'fileName' => $fileName,
                 ],
             );
 
@@ -92,22 +99,4 @@ trait WithDatatableExport
             );
         }
     }
-
-   #[On('datatable-export-handler')]
-   public function datatableExportHandler($data, $columns, $type, $title, $filters, $fileName)
-   {
-      return self::export(
-         $type,
-         $fileName,
-         $data,
-         "app.layouts.export",
-         $filters,
-         [
-             'size' => 'legal',
-             'orientation' => 'portrait',
-         ],
-         unserialize($columns),
-         $title,
-     );
-   }
 }

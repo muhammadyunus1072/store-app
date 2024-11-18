@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>{{ $title }}</title>
+    <title>{{ $fileName }}</title>
     <style>
         .table-border {
             border-collapse: collapse;
@@ -29,10 +29,10 @@
 
             <tr>
                 <td colspan="{{count($columns)}}" style="text-align: center; font-weight: bold;">
-                    {{ $title }}
+                    {{ $fileName }}
                 </td>
             </tr>
-            @foreach ($request as $key => $value)
+            @foreach ($filters as $key => $value)
                 <tr>
                     <td colspan="{{count($columns)}}" style="font-weight: bold;">
                         {{$key}} :{{ $value }}
@@ -42,7 +42,7 @@
 
             <tr>
                 <td colspan="{{count($columns)}}" style="border: 0px; padding:8px">
-            </tr>
+            </tr>            
             <tr>
                 @foreach ($columns as $index => $col)
                     <th>
@@ -52,31 +52,24 @@
                     </th>
                 @endforeach
             </tr>
+
         </thead>
 
         <tbody>
             @php
                 $isNumberFormat = $type == App\Helpers\General\ExportHelper::TYPE_PDF;
-
-                $withFooter = false;
-                $footerData = [];
-                foreach ($columns as $col) {
-                    if (isset($col['withFooter']) && $col['withFooter']) {
-                        $withFooter = true;
-                        $footerData[$col['name']] = 0;
-                    }
-                }
             @endphp
 
 
-            @foreach ($collection as $index => $item)
+            @foreach ($data as $index => $item)
                 <tr>
-                    @foreach ($columns as $col)
+                    @foreach ($columns as $i => $col)
                         @php
-                            if($withFooter && (isset($col['withFooter']) && $col['withFooter']) && !isset($col['footer']))
+                            if(!empty($footerTotal) && isset($footerTotal[$i]))
                             {
-                                $footerData[$col['name']] += $col['render']($item);
+                                !isset($col['footer']) ? $footerTotal[$i]['value'] += (float)(str_replace(['.', ','], ['', '.'], $col['render']($item))) : null; 
                             }
+
                             $cell_colspan = '';
                             if (isset($col['colspan'])) {
                                 $cell_colspan = is_callable($col['colspan'])
@@ -110,63 +103,33 @@
                             }
                         @endphp
 
-                        <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!} {!! $cell_style !!}>
-                            {{ (is_numeric($col['render']( $item, $index)) && $isNumberFormat) ? number_format($col['render']( $item, $index), 0, '.', '.') : $col['render']( $item, $index) }}
-                        </td>
+                        @if (isset($col['render']) && is_callable($col['render']))
+                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!} {!! $cell_style !!}>
+                                {!! call_user_func($col['render'], $item, $index) !!}
+                            </td>
+                        @elseif (isset($col['key']))
+                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!} {!! $cell_style !!}>
+                                {{ $item->{$col['key']} }}
+                            </td>
+                        @endif
                     @endforeach
                 </tr>
             @endforeach
-
             <tr>
                 <td colspan="{{count($columns)}}" style="border: 0px; padding:8px">
             </tr>
         </tbody>
-        @if($withFooter)
-
-        <thead>
-            <tr>
-                @foreach ($columns as $col)
-                    @php
-                        $cell_colspan = '';
-                        if (isset($col['footerColspan'])) {
-                            $cell_colspan = is_callable($col['footerColspan'])
-                                ? call_user_func($col['footerColspan'], $item, $index)
-                                : $col['footerColspan'];
-                            $cell_colspan = "colspan='{$cell_colspan}'";
-                        }
-
-                        $cell_rowspan = '';
-                        if (isset($col['footerRowspan'])) {
-                            $cell_rowspan = is_callable($col['footerRowspan'])
-                                ? call_user_func($col['footerRowspan'], $item, $index)
-                                : $col['footerRowspan'];
-                            $cell_rowspan = "rowspan='{$cell_rowspan}'";
-                        }
-
-                        $cell_style = '';
-                        if (isset($col['footerStyle'])) {
-                            $cell_style = is_callable($col['footerStyle'])
-                                ? call_user_func($col['footerStyle'], $item, $index)
-                                : $col['footerStyle'];
-                            $cell_style = "style='{$cell_style}'";
-                        }
-
-                        $cell_class = '';
-                        if (isset($col['footerClass'])) {
-                            $cell_class = is_callable($col['footerClass'])
-                                ? call_user_func($col['footerClass'], $item, $index)
-                                : $col['footerClass'];
-                            $cell_class = "class='{$cell_class}'";
-                        }
-                    @endphp
-                    @if (isset($col['withFooter']) && $col['withFooter'])
-                        <th {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!} {!! $cell_style !!}>
-                            {{ isset($col['footer']) ? $col['footer'] : ($isNumberFormat ? number_format($footerData[$col['name']], 0, '.', '.') : $footerData[$col['name']]) }}
+        
+        @if(!empty($footerTotal))
+            <thead>
+                <tr>
+                    @foreach ($footerTotal as $index => $col)
+                        <th colspan="{{ $col['colspan'] }}">
+                            {{ isset($columns[$index]['footer']) ? $columns[$index]['footer'] : App\Helpers\General\NumberFormatter::format($col['value']) }}
                         </th>
-                    @endif
-                @endforeach
-            </tr>
-        </thead>
+                    @endforeach
+                </tr>
+            </thead>
         @endif
     </table>
 </body>

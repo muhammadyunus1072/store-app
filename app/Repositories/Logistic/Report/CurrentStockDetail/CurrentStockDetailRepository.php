@@ -34,8 +34,8 @@ class CurrentStockDetailRepository
             dateStart: $dateStart,
             dateEnd: $dateEnd,
             remarksTypes: [
-                'stock_expense' => [['remarks_type', '=', StockExpenseProduct::class]],
-                'purchase_order' => [['remarks_type', '=', PurchaseOrderProduct::class]],
+                'stock_expense' => [['product_detail_histories.remarks_type', '=', StockExpenseProduct::class]],
+                'purchase_order' => [['product_detail_histories.remarks_type', '=', PurchaseOrderProduct::class]],
             ],
             groupBy: [
                 'product_id',
@@ -50,11 +50,11 @@ class CurrentStockDetailRepository
         return Product::select(
             'products.name',
             'unit_details.name as unit_detail_name',
-            'stocks.value as price',
-            'stocks.value as entry_date',
-            'stocks.value as code',
-            'stocks.value as batch',
-            'stocks.value as expired_date',
+            'stocks.price as price',
+            'stocks.entry_date as entry_date',
+            'stocks.code as code',
+            'stocks.batch as batch',
+            'stocks.expired_date as expired_date',
             'stocks.quantity as stock_quantity',
             'stocks.value as stock_value',
             'transactions.quantity_stock_expense',
@@ -82,7 +82,7 @@ class CurrentStockDetailRepository
                     ->on('stocks.batch', '=', 'transactions.batch')
                     ->on('stocks.expired_date', '=', 'transactions.expired_date');
             })
-            ->when($products, function ($query) use ($products) {
+            ->when(!empty($products), function ($query) use ($products) {
                 $query->whereIn('products.id', $products);
             })
             ->when($categoryProducts, function ($query) use ($categoryProducts) {

@@ -4,59 +4,72 @@ namespace App\Livewire\Purchasing\Report\PurchaseOrder;
 
 use Carbon\Carbon;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use App\Helpers\General\ExportHelper;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
-use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
-use App\Repositories\Logistic\Master\Product\ProductRepository;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Attributes\On;
+use App\Traits\Livewire\WithDatatableExport;
+use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Report\Expense\ExpenseRepository;
 use App\Repositories\Purchasing\Master\Supplier\SupplierRepository;
 use App\Repositories\Purchasing\Report\PurchaseOrder\PurchaseOrderRepository;
+use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
 
 class Datatable extends Component
 {
-    use WithDatatable;
+    use WithDatatable, WithDatatableExport;
 
-    public $date_start;
-    public $date_end;
-    public $supplier_id;
+    public $dateStart;
+    public $dateEnd;
+    public $supplierIds = [];
 
     public $header = [];
     public $show_header = true;
 
     public function onMount()
     {
-        $this->date_start = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->date_end = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
     }
 
-    #[On('export')]
-    public function export($type)
+    public function updatedSearch()
     {
-        // dd("OWE");
-        // $data = $this->datatableGetProcessedQuery()->get(); 
-        // $columns = [
-        //     'name' => 'No',
-        //     'render' => function($item, $index)
-        //     {
-        //         dd('OKE');
-        //         // return $index + 1;
-        //     }
-        // ];
-        $this->dispatch('consoleLog', 'WIO');
-        // $this->dispatch('datatable-export-handler'
-        //     // $columns,
-        //     // $type, 
-        //     // [
-        //     //     'date_start' => $this->date_start,
-        //     //     'date_end' => $this->date_end,
-        //     //     'supplier' => $this->supplier_id ? SupplierRepository::find(Crypt::decrypt($this->supplier_id))->name : null,
-        //     //     'keyword' => $this->search,
-        //     // ]
-        // );
+        $this->dispatch('add-filter', [
+            'search' => $this->search,
+        ]);
+    }
+
+    #[On('add-filter')]
+    public function addFilter($filter)
+    {
+        foreach ($filter as $key => $value) {
+            $this->$key = $value;
+        }        
+    }
+    
+    function datatableExportFileName(): string
+    {
+        return 'Laporan Pembelian ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
+    }
+
+    function datatableExportFilter(): array
+    {
+        $supplierIds = collect($this->supplierIds)->map(function ($id) {
+            return SupplierRepository::find($id)->name;
+        })->toArray();
+        return [
+            'Tanggal Mulai' => $this->dateStart,
+            'Tanggal Akhir' => $this->dateEnd,
+            'Supplier' => implode(" , ", $supplierIds),
+            'Kata Kunci' => $this->search,
+        ];
+    }
+
+    function datatableExportEnableFooterTotal()
+    {
+        return [3, 4];
     }
     
     public function getColumns(): array
@@ -93,6 +106,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Supplier',
+                'footer' => 'Total',
                 'render' => function($item)
                 {
                     return $item->supplier_name;
@@ -112,12 +126,11 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return PurchaseOrderRepository::datatable($this->search, $this->date_start, $this->date_end, $this->supplier_id ? Crypt::decrypt($this->supplier_id) : null);
+        return PurchaseOrderRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->supplierIds);
     }
 
     public function getView(): string
     {
-        $this->dispatch('datatable-header-handler', $this->datatableGetProcessedQuery()->get());
         return 'livewire.purchasing.report.purchase-order.datatable';
     }
 }

@@ -113,6 +113,7 @@ class Filter extends Component
             'expiredDateEnd' => $this->expiredDateEnd,
             'entryDateStart' => $this->entryDateStart,
             'entryDateEnd' => $this->entryDateEnd,
+            'dispatchEvent' => $this->dispatchEvent,
         ]);
     }
 

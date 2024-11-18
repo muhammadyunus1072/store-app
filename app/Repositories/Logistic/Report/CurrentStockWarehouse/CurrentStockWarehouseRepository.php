@@ -30,15 +30,15 @@ class CurrentStockWarehouseRepository
             dateStart: $dateStart,
             dateEnd: $dateEnd,
             remarksTypes: [
-                'stock_expense' => [['remarks_type', '=', StockExpenseProduct::class]],
-                'purchase_order' => [['remarks_type', '=', PurchaseOrderProduct::class]],
-                'stock_request_out' => [['remarks_type', '=', StockRequestProduct::class], ['quantity', '<', 0]],
-                'stock_request_in' => [['remarks_type', '=', StockRequestProduct::class], ['quantity', '>', 0]],
+                'stock_expense' => [['product_detail_histories.remarks_type', '=', StockExpenseProduct::class]],
+                'purchase_order' => [['product_detail_histories.remarks_type', '=', PurchaseOrderProduct::class]],
+                'stock_request_out' => [['product_detail_histories.remarks_type', '=', StockRequestProduct::class], ['quantity', '<', 0]],
+                'stock_request_in' => [['product_detail_histories.remarks_type', '=', StockRequestProduct::class], ['quantity', '>', 0]],
             ],
             groupBy: ['product_id'],
             whereClause: [['warehouse_id', '=', $warehouseId]]
         );
-
+        
         return Product::select(
             'products.name',
             'unit_details.name as unit_detail_name',

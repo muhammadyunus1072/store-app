@@ -2,20 +2,35 @@
 
 namespace App\Livewire\Purchasing\Report\PurchaseOrder;
 
-use App\Traits\Livewire\WithDatatableHeader;
+use Carbon\Carbon;
 use Livewire\Component;
+use Illuminate\Support\Facades\Crypt;
+use App\Traits\Livewire\WithDatatableHeader;
+use App\Repositories\Purchasing\Report\PurchaseOrder\PurchaseOrderRepository;
 
 class DatatableHeader extends Component
 {
     use WithDatatableHeader;
-    public $header = [];
     
-    private function getHeader($data)
+    public $search;
+    public $dateStart;
+    public $dateEnd;
+    public $supplierIds = [];
+    public $productIds = [];
+    public $categoryProductIds = [];
+
+    public function mount()
     {
-        $data = collect($data);
+        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
+    }
+
+    public function getHeaderData()
+    {
+        $data = PurchaseOrderRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->supplierIds)->get();
         $total_qty = $data->count();
         $total_value = $data->sum('value');
-        $this->header = [
+        return [
             [
                 "col" => 3,
                 "name" => "Jumlah Transaksi",
@@ -27,10 +42,5 @@ class DatatableHeader extends Component
                 "value" => $total_value
             ],
         ];
-    }
-
-    public function render()
-    {
-        return view('livewire.purchasing.report.purchase-order.datatable-header');
     }
 }

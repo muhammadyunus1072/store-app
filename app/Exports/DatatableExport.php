@@ -9,33 +9,33 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 class DatatableExport implements FromView, ShouldAutoSize
 {
     private $view;
-
-    private $collection;
     private $columns;
+    private $data;
+    private $filters;
     private $type;
-    private $title;
+    private $footerTotal;
+    private $fileName;
 
-    private $request;
-
-    public function __construct($request, $collection, $view, $type, $columns = null, $title = null)
+    public function __construct($view, $columns, $data, $filters, $type, $footerTotal, $fileName)
     {
-        $this->request = $request;
-        $this->collection = $collection;
         $this->view = $view;
-        $this->type = $type;
         $this->columns = $columns;
-        $this->title = $title;
+        $this->data = $data;
+        $this->filters = $filters;
+        $this->type = $type;
+        $this->footerTotal = $footerTotal;
+        $this->fileName = $fileName;
     }
 
     public function view(): View
     {
         return view($this->view, [
-            'request' => $this->request,
-            'collection' => $this->collection,
-            'type' => $this->type,
             'columns' => $this->columns,
-            'title' => $this->title,
-            'number_format' => false,
+            'data' => $this->data,
+            'filters' => $this->filters,
+            'type' => $this->type,
+            'footerTotal' => $this->footerTotal,
+            'fileName' => $this->fileName,
         ]);
     }
 }

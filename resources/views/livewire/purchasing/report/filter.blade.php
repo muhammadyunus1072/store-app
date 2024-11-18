@@ -1,36 +1,37 @@
 <div class='row w-100 py-3'>
     <div class="row">
         <div class="row">
-            @if ($show_input_date_start)
+            @if ($filterDateStart)
                 <div class="col-md-4 mb-2">
                     <label class="form-label">Tanggal Mulai</label>
-                    <input type="date" class="form-control" wire:model.live="date_start" />
+                    <input type="date" class="form-control" wire:model.live="dateStart" />
                 </div>
             @endif
-            @if ($show_input_date_end)
+            @if ($filterDateEnd)
                 <div class="col-md-4 mb-2">
                     <label class="form-label">Tanggal Akhir</label>
-                    <input type="date" class="form-control" wire:model.live="date_end" />
+                    <input type="date" class="form-control" wire:model.live="dateEnd" />
                 </div>
             @endif
         </div>
         <div class="row">
-            @if ($show_input_entry_date_start)
+            @if ($show_input_entry_dateStart)
                 <div class="col-md-4 mb-2">
                     <label class="form-label">Tgl Masuk Mulai</label>
                     <div class="d-flex">
-                        <input type="date" class="form-control" wire:model.live="entry_date_start" />
+                        <input type="date" class="form-control" wire:model.live="entry_dateStart" />
                         <button class="btn btn-danger ms-2" wire:click="resetEntryDateStart">
                             Reset
                         </button>
                     </div>
                 </div>
             @endif
-            @if ($show_input_entry_date_end)
+
+            @if ($show_input_entry_dateEnd)
                 <div class="col-md-4 mb-2">
                     <label class="form-label">Tgl Masuk Akhir</label>
                     <div class="d-flex">
-                        <input type="date" class="form-control" wire:model.live="entry_date_end" />
+                        <input type="date" class="form-control" wire:model.live="entry_dateEnd" />
                         <button class="btn btn-danger ms-2" wire:click="resetEntryDateEnd">
                             Reset
                         </button>
@@ -38,7 +39,9 @@
                 </div>
             @endif
         </div>
-        @if ($show_input_product)
+
+        {{-- SELECT PRODUCT --}}
+        @if ($filterProduct)
             <div class="col-md-4 mb-2" wire:ignore>
                 <label>Produk</label>
                 <div class="d-flex">
@@ -46,7 +49,19 @@
                 </div>
             </div>
         @endif
-        @if ($show_input_category_product)
+
+        {{-- SELECT PRODUCT MULTIPLE --}}
+        @if ($filterProductMultiple)
+            <div class="col-md-4 mb-3" wire:ignore>
+                <label>Produk</label>
+                <div class="d-flex">
+                    <select class="form-select" id="select2-products" multiple></select>
+                </div>
+            </div>
+        @endif
+
+        {{-- SELECT CATEGORY PRODUCT MULTIPLE --}}
+        @if ($filterCategoryProductMultiple)
             <div class="col-md-4 mb-2" wire:ignore>
                 <label>Kategori Produk</label>
                 <div class="d-flex">
@@ -54,7 +69,7 @@
                 </div>
             </div>
         @endif
-        @if ($show_input_warehouse)
+        @if ($filterWarehouse)
 
             {{-- SELECT WAREHOUSE --}}
             <div class="col-md-4 mb-3">
@@ -73,35 +88,32 @@
                 </select>
             </div>
         @endif
-        @if ($show_input_supplier)
+        @if ($filterSupplier)
             <div class="col-md-4 mb-2" wire:ignore>
                 <label>Suplier</label>
                 <div class="d-flex">
-                    <select class="form-select" id="select2-supplier"></select>
-                    <button class="btn btn-danger ms-2" onclick="$('#select2-supplier').val('').trigger('change')">
-                        Reset
-                    </button>
+                    <select class="form-select" id="select2-supplier" multiple></select>
                 </div>
             </div>
         @endif
     </div>
     <div class="row">
-        @if ($show_input_expired_date_start && $setting_product_expired_date)
+        @if ($show_input_expired_dateStart && $setting_product_expired_date)
             <div class="col-md-4 mb-2">
                 <label class="form-label">Expired Date Mulai</label>
                 <div class="d-flex">
-                    <input type="date" class="form-control" wire:model.live="expired_date_start" />
+                    <input type="date" class="form-control" wire:model.live="expired_dateStart" />
                     <button class="btn btn-danger ms-2" wire:click="resetExpiredDateStart">
                         Reset
                     </button>
                 </div>
             </div>
         @endif
-        @if ($show_input_expired_date_end && $setting_product_expired_date)
+        @if ($show_input_expired_dateEnd && $setting_product_expired_date)
             <div class="col-md-4 mb-2">
                 <label class="form-label">Expired Date Sampai</label>
                 <div class="d-flex">
-                    <input type="date" class="form-control" wire:model.live="expired_date_end" />
+                    <input type="date" class="form-control" wire:model.live="expired_dateEnd" />
                     <button class="btn btn-danger ms-2" wire:click="resetExpiredDateEnd">
                         Reset
                     </button>
@@ -110,6 +122,28 @@
         @endif
     </div>
 
+    {{-- EXPORT DATA --}}
+    @if ($showExport)
+        <div class="row col-12 my-3">
+            <div class="col-auto">
+                <label>Export Data:</label>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-light-success btn-sm"
+                    wire:click="$dispatch('datatable-export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_EXCEL }}' })">
+                    <i class="fa fa-file-excel"></i>
+                    Export Excel
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-light-danger btn-sm"
+                    wire:click="$dispatch('datatable-export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_PDF }}' })">
+                    <i class="fa fa-file-pdf"></i>
+                    Export PDF
+                </button>
+            </div>
+        </div>
+    @endif
 </div>
 
 @push('js')
@@ -206,11 +240,12 @@
                 }
             });
 
-            $("#select2-supplier").on('change', async function(e) {
-                let data = $('#select2-supplier').val();
+            $('#select2-supplier').on('select2:select', function(e) {
+                @this.call('selectSuppliers', e.params.data)
+            });
 
-                let text = $("#select2-supplier").find(':selected').text();
-                await @this.set('supplier_id', data);
+            $('#select2-supplier').on('select2:unselect', function(e) {
+                @this.call('unselectSuppliers', e.params.data)
             });
         })
     </script>

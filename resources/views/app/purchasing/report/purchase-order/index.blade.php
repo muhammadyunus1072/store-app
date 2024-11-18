@@ -23,9 +23,9 @@
     <div class="card">
         <div class="card-header">
             <livewire:purchasing.report.filter 
-            :show_input_date_start="true"
-            :show_input_date_end="true"
-            :show_input_supplier="true"
+            :filterDateStart="true"
+            :filterDateEnd="true"
+            :filterSupplier="true"
             >
         </div>
         <div class="card-body">

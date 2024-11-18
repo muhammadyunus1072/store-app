@@ -6,11 +6,21 @@ use Livewire\Attributes\On;
 
 trait WithDatatableHeader
 {
-    abstract public function getHeader($data);
+    abstract public function getHeaderData();
 
-    #[On('datatable-header-handler')]
-    public function datatableHeaderHandler($data)
+    #[On('add-filter')]
+    public function addFilter($filter)
     {
-        $this->getHeader($data);
+        foreach ($filter as $key => $value) {
+            $this->$key = $value;
+        }        
     }
+
+    public function render()
+    {
+        return view('livewire.livewire-datatable-header', [
+            'data' => $this->getHeaderData(),
+        ]);
+    }
+
 }
