@@ -6,8 +6,6 @@ use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Settings\SettingLogistic;
-use App\Helpers\General\ExportHelper;
-use Illuminate\Support\Facades\Crypt;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
 use Illuminate\Database\Eloquent\Builder;

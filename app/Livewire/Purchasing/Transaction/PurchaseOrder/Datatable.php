@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
+use App\Settings\SettingPurchasing;
 use Illuminate\Support\Facades\DB;
 
 class Datatable extends Component
@@ -21,6 +22,9 @@ class Datatable extends Component
 
     public $isCanUpdate;
     public $isCanDelete;
+
+    public $settingPurchaseOrderAddStock;
+    public $settingApprovalKeyPurchaseOrder;
 
     // Delete Dialog
     public $targetDeleteId;
@@ -32,6 +36,9 @@ class Datatable extends Component
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_DELETE));
+
+        $this->settingPurchaseOrderAddStock = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK);
+        $this->settingApprovalKeyPurchaseOrder = SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER);
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -78,7 +85,7 @@ class Datatable extends Component
 
     public function getColumns(): array
     {
-        return [
+        $columns = [
             [
                 'name' => 'Aksi',
                 'sortable' => false,
@@ -151,15 +158,31 @@ class Datatable extends Component
                 'key' => 'warehouse_name',
                 'name' => 'Gudang',
             ],
-            [
+        ];
+
+        if ($this->settingPurchaseOrderAddStock) {
+            $columns[] = [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Status Proses Stok',
                 'render' => function ($item) {
                     return $item->transactionStockStatus();
                 }
-            ],
-        ];
+            ];
+        }
+
+        if ($this->settingApprovalKeyPurchaseOrder) {
+            $columns[] = [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Status Persetujuan',
+                'render' => function ($item) {
+                    return $item->approvalUrlButton();
+                }
+            ];
+        }
+
+        return $columns;
     }
 
     public function getQuery(): Builder

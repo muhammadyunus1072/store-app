@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Logistic\Transaction\StockExpense\StockExpenseRepository;
+use App\Settings\SettingLogistic;
 
 class Datatable extends Component
 {
@@ -20,6 +21,8 @@ class Datatable extends Component
 
     public $isCanUpdate;
     public $isCanDelete;
+
+    public $settingApprovalKeyStockExpense;
 
     // Delete Dialog
     public $targetDeleteId;
@@ -31,6 +34,8 @@ class Datatable extends Component
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_EXPENSE, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_EXPENSE, PermissionHelper::TYPE_DELETE));
+
+        $this->settingApprovalKeyStockExpense = SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE);
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -68,7 +73,7 @@ class Datatable extends Component
 
     public function getColumns(): array
     {
-        return [
+        $columns = [
             [
                 'name' => 'Aksi',
                 'sortable' => false,
@@ -145,15 +150,20 @@ class Datatable extends Component
                     return $item->transactionStockStatus();
                 }
             ],
-            [
+        ];
+
+        if ($this->settingApprovalKeyStockExpense) {
+            $columns[] = [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Status Persetujuan',
                 'render' => function ($item) {
                     return $item->approvalUrlButton();
                 }
-            ],
-        ];
+            ];
+        }
+
+        return $columns;
     }
 
     public function getQuery(): Builder

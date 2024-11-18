@@ -32,7 +32,7 @@ class CurrentStockRepository
             ],
             groupBy: ['product_id']
         );
-        
+
         return Product::select(
             'products.name',
             'unit_details.name as unit_detail_name',
@@ -58,6 +58,7 @@ class CurrentStockRepository
             ->leftJoinSub($querySumTransaction, 'transactions', function ($join) {
                 $join->on('stocks.product_id', '=', 'transactions.product_id');
             })
+            ->where('products.type', '=', Product::TYPE_PRODUCT_WITH_STOCK)
             ->when($products, function ($query) use ($products) {
                 $query->whereIn('products.id', $products);
             })
@@ -65,6 +66,11 @@ class CurrentStockRepository
                 $query->whereHas('productCategories', function ($query) use ($categoryProducts) {
                     $query->whereIn('category_product_id', $categoryProducts);
                 });
+            })
+            ->where(function ($query) {
+                $query->where('stocks.quantity', '!=', 0)
+                    ->orWhere('transactions.quantity_stock_expense', '!=', 0)
+                    ->orWhere('transactions.quantity_purchase_order', '!=', 0);
             })
             ->when($search, function ($query) use ($search) {
                 $query->where('products.name', env('QUERY_LIKE'), '%' . $search . '%');

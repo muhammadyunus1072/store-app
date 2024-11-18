@@ -5,16 +5,14 @@ namespace App\Livewire\Logistic\Report\CurrentStockWarehouse;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Helpers\General\ExportHelper;
-use Illuminate\Support\Facades\Crypt;
-use App\Helpers\Core\UserStateHandler;
 use App\Traits\Livewire\WithDatatable;
-use App\Helpers\General\NumberFormatter;
-use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Livewire\WithDatatableExport;
+use App\Helpers\Core\UserStateHandler;
+use App\Helpers\General\NumberFormatter;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
-use App\Repositories\Logistic\Report\CurrentStock\CurrentStockRepository;
 use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
 use App\Repositories\Logistic\Report\CurrentStockWarehouse\CurrentStockWarehouseRepository;
 
@@ -58,9 +56,9 @@ class Datatable extends Component
     {
         foreach ($filter as $key => $value) {
             $this->$key = $value;
-        }        
+        }
     }
-    
+
     public function loadUserState()
     {
         $userState = UserStateHandler::get();
@@ -75,7 +73,7 @@ class Datatable extends Component
             $this->warehouseId = Crypt::decrypt($userState['warehouse_id']);
         }
     }
-    
+
     function datatableExportFileName(): string
     {
         return 'Laporan Stok Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
@@ -103,7 +101,7 @@ class Datatable extends Component
     {
         return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     }
-    
+
     public function getColumns(): array
     {
         return [
@@ -124,8 +122,7 @@ class Datatable extends Component
                 'searchable' => false,
                 'name' => 'Satuan',
                 'footer' => 'Total',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return $item->unit_detail_name;
                 }
             ],
@@ -133,17 +130,15 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Stok Awal',
-                'render' => function($item)
-                {
-                    return NumberFormatter::format($item->stock_quantity - $item->quantity_stock_expense - $item->quantity_purchase_order);
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->stock_quantity - $item->quantity_stock_expense - $item->quantity_purchase_order - $item->quantity_stock_request_in - $item->quantity_stock_request_out);
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Pembelian',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->quantity_purchase_order);
                 }
             ],
@@ -151,26 +146,23 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Tranfer Masuk',
-                'render' => function($item)
-                {
-                    return NumberFormatter::format($item->incoming_tranfer_quantity);
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->quantity_stock_request_in);
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Tranfer Keluar',
-                'render' => function($item)
-                {
-                    return NumberFormatter::format($item->outgoing_tranfer_quantity * -1);
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->quantity_stock_request_out * -1);
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Pengeluaran',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->quantity_stock_expense);
                 }
             ],
@@ -178,8 +170,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Stok Akhir',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->stock_quantity);
                 }
             ],
@@ -187,17 +178,15 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Awal',
-                'render' => function($item)
-                {
-                    return NumberFormatter::format($item->stock_value - $item->value_stock_expense - $item->value_purchase_order);
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->stock_value - $item->value_stock_expense - $item->value_purchase_order - $item->value_stock_request_in - $item->value_stock_request_out);
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Pembelian',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->value_purchase_order);
                 }
             ],
@@ -205,26 +194,23 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Tranfer Masuk',
-                'render' => function($item)
-                {
-                    return NumberFormatter::format($item->incoming_tranfer_value);
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->value_stock_request_in);
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Tranfer Keluar',
-                'render' => function($item)
-                {
-                    return NumberFormatter::format($item->outgoing_tranfer_value * -1);
+                'render' => function ($item) {
+                    return NumberFormatter::format($item->value_stock_request_out * -1);
                 }
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Pengeluaran',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->value_stock_expense);
                 }
             ],
@@ -232,8 +218,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nilai Akhir',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->stock_value);
                 }
             ],

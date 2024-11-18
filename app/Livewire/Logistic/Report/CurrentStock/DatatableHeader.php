@@ -4,7 +4,6 @@ namespace App\Livewire\Logistic\Report\CurrentStock;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatableHeader;
 use App\Repositories\Logistic\Report\CurrentStock\CurrentStockRepository;
 

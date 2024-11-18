@@ -5,12 +5,9 @@ namespace App\Livewire\Logistic\Report\CurrentStock;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Helpers\General\ExportHelper;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
 use Illuminate\Database\Eloquent\Builder;
-use App\Traits\Livewire\WithDatatableHeader;
-use Laravel\SerializableClosure\SerializableClosure;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Report\CurrentStock\CurrentStockRepository;
 use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
@@ -43,9 +40,9 @@ class Datatable extends Component
     {
         foreach ($filter as $key => $value) {
             $this->$key = $value;
-        }        
+        }
     }
-    
+
     function datatableExportFileName(): string
     {
         return 'Laporan Stok Akhir ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');

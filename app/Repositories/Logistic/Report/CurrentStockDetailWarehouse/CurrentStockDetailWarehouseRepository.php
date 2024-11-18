@@ -7,6 +7,7 @@ use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
+use Illuminate\Support\Facades\DB;
 
 class CurrentStockDetailWarehouseRepository
 {
@@ -54,11 +55,11 @@ class CurrentStockDetailWarehouseRepository
         return Product::select(
             'products.name',
             'unit_details.name as unit_detail_name',
-            'stocks.value as price',
-            'stocks.value as entry_date',
-            'stocks.value as code',
-            'stocks.value as batch',
-            'stocks.value as expired_date',
+            'stocks.price as price',
+            'stocks.entry_date as entry_date',
+            'stocks.code as code',
+            'stocks.batch as batch',
+            DB::raw("(CASE WHEN stocks.expired_date = '0001-01-01' THEN NULL ELSE stocks.expired_date END) as expired_date"),
             'stocks.quantity as stock_quantity',
             'stocks.value as stock_value',
             'transactions.quantity_stock_expense',
@@ -92,6 +93,7 @@ class CurrentStockDetailWarehouseRepository
                     ->on('stocks.batch', '=', 'transactions.batch')
                     ->on('stocks.expired_date', '=', 'transactions.expired_date');
             })
+            ->where('products.type', '=', Product::TYPE_PRODUCT_WITH_STOCK)
             ->when($products, function ($query) use ($products) {
                 $query->whereIn('products.id', $products);
             })
@@ -99,6 +101,11 @@ class CurrentStockDetailWarehouseRepository
                 $query->whereHas('productCategories', function ($query) use ($categoryProducts) {
                     $query->whereIn('category_product_id', $categoryProducts);
                 });
+            })
+            ->where(function ($query) {
+                $query->where('stocks.quantity', '!=', 0)
+                    ->orWhere('transactions.quantity_stock_expense', '!=', 0)
+                    ->orWhere('transactions.quantity_purchase_order', '!=', 0);
             })
             ->when($search, function ($query) use ($search) {
                 $query->where('products.name', env('QUERY_LIKE'), '%' . $search . '%');

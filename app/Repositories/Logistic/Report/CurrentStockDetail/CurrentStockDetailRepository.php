@@ -6,6 +6,7 @@ use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
+use Illuminate\Support\Facades\DB;
 
 class CurrentStockDetailRepository
 {
@@ -54,7 +55,7 @@ class CurrentStockDetailRepository
             'stocks.entry_date as entry_date',
             'stocks.code as code',
             'stocks.batch as batch',
-            'stocks.expired_date as expired_date',
+            DB::raw("(CASE WHEN stocks.expired_date = '0001-01-01' THEN NULL ELSE stocks.expired_date END) as expired_date"),
             'stocks.quantity as stock_quantity',
             'stocks.value as stock_value',
             'transactions.quantity_stock_expense',
@@ -82,6 +83,7 @@ class CurrentStockDetailRepository
                     ->on('stocks.batch', '=', 'transactions.batch')
                     ->on('stocks.expired_date', '=', 'transactions.expired_date');
             })
+            ->where('products.type', '=', Product::TYPE_PRODUCT_WITH_STOCK)
             ->when(!empty($products), function ($query) use ($products) {
                 $query->whereIn('products.id', $products);
             })
@@ -89,6 +91,11 @@ class CurrentStockDetailRepository
                 $query->whereHas('productCategories', function ($query) use ($categoryProducts) {
                     $query->whereIn('category_product_id', $categoryProducts);
                 });
+            })
+            ->where(function ($query) {
+                $query->where('stocks.quantity', '!=', 0)
+                    ->orWhere('transactions.quantity_stock_expense', '!=', 0)
+                    ->orWhere('transactions.quantity_purchase_order', '!=', 0);
             })
             ->when($search, function ($query) use ($search) {
                 $query->where('products.name', env('QUERY_LIKE'), '%' . $search . '%');

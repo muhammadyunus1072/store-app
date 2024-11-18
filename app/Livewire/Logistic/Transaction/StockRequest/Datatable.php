@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Logistic\Transaction\StockRequest\StockRequestRepository;
+use App\Settings\SettingLogistic;
 
 class Datatable extends Component
 {
@@ -21,16 +22,20 @@ class Datatable extends Component
     public $isCanUpdate;
     public $isCanDelete;
 
+    public $settingApprovalKeyStockRequest;
+
     // Delete Dialog
     public $targetDeleteId;
 
     public function onMount()
     {
         $this->sortDirection = 'desc';
-        
+
         $authUser = UserRepository::authenticatedUser();
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_DELETE));
+
+        $this->settingApprovalKeyStockRequest = SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST);
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -39,7 +44,7 @@ class Datatable extends Component
         if (!$this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
-        
+
         StockRequestRepository::delete(Crypt::decrypt($this->targetDeleteId));
         Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
     }
@@ -68,7 +73,7 @@ class Datatable extends Component
 
     public function getColumns(): array
     {
-        return [
+        $columns =  [
             [
                 'name' => 'Aksi',
                 'sortable' => false,
@@ -129,8 +134,7 @@ class Datatable extends Component
             [
                 'key' => 'transaction_date',
                 'name' => 'Tanggal Penerimaan',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
                 }
             ],
@@ -147,6 +151,19 @@ class Datatable extends Component
                 }
             ],
         ];
+
+        if ($this->settingApprovalKeyStockRequest) {
+            $columns[] = [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Status Persetujuan',
+                'render' => function ($item) {
+                    return $item->approvalUrlButton();
+                }
+            ];
+        }
+
+        return $columns;
     }
 
     public function getQuery(): Builder

@@ -142,7 +142,17 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             ->where('rn', '=', 1);
 
         foreach ($groupBy as $column) {
-            $query->addSelect($column)->groupBy($column);
+            if ($column == 'code') {
+                $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
+            } elseif ($column == 'batch') {
+                $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
+            } elseif ($column == 'expired_date') {
+                $query->addSelect(DB::raw("COALESCE($column, '0001-01-01') as $column"));
+            } else {
+                $query->addSelect($column);
+            }
+
+            $query->groupBy($column);
         }
         return $query;
     }
@@ -150,10 +160,10 @@ class ProductDetailHistoryRepository extends MasterDataRepository
     public static function querySumTransactions($dateStart, $dateEnd, $remarksTypes, $groupBy, $whereClause = [])
     {
         $query = ProductDetailHistory::whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"])
-        ->join('product_details', function ($join) {
-            $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id')
-                ->whereNull('product_details.deleted_at');
-        });
+            ->join('product_details', function ($join) {
+                $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id')
+                    ->whereNull('product_details.deleted_at');
+            });
 
         // Handle Where Clause
         foreach ($whereClause as $col) {
@@ -164,14 +174,18 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         foreach ($remarksTypes as $key => $columns) {
             $whereFilter = "";
             $filter = "";
-            if(isset($columns[1]))
-            {
-                $whereFilter .= "{$columns[1][0]} {$columns[1][1]} '{$columns[1][2]}'";
+
+            foreach ($columns as $col) {
+                if ($whereFilter != "") {
+                    $whereFilter .= " AND ";
+                }
+
+
+                $whereFilter .= "{$col[0]} {$col[1]} '{$col[2]}'";
             }
 
-            if($filter)
-            {
-                $filter .= "FILTER (WHERE $whereFilter)";
+            if ($whereFilter) {
+                $filter = "FILTER (WHERE $whereFilter)";
             }
 
             $query->addSelect(
@@ -184,7 +198,16 @@ class ProductDetailHistoryRepository extends MasterDataRepository
 
         // Handle Group By
         foreach ($groupBy as $column) {
-            $query->addSelect($column)->groupBy($column);
+            if ($column == 'code') {
+                $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
+            } elseif ($column == 'batch') {
+                $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
+            } elseif ($column == 'expired_date') {
+                $query->addSelect(DB::raw("COALESCE($column, '0001-01-01') as $column"));
+            } else {
+                $query->addSelect($column);
+            }
+            $query->groupBy($column);
         }
 
         return $query;
