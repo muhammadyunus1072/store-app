@@ -27,12 +27,12 @@ class CurrentStockRepository
             dateStart: $dateStart,
             dateEnd: $dateEnd,
             remarksTypes: [
-                'stock_expense' => [['remarks_type', '=', StockExpenseProduct::class]],
-                'purchase_order' => [['remarks_type', '=', PurchaseOrderProduct::class]],
+                'stock_expense' => [['product_detail_histories.remarks_type', '=', StockExpenseProduct::class]],
+                'purchase_order' => [['product_detail_histories.remarks_type', '=', PurchaseOrderProduct::class]],
             ],
             groupBy: ['product_id']
         );
-
+        
         return Product::select(
             'products.name',
             'unit_details.name as unit_detail_name',

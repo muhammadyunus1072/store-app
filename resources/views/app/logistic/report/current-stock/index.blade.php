@@ -22,9 +22,15 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <livewire:logistic.report.filter :show_input_date_start="true" :show_input_date_end="true" :show_input_product="true" :show_input_category_product="true">
+            <livewire:logistic.report.filter 
+            dispatchEvent="add-filter" 
+            :filterDateStart="true" 
+            :filterDateEnd="true" 
+            :filterProductMultiple="true" 
+            :filterCategoryProductMultiple="true">
         </div>
         <div class="card-body">
+            <livewire:logistic.report.current-stock.datatable-header>
             <livewire:logistic.report.current-stock.datatable lazy>
         </div>
     </div>

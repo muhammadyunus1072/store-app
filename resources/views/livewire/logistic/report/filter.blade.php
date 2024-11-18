@@ -111,9 +111,6 @@
                 <label>Produk</label>
                 <div class="d-flex">
                     <select class="form-select" id="select2-products" multiple></select>
-                    <button class="btn btn-danger ms-2" onclick="$('#select2-products').val('').trigger('change')">
-                        Reset
-                    </button>
                 </div>
             </div>
         @endif
@@ -124,10 +121,6 @@
                 <label>Kategori Produk</label>
                 <div class="d-flex">
                     <select class="form-select" id="select2-category-products" multiple></select>
-                    <button class="btn btn-danger ms-2"
-                        onclick="$('#select2-category-products').val('').trigger('change')">
-                        Reset
-                    </button>
                 </div>
             </div>
         @endif
@@ -141,14 +134,14 @@
             </div>
             <div class="col-auto">
                 <button class="btn btn-light-success btn-sm"
-                    wire:click="$dispatch('export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_EXCEL }}' })">
+                    wire:click="$dispatch('datatable-export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_EXCEL }}' })">
                     <i class="fa fa-file-excel"></i>
                     Export Excel
                 </button>
             </div>
             <div class="col-auto">
                 <button class="btn btn-light-danger btn-sm"
-                    wire:click="$dispatch('export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_PDF }}' })">
+                    wire:click="$dispatch('datatable-export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_PDF }}' })">
                     <i class="fa fa-file-pdf"></i>
                     Export PDF
                 </button>
@@ -217,7 +210,7 @@
                     },
                 }
             });
-
+            
             $('#select2-products').on('select2:select', function(e) {
                 @this.call('onSelectProduct', e.params.data.id)
             });

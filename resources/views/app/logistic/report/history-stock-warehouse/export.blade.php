@@ -33,8 +33,8 @@
 
             <tr>
                 <td colspan="11" style="font-weight: bold;">
-                    Tanggal :{{ Carbon\Carbon::parse($request['date_start'])->format('Y-m-d') }} s/d
-                    {{ Carbon\Carbon::parse($request['date_end'])->format('Y-m-d') }}
+                    Tanggal :{{ Carbon\Carbon::parse($request['dateStart'])->format('Y-m-d') }} s/d
+                    {{ Carbon\Carbon::parse($request['dateEnd'])->format('Y-m-d') }}
                 </td>
             </tr>
             <tr>
@@ -46,7 +46,7 @@
                 </td>
                 <td colspan="4" style="font-weight: bold;">
                     Kategori Produk :
-                    @foreach ($request['category_products'] as $index => $category_product)
+                    @foreach ($request['categoryProductIds'] as $index => $category_product)
                      {{ $index ? ", ".$category_product : $category_product }}
                     @endforeach
                 </td>

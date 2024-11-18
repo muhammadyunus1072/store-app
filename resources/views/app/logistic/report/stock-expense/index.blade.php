@@ -23,13 +23,15 @@
     <div class="card">
         <div class="card-header">
             <livewire:logistic.report.filter 
-            :show_input_date_start="true"
-            :show_input_date_end="true"
-            :show_input_product="true"
-            :show_input_category_product="true"
+            dispatchEvent="add-filter"
+            :filterDateStart="true"
+            :filterDateEnd="true"
+            :filterProductMultiple="true" 
+            :filterCategoryProductMultiple="true"
             >
         </div>
         <div class="card-body">
+            <livewire:logistic.report.stock-expense.datatable-header lazy>
             <livewire:logistic.report.stock-expense.datatable lazy>
         </div>
     </div>

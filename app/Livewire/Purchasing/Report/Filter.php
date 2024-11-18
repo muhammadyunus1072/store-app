@@ -12,27 +12,28 @@ use App\Repositories\Core\Setting\SettingRepository;
 class Filter extends Component
 {
     // Setting Filter
-    public $show_input_product;
-    public $show_input_category_product;
-    public $show_input_warehouse;
-    public $show_input_supplier;
-    public $show_input_entry_date_start;
-    public $show_input_entry_date_end;
-    public $show_input_expired_date_start;
-    public $show_input_expired_date_end;
-    public $show_input_date_start;
-    public $show_input_date_end;
+    public $filterProduct;
+    public $filterProductMultiple;
+    public $filterCategoryProductMultiple;
+    public $filterWarehouse;
+    public $filterSupplier;
+    public $show_input_entry_dateStart;
+    public $show_input_entry_dateEnd;
+    public $show_input_expired_dateStart;
+    public $show_input_expired_dateEnd;
+    public $filterDateStart;
+    public $filterDateEnd;
 
-    public $products = [];
-    public $category_products = [];
+    public $productIds = [];
+    public $categoryProductIds = [];
+    public $supplierIds;
     public $warehouse_id;
-    public $supplier_id;
-    public $entry_date_start;
-    public $entry_date_end;
-    public $expired_date_start;
-    public $expired_date_end;
-    public $date_start;
-    public $date_end;
+    public $entry_dateStart;
+    public $entry_dateEnd;
+    public $expired_dateStart;
+    public $expired_dateEnd;
+    public $dateStart;
+    public $dateEnd;
 
     // Setting
     public $setting_product_code;
@@ -51,11 +52,12 @@ class Filter extends Component
 
     public $companyId;
     public $companyText;
-    
+    public $showExport = true;
+
     public function mount()
     {
-        $this->date_start = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->date_end = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
 
         // $setting = SettingRepository::findByName(Setting::NAME_LOGISTIC);
         // $settings = json_decode($setting->setting);
@@ -89,24 +91,28 @@ class Filter extends Component
     private function filterHandle()
     {
         $this->dispatch('datatable-add-filter', [
-            'products' => collect($this->products)
+            'productIds' => collect($this->productIds)
             ->pluck('id')
             ->map(function ($id) {
                 return Crypt::decrypt($id);
             }),
-            'category_products' => collect($this->category_products)
+            'categoryProductIds' => collect($this->categoryProductIds)
+            ->pluck('id')
+            ->map(function ($id) {
+                return Crypt::decrypt($id);
+            }),
+            'supplierIds' => collect($this->supplierIds)
             ->pluck('id')
             ->map(function ($id) {
                 return Crypt::decrypt($id);
             }),
             'warehouse_id' => $this->warehouse_id,
-            'supplier_id' => $this->supplier_id,
-            'expired_date_start' => $this->expired_date_start,
-            'expired_date_end' => $this->expired_date_end,
-            'entry_date_start' => $this->entry_date_start,
-            'entry_date_end' => $this->entry_date_end,
-            'date_start' => $this->date_start,
-            'date_end' => $this->date_end,
+            'expired_dateStart' => $this->expired_dateStart,
+            'expired_dateEnd' => $this->expired_dateEnd,
+            'entry_dateStart' => $this->entry_dateStart,
+            'entry_dateEnd' => $this->entry_dateEnd,
+            'dateStart' => $this->dateStart,
+            'dateEnd' => $this->dateEnd,
 
             'companyId' => $this->companyId,
             'warehouseId' => $this->warehouseId,
@@ -114,29 +120,29 @@ class Filter extends Component
     }
     public function resetEntryDateStart()
     {
-        $this->entry_date_start = null;
+        $this->entry_dateStart = null;
         $this->filterHandle();
     }
     public function resetEntryDateEnd()
     {
-        $this->entry_date_end = null;
+        $this->entry_dateEnd = null;
         $this->filterHandle();
     }
     public function resetExpiredDateStart()
     {
-        $this->expired_date_start = null;
+        $this->expired_dateStart = null;
         $this->filterHandle();
     }
     public function resetExpiredDateEnd()
     {
-        $this->expired_date_end = null;
+        $this->expired_dateEnd = null;
         $this->filterHandle();
     }
 
 
     public function selectCategoryProducts($data)
     {
-        $this->category_products[] = [
+        $this->categoryProductIds[] = [
             'id' => $data['id'],
             'text' => $data['text'],
         ];
@@ -145,16 +151,34 @@ class Filter extends Component
 
     public function unselectCategoryProducts($data)
     {
-        $index = array_search($data['id'], array_column($this->category_products, 'id'));
+        $index = array_search($data['id'], array_column($this->categoryProductIds, 'id'));
         if ($index !== false) {
-            unset($this->category_products[$index]);
+            unset($this->categoryProductIds[$index]);
+        }
+        $this->filterHandle();
+    }
+
+    public function selectSuppliers($data)
+    {
+        $this->supplierIds[] = [
+            'id' => $data['id'],
+            'text' => $data['text'],
+        ];
+        $this->filterHandle();
+    }
+
+    public function unselectSuppliers($data)
+    {
+        $index = array_search($data['id'], array_column($this->supplierIds, 'id'));
+        if ($index !== false) {
+            unset($this->supplierIds[$index]);
         }
         $this->filterHandle();
     }
 
     public function selectProducts($data)
     {
-        $this->products[] = [
+        $this->productIds[] = [
             'id' => $data['id'],
             'text' => $data['text'],
         ];
@@ -163,9 +187,9 @@ class Filter extends Component
 
     public function unselectProducts($data)
     {
-        $index = array_search($data['id'], array_column($this->products, 'id'));
+        $index = array_search($data['id'], array_column($this->productIds, 'id'));
         if ($index !== false) {
-            unset($this->products[$index]);
+            unset($this->productIds[$index]);
         }
         $this->filterHandle();
     }

@@ -11,6 +11,7 @@ use App\Helpers\Core\UserStateHandler;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\NumberFormatter;
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\Livewire\WithDatatableExport;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
 use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
@@ -18,12 +19,12 @@ use App\Repositories\Logistic\Report\StockExpenseWarehouse\StockExpenseWarehouse
 
 class Datatable extends Component
 {
-    use WithDatatable;
+    use WithDatatable, WithDatatableExport;
 
-    public $date_start;
-    public $date_end;
-    public $products = [];
-    public $category_products = [];
+    public $dateStart;
+    public $dateEnd;
+    public $productIds = [];
+    public $categoryProductIds = [];
 
     public $header = [];
     public $show_header = true;
@@ -42,11 +43,26 @@ class Datatable extends Component
 
     public function onMount()
     {
-        $this->date_start = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->date_end = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
       $this->loadUserState();
     }
 
+    public function updatedSearch()
+    {
+        $this->dispatch('add-filter', [
+            'search' => $this->search,
+        ]);
+    }
+
+    #[On('add-filter')]
+    public function addFilter($filter)
+    {
+        foreach ($filter as $key => $value) {
+            $this->$key = $value;
+        }        
+    }
+    
     public function loadUserState()
     {
         $userState = UserStateHandler::get();
@@ -58,43 +74,36 @@ class Datatable extends Component
         } else {
             $this->companyId = $userState['company_id'];
             $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = $userState['warehouse_id'];
+            $this->warehouseId = Crypt::decrypt($userState['warehouse_id']);
         }
     }
 
-    #[On('export')]
-    public function export($type)
+    function datatableExportFileName(): string
     {
-        $fileName = 'Data Pengeluaran Gudang ' . Carbon::parse($this->date_start)->format('Y-m-d') . ' sd ' . Carbon::parse($this->date_end)->format('Y-m-d');
+        return 'Laporan Pengeluaran Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
+    }
 
-        $data = $this->datatableGetProcessedQuery()->get();
-
-        $products = collect($this->products)->map(function ($id) {
+    function datatableExportFilter(): array
+    {
+        $productIds = collect($this->productIds)->map(function ($id) {
             return ProductRepository::find($id)->name;
-        });
-        $category_products = collect($this->category_products)->map(function ($id) {
+        })->toArray();
+        $categoryProductIds = collect($this->categoryProductIds)->map(function ($id) {
             return CategoryProductRepository::find($id)->name;
-        });
-        return ExportHelper::export(
-            $type,
-            $fileName,
-            $data,
-            "app.logistic.report.stock-expense-warehouse.export",
-            [
-                'date_start' => $this->date_start,
-                'date_end' => $this->date_end,
-                'products' => $products,
-                'category_products' => $category_products,
-                'warehouse' => $this->warehouseId ? WarehouseRepository::find(Crypt::decrypt($this->warehouseId))->name : null,
-                'keyword' => $this->search,
-                'type' => $type,
-                'title' => 'Data Pengeluaran Gudang',
-            ],
-            [
-                'size' => 'legal',
-                'orientation' => 'portrait',
-            ]
-        );
+        })->toArray();
+        return [
+            'Tanggal Mulai' => $this->dateStart,
+            'Tanggal Akhir' => $this->dateEnd,
+            'Produk' => implode(" , ", $productIds),
+            'Kategori Produk' => implode(" , ", $categoryProductIds),
+            'Gudang' => $this->warehouseId ? WarehouseRepository::find($this->warehouseId)->name : null,
+            'Kata Kunci' => $this->search,
+        ];
+    }
+
+    function datatableExportEnableFooterTotal()
+    {
+        return [5, 6, 7];
     }
     
     public function getColumns(): array
@@ -149,6 +158,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Satuan',
+                'footer' => 'Total',
                 'render' => function($item)
                 {
                     return $item->unit_detail_name;
@@ -167,6 +177,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Satuan Konversi',
+                'footer' => '',
                 'render' => function($item)
                 {
                     return $item->main_unit_detail_name;
@@ -177,25 +188,11 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return StockExpenseWarehouseRepository::datatable($this->search, $this->date_start, $this->date_end, $this->products, $this->category_products, $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null);
-    }
-
-    private function setHeader()
-    {
-        $data = $this->datatableGetProcessedQuery()->get();
-        $total = $data->sum('converted_quantity');
-        $this->header = [
-            [
-                "col" => 3,
-                "name" => "Total Jumlah Pengeluaran",
-                "value" => $total
-            ],
-        ];
+        return StockExpenseWarehouseRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->productIds, $this->categoryProductIds, $this->warehouseId);
     }
 
     public function getView(): string
     {
-        $this->setHeader();
         return 'livewire.logistic.report.stock-expense-warehouse.datatable';
     }
 }

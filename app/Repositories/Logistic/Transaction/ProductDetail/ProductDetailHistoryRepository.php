@@ -133,7 +133,6 @@ class ProductDetailHistoryRepository extends MasterDataRepository
 
             $query->addSelect($column);
         }
-
         // Query Last Row Number
         $query = DB::table($query, "stocks")
             ->select(
@@ -145,13 +144,16 @@ class ProductDetailHistoryRepository extends MasterDataRepository
         foreach ($groupBy as $column) {
             $query->addSelect($column)->groupBy($column);
         }
-
         return $query;
     }
 
     public static function querySumTransactions($dateStart, $dateEnd, $remarksTypes, $groupBy, $whereClause = [])
     {
-        $query = ProductDetailHistory::whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"]);
+        $query = ProductDetailHistory::whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"])
+        ->join('product_details', function ($join) {
+            $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id')
+                ->whereNull('product_details.deleted_at');
+        });
 
         // Handle Where Clause
         foreach ($whereClause as $col) {
@@ -160,13 +162,23 @@ class ProductDetailHistoryRepository extends MasterDataRepository
 
         // Handle Remarks Type
         foreach ($remarksTypes as $key => $columns) {
+            $whereFilter = "";
             $filter = "";
-            foreach ($columns as $col) {
-                $filter .= "{$col[0]} {$col[1]} '{$col[2]}'";
+            if(isset($columns[1]))
+            {
+                $whereFilter .= "{$columns[1][0]} {$columns[1][1]} '{$columns[1][2]}'";
+            }
+
+            if($filter)
+            {
+                $filter .= "FILTER (WHERE $whereFilter)";
             }
 
             $query->addSelect(
-                DB::raw("SUM(quantity) FILTER (WHERE $filter) AS quantity_$key")
+                DB::raw("SUM(quantity) $filter AS quantity_$key")
+            );
+            $query->addSelect(
+                DB::raw("SUM(quantity * price) $filter AS value_$key")
             );
         }
 

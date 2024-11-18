@@ -23,14 +23,15 @@
     <div class="card">
         <div class="card-header">
             <livewire:purchasing.report.filter 
-            :show_input_date_start="true"
-            :show_input_date_end="true"
-            :show_input_supplier="true"
-            :show_input_product="true"
-            :show_input_category_product="true"
+            :filterDateStart="true"
+            :filterDateEnd="true"
+            :filterSupplier="true"
+            :filterProductMultiple="true" 
+            :filterCategoryProductMultiple="true"
             >
         </div>
         <div class="card-body">
+            <livewire:purchasing.report.purchase-order-product-detail.datatable-header lazy>
             <livewire:purchasing.report.purchase-order-product-detail.datatable lazy>
         </div>
     </div>
