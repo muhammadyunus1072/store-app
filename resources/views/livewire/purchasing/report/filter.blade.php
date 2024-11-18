@@ -69,8 +69,8 @@
                 </div>
             </div>
         @endif
-        @if ($filterWarehouse)
 
+        @if ($filterWarehouse)
             {{-- SELECT WAREHOUSE --}}
             <div class="col-md-4 mb-3">
                 <label>Gudang</label>
@@ -88,9 +88,10 @@
                 </select>
             </div>
         @endif
+
         @if ($filterSupplier)
             <div class="col-md-4 mb-2" wire:ignore>
-                <label>Suplier</label>
+                <label>Supplier</label>
                 <div class="d-flex">
                     <select class="form-select" id="select2-supplier" multiple></select>
                 </div>
