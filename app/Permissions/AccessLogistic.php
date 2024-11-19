@@ -25,6 +25,8 @@ class AccessLogistic
     const STOCK_EXPENSE_REPORT = "stock_expense_report";
     const STOCK_EXPENSE_WAREHOUSE = "stock_expense_warehouse";
 
+    const IMPORT_DATA = "import_data_logistic";
+
     const ALL = [
         self::SETTING,
         self::UNIT,
@@ -46,6 +48,8 @@ class AccessLogistic
 
         self::STOCK_EXPENSE_REPORT,
         self::STOCK_EXPENSE_WAREHOUSE,
+
+        self::IMPORT_DATA,
     ];
 
     const TYPE_ALL = [
@@ -69,6 +73,8 @@ class AccessLogistic
 
         self::STOCK_EXPENSE_REPORT => [PermissionHelper::TYPE_READ],
         self::STOCK_EXPENSE_WAREHOUSE => [PermissionHelper::TYPE_READ],
+
+        self::IMPORT_DATA => [PermissionHelper::TYPE_READ],
     ];
 
     const TRANSLATE = [
@@ -92,5 +98,7 @@ class AccessLogistic
 
         self::STOCK_EXPENSE_REPORT => "Laporan Pengeluaran",
         self::STOCK_EXPENSE_WAREHOUSE => "Laporan Pengeluaran Gudang",
+
+        self::IMPORT_DATA => "Import Data",
     ];
 }

@@ -143,6 +143,11 @@ return [
             ],
         ],
         [
+            'text' => 'Import Data',
+            'route'  => 'import_data_logistic.index',
+            'icon' => 'ki-duotone ki-setting-2',
+        ],
+        [
             'text' => 'Pengaturan',
             'route'  => 'setting_logistic.index',
             'icon' => 'ki-duotone ki-setting-2',
