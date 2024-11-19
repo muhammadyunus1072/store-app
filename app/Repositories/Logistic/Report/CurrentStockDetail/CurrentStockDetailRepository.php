@@ -14,8 +14,8 @@ class CurrentStockDetailRepository
         $search,
         $dateStart,
         $dateEnd,
-        $products,
-        $categoryProducts
+        $productIds,
+        $categoryProductIds
     ) {
         // QUERY : LAST STOCK
         $queryLastStock = ProductDetailHistoryRepository::queryLastStock(
@@ -84,12 +84,12 @@ class CurrentStockDetailRepository
                     ->on('stocks.expired_date', '=', 'transactions.expired_date');
             })
             ->where('products.type', '=', Product::TYPE_PRODUCT_WITH_STOCK)
-            ->when(!empty($products), function ($query) use ($products) {
-                $query->whereIn('products.id', $products);
+            ->when(!empty($productIds), function ($query) use ($productIds) {
+                $query->whereIn('products.id', $productIds);
             })
-            ->when($categoryProducts, function ($query) use ($categoryProducts) {
-                $query->whereHas('productCategories', function ($query) use ($categoryProducts) {
-                    $query->whereIn('category_product_id', $categoryProducts);
+            ->when($categoryProductIds, function ($query) use ($categoryProductIds) {
+                $query->whereHas('productCategories', function ($query) use ($categoryProductIds) {
+                    $query->whereIn('category_product_id', $categoryProductIds);
                 });
             })
             ->where(function ($query) {
@@ -98,7 +98,9 @@ class CurrentStockDetailRepository
                     ->orWhere('transactions.quantity_purchase_order', '!=', 0);
             })
             ->when($search, function ($query) use ($search) {
-                $query->where('products.name', env('QUERY_LIKE'), '%' . $search . '%');
+                $query->where(function ($query) use ($search) {
+                    $query->orWhere('products.name', env('QUERY_LIKE'), '%' . $search . '%');
+                });
             });
     }
 }

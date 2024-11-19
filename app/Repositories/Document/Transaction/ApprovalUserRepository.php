@@ -12,6 +12,13 @@ class ApprovalUserRepository extends MasterDataRepository
         return ApprovalUser::class;
     }
 
+    public static function countMenuNotification($userId)
+    {
+        return ApprovalUser::where('user_id', $userId)
+            ->whereDoesntHave('approvalStatus')
+            ->count();
+    }
+
     public static function findNextSubmission($approvalId)
     {
         return ApprovalUser::where('approval_id', $approvalId)

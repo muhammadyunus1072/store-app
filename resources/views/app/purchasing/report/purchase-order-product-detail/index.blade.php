@@ -22,17 +22,26 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <livewire:purchasing.report.filter 
+            <livewire:purchasing.filter 
             :filterDateStart="true"
             :filterDateEnd="true"
-            :filterSupplier="true"
+            :filterSupplierMultiple="true"
             :filterProductMultiple="true" 
             :filterCategoryProductMultiple="true"
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')"
             >
         </div>
         <div class="card-body">
-            <livewire:purchasing.report.purchase-order-product-detail.datatable-header lazy>
-            <livewire:purchasing.report.purchase-order-product-detail.datatable lazy>
+            <livewire:purchasing.report.purchase-order-product-detail.datatable-header 
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')"
+            lazy>
+            
+            <livewire:purchasing.report.purchase-order-product-detail.datatable 
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')"
+            lazy>
         </div>
     </div>
 @stop

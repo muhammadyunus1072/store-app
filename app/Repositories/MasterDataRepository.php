@@ -23,6 +23,10 @@ abstract class MasterDataRepository
                 $operator = isset($clause['operator']) ? $clause['operator'] : $clause[1];
                 $value = isset($clause['value']) ? $clause['value'] : $clause[2];
                 $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[3]) ? $clause[3] : null);
+            } else if (is_array($clause[1])) {
+                $operator = "IN";
+                $value = $clause[1];
+                $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[2]) ? $clause[2] : null);
             } else {
                 $operator = "=";
                 $value = isset($clause['value']) ? $clause['value'] : $clause[1];
@@ -30,9 +34,17 @@ abstract class MasterDataRepository
             }
 
             if ($conjunction == 'OR') {
-                $query->orWhere($column, $operator, $value);
+                if ($operator == "IN") {
+                    $query->orWhereIn($column, $value);
+                } else {
+                    $query->orWhere($column, $operator, $value);
+                }
             } else {
-                $query->where($column, $operator, $value);
+                if ($operator == "IN") {
+                    $query->whereIn($column, $value);
+                } else {
+                    $query->where($column, $operator, $value);
+                }
             }
         }
 

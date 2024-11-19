@@ -3,6 +3,7 @@
 namespace App\Repositories\Logistic\Report\HistoryStockDetail;
 
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
+use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
 
 class HistoryStockDetailRepository
@@ -48,6 +49,7 @@ class HistoryStockDetailRepository
             })
             ->where('product_id', $productId)
             ->whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"])
+            ->whereNotIn('product_detail_histories.remarks_type', [StockRequestProduct::class])
             ->orderBy('transaction_date', 'ASC')
             ->orderBy('id', 'ASC')
             ->get();

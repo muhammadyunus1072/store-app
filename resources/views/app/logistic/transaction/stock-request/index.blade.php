@@ -35,8 +35,20 @@
 
 @section('content')
     <div class="card">
+        <div class="card-header">
+            <livewire:logistic.filter
+            :filterDateStart="true" 
+            :filterDateEnd="true"
+            :filterCompany="true"
+            :filterWarehouse="true"
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')">
+        </div>
         <div class="card-body">
-            <livewire:logistic.transaction.stock-request.datatable lazy>
+            <livewire:logistic.transaction.stock-request.datatable 
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')"
+            lazy>
         </div>
     </div>
 @stop

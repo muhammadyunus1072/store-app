@@ -29,8 +29,8 @@ class SettingLogistic
         self::SUBSTRACT_STOCK_METHOD => StockHandler::SUBSTRACT_STOCK_METHOD_FIFO,
         self::PRICE_INTEGER_VALUE => true,
 
-        self::APPROVAL_KEY_STOCK_REQUEST => "",
-        self::APPROVAL_KEY_STOCK_EXPENSE => "",
+        self::APPROVAL_KEY_STOCK_REQUEST => "permintaan",
+        self::APPROVAL_KEY_STOCK_EXPENSE => "pengeluaran",
     ];
 
     public $parsedSetting;

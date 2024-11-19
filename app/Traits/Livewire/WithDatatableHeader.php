@@ -8,12 +8,13 @@ trait WithDatatableHeader
 {
     abstract public function getHeaderData();
 
-    #[On('add-filter')]
+    #[On('on-search-updated')]
+    #[On('datatable-add-filter')]
     public function addFilter($filter)
     {
         foreach ($filter as $key => $value) {
             $this->$key = $value;
-        }        
+        }
     }
 
     public function render()
@@ -22,5 +23,4 @@ trait WithDatatableHeader
             'data' => $this->getHeaderData(),
         ]);
     }
-
 }

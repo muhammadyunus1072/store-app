@@ -8,8 +8,12 @@ use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 
 class PurchaseOrderRepository
 {
-    public static function datatable($search, $dateStart, $dateEnd, $supplierIds)
-    {
+    public static function datatable(
+        $search,
+        $dateStart,
+        $dateEnd,
+        $supplierIds
+    ) {
         $queryPurchaseOrderProduct = PurchaseOrderProduct::select(
             'purchase_order_products.purchase_order_id',
             DB::raw('SUM(purchase_order_products.quantity * purchase_order_products.price) as value'),
@@ -30,8 +34,9 @@ class PurchaseOrderRepository
                 $query->whereIn('purchase_orders.supplier_id', $supplierIds);
             })
             ->when($search, function ($query) use ($search) {
-                $query->orWhere('purchase_orders.number', env('QUERY_LIKE'), '%' . $search . '%')
-                    ->orWhere('purchase_orders.supplier_name', env('QUERY_LIKE'), '%' . $search . '%');
+                $query->where(function($query) use($search){
+                    $query->orWhere('purchase_orders.number', env('QUERY_LIKE'), '%' . $search . '%');
+                });
             });
     }
 }

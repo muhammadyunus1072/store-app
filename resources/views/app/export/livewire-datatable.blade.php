@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>{{ $fileName }}</title>
+    <title>Data</title>
     <style>
         .table-border {
             border-collapse: collapse;
@@ -23,26 +23,29 @@
 </head>
 
 <body>
-    
-     <table class="table-border" style="width: 100%">
+    <table class="table-border" style="width: 100%">
         <thead>
-
             <tr>
-                <td colspan="{{count($columns)}}" style="text-align: center; font-weight: bold;">
+                <td colspan="{{ count($columns) }}" style="text-align: center; font-weight: bold;">
                     {{ $fileName }}
                 </td>
             </tr>
+
+            {{-- FILTER --}}
             @foreach ($filters as $key => $value)
-                <tr>
-                    <td colspan="{{count($columns)}}" style="font-weight: bold;">
-                        {{$key}} :{{ $value }}
-                    </td>
-                </tr>
+                @if ($value)
+                    <tr>
+                        <td colspan="{{ count($columns) }}" style="font-weight: bold;">
+                            {{ $key }} :{{ $value }}
+                        </td>
+                    </tr>
+                @endif
             @endforeach
 
+            {{-- HEADER COLUMN --}}
             <tr>
-                <td colspan="{{count($columns)}}" style="border: 0px; padding:8px">
-            </tr>            
+                <td colspan="{{ count($columns) }}" style="border: 0px; padding:8px">
+            </tr>
             <tr>
                 @foreach ($columns as $index => $col)
                     <th>
@@ -52,7 +55,6 @@
                     </th>
                 @endforeach
             </tr>
-
         </thead>
 
         <tbody>
@@ -60,14 +62,18 @@
                 $isNumberFormat = $type == App\Helpers\General\ExportHelper::TYPE_PDF;
             @endphp
 
-
             @foreach ($data as $index => $item)
                 <tr>
                     @foreach ($columns as $i => $col)
                         @php
-                            if(!empty($footerTotal) && isset($footerTotal[$i]))
-                            {
-                                !isset($col['footer']) ? $footerTotal[$i]['value'] += (float)(str_replace(['.', ','], ['', '.'], $col['render']($item))) : null; 
+                            if (!empty($footerTotal) && isset($footerTotal[$i])) {
+                                !isset($col['footer'])
+                                    ? ($footerTotal[$i]['value'] += (float) str_replace(
+                                        ['.', ','],
+                                        ['', '.'],
+                                        $col['render']($item),
+                                    ))
+                                    : null;
                             }
 
                             $cell_colspan = '';
@@ -104,11 +110,13 @@
                         @endphp
 
                         @if (isset($col['render']) && is_callable($col['render']))
-                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!} {!! $cell_style !!}>
+                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
+                                {!! $cell_style !!}>
                                 {!! call_user_func($col['render'], $item, $index) !!}
                             </td>
                         @elseif (isset($col['key']))
-                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!} {!! $cell_style !!}>
+                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
+                                {!! $cell_style !!}>
                                 {{ $item->{$col['key']} }}
                             </td>
                         @endif
@@ -116,11 +124,11 @@
                 </tr>
             @endforeach
             <tr>
-                <td colspan="{{count($columns)}}" style="border: 0px; padding:8px">
+                <td colspan="{{ count($columns) }}" style="border: 0px; padding:8px">
             </tr>
         </tbody>
-        
-        @if(!empty($footerTotal))
+
+        @if (!empty($footerTotal))
             <thead>
                 <tr>
                     @foreach ($footerTotal as $index => $col)

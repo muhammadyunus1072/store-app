@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Purchasing\Transaction\PurchaseOrder;
 
+use App\Helpers\Core\UserStateHandler;
 use Carbon\Carbon;
 use App\Traits\Livewire\WithDatatable;
 use App\Helpers\General\Alert;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
+use App\Settings\SettingCore;
 use App\Settings\SettingPurchasing;
 use Illuminate\Support\Facades\DB;
 
@@ -23,12 +25,24 @@ class Datatable extends Component
     public $isCanUpdate;
     public $isCanDelete;
 
+    public $settingMultipleCompany;
     public $settingPurchaseOrderAddStock;
     public $settingApprovalKeyPurchaseOrder;
 
     // Delete Dialog
     public $targetDeleteId;
 
+    // Filter
+    public $dateStart;
+    public $dateEnd;
+    public $warehouseId;
+    public $companyId;
+    public $productIds = [];
+    public $supplierIds = [];
+
+    /*
+    | WITH DATATABLE
+    */
     public function onMount()
     {
         $this->sortDirection = 'desc';
@@ -37,50 +51,13 @@ class Datatable extends Component
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessPurchasing::PURCHASE_ORDER, PermissionHelper::TYPE_DELETE));
 
+        $this->settingMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
         $this->settingPurchaseOrderAddStock = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_ADD_STOCK);
         $this->settingApprovalKeyPurchaseOrder = SettingPurchasing::get(SettingPurchasing::APPROVAL_KEY_PURCHASE_ORDER);
-    }
 
-    #[On('on-delete-dialog-confirm')]
-    public function onDialogDeleteConfirm()
-    {
-        try {
-            DB::beginTransaction();
-
-            if (!$this->isCanDelete || $this->targetDeleteId == null) {
-                return;
-            }
-
-            PurchaseOrderRepository::delete(Crypt::decrypt($this->targetDeleteId));
-            Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Alert::fail($this, 'Gagal', $e->getMessage());
-        }
-    }
-
-    #[On('on-delete-dialog-cancel')]
-    public function onDialogDeleteCancel()
-    {
-        $this->targetDeleteId = null;
-    }
-
-    public function showDeleteDialog($id)
-    {
-        $this->targetDeleteId = $id;
-
-        Alert::confirmation(
-            $this,
-            Alert::ICON_QUESTION,
-            "Hapus Data",
-            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
-            "on-delete-dialog-confirm",
-            "on-delete-dialog-cancel",
-            "Hapus",
-            "Batal",
-        );
+        $userState = UserStateHandler::get();
+        $this->companyId = $userState['company_id'];
+        $this->warehouseId = $userState['warehouse_id'];
     }
 
     public function getColumns(): array
@@ -154,10 +131,20 @@ class Datatable extends Component
                 'key' => 'supplier_name',
                 'name' => 'Supplier',
             ],
-            [
-                'key' => 'warehouse_name',
-                'name' => 'Gudang',
-            ],
+        ];
+
+        if ($this->settingMultipleCompany) {
+            $columns[] = [
+                'sortable' => false,
+                'searchable' => false,
+                'key' => 'company_name',
+                'name' => 'Perusahaan',
+            ];
+        }
+
+        $columns[] = [
+            'key' => 'warehouse_name',
+            'name' => 'Gudang',
         ];
 
         if ($this->settingPurchaseOrderAddStock) {
@@ -187,11 +174,67 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return PurchaseOrderRepository::datatable();
+        return PurchaseOrderRepository::datatable(
+            dateStart: $this->dateStart,
+            dateEnd: $this->dateEnd,
+            warehouseId: $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null,
+            companyId: $this->companyId ? Crypt::decrypt($this->companyId) : null,
+            productIds: collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            supplierIds: collect($this->supplierIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+        );
     }
 
     public function getView(): string
     {
         return 'livewire.purchasing.transaction.purchase-order.datatable';
+    }
+
+    /*
+    | DELETE DIALOGUE
+    */
+    #[On('on-delete-dialog-confirm')]
+    public function onDialogDeleteConfirm()
+    {
+        try {
+            DB::beginTransaction();
+
+            if (!$this->isCanDelete || $this->targetDeleteId == null) {
+                return;
+            }
+
+            PurchaseOrderRepository::delete(Crypt::decrypt($this->targetDeleteId));
+            Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Alert::fail($this, 'Gagal', $e->getMessage());
+        }
+    }
+
+    #[On('on-delete-dialog-cancel')]
+    public function onDialogDeleteCancel()
+    {
+        $this->targetDeleteId = null;
+    }
+
+    public function showDeleteDialog($id)
+    {
+        $this->targetDeleteId = $id;
+
+        Alert::confirmation(
+            $this,
+            Alert::ICON_QUESTION,
+            "Hapus Data",
+            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
+            "on-delete-dialog-confirm",
+            "on-delete-dialog-cancel",
+            "Hapus",
+            "Batal",
+        );
     }
 }

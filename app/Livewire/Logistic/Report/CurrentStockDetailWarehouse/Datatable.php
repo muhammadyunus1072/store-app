@@ -4,7 +4,6 @@ namespace App\Livewire\Logistic\Report\CurrentStockDetailWarehouse;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Settings\SettingLogistic;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,48 +20,23 @@ class Datatable extends Component
 {
     use WithDatatable, WithDatatableExport;
 
+    // Filter
+    public $warehouseId;
+    public $companyId;
     public $dateStart;
     public $dateEnd;
     public $productIds = [];
     public $categoryProductIds = [];
 
-    // Helpers
-    public $isMultipleCompany = false;
-
-    public $companies = [];
-    public $warehouses = [];
-
-    public $warehouseId;
-    public $warehouseText;
-
-    public $companyId;
-    public $companyText;
-
+    // Setting
     public $isInputProductCode;
     public $isInputProductExpiredDate;
     public $isInputProductBatch;
 
     public function onMount()
     {
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
         $this->loadUserState();
         $this->loadSetting();
-    }
-
-    public function updatedSearch()
-    {
-        $this->dispatch('add-filter', [
-            'search' => $this->search,
-        ]);
-    }
-
-    #[On('add-filter')]
-    public function addFilter($filter)
-    {
-        foreach ($filter as $key => $value) {
-            $this->$key = $value;
-        }
     }
 
     public function loadSetting()
@@ -75,66 +49,22 @@ class Datatable extends Component
     public function loadUserState()
     {
         $userState = UserStateHandler::get();
-        if ($this->isMultipleCompany) {
-            $this->companies = $userState['companies'];
-            $this->companyId = $userState['company_id'];
-            $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = $userState['warehouse_id'];
-        } else {
-            $this->companyId = $userState['company_id'];
-            $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = Crypt::decrypt($userState['warehouse_id']);
-        }
-    }
-    public function datatableExportPaperOption()
-    {
-        return [
-            'size' => 'legal',
-            'orientation' => 'landscape',
-        ];
+        $this->companyId = $userState['company_id'];
+        $this->warehouseId = $userState['warehouse_id'];
     }
 
-    function datatableExportFileName(): string
+    public function updatedSearch()
     {
-        return 'Laporan Stok Detail Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
+        $this->dispatch('on-search-updated', [
+            'search' => $this->search,
+        ]);
     }
 
-    function datatableExportFilter(): array
-    {
-        $productIds = collect($this->productIds)->map(function ($id) {
-            return ProductRepository::find($id)->name;
-        })->toArray();
-        $categoryProductIds = collect($this->categoryProductIds)->map(function ($id) {
-            return CategoryProductRepository::find($id)->name;
-        })->toArray();
-        return [
-            'Tanggal Mulai' => $this->dateStart,
-            'Tanggal Akhir' => $this->dateEnd,
-            'Produk' => implode(" , ", $productIds),
-            'Kategori Produk' => implode(" , ", $categoryProductIds),
-            'Gudang' => $this->warehouseId ? WarehouseRepository::find($this->warehouseId)->name : null,
-            'Kata Kunci' => $this->search,
-        ];
-    }
-
-    function datatableExportEnableFooterTotal()
-    {
-        $colspan = 0;
-        if ($this->isInputProductCode) {
-            $colspan++;
-        }
-        if ($this->isInputProductExpiredDate) {
-            $colspan++;
-        }
-        if ($this->isInputProductBatch) {
-            $colspan++;
-        }
-        return [3 + $colspan, 4 + $colspan, 5 + $colspan, 6 + $colspan, 7 + $colspan, 8 + $colspan, 9 + $colspan, 10 + $colspan, 11 + $colspan, 12 + $colspan, 13 + $colspan, 14 + $colspan, 15 + $colspan];
-    }
-
+    /*
+    | WITH DATATABLE
+    */
     public function getColumns(): array
     {
-
         $columns = [
             [
                 'sortable' => false,
@@ -145,6 +75,8 @@ class Datatable extends Component
                 }
             ],
             [
+                'sortable' => false,
+                'searchable' => false,
                 'key' => 'name',
                 'name' => 'Nama Produk',
             ],
@@ -270,7 +202,7 @@ class Datatable extends Component
             [
                 'sortable' => false,
                 'searchable' => false,
-                'name' => 'Nilai Tranfer Masuk',
+                'name' => 'Nilai Transfer Masuk',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value_stock_request_in);
                 }
@@ -278,7 +210,7 @@ class Datatable extends Component
             [
                 'sortable' => false,
                 'searchable' => false,
-                'name' => 'Nilai Tranfer Keluar',
+                'name' => 'Nilai Transfer Keluar',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value_stock_request_out * -1);
                 }
@@ -305,11 +237,77 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return CurrentStockDetailWarehouseRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->productIds, $this->categoryProductIds, $this->warehouseId);
+        return CurrentStockDetailWarehouseRepository::datatable(
+            $this->search,
+            $this->dateStart,
+            $this->dateEnd,
+            productIds: collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            categoryProductIds: collect($this->categoryProductIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            warehouseId: $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null
+        );
     }
 
     public function getView(): string
     {
         return 'livewire.logistic.report.current-stock-detail-warehouse.datatable';
+    }
+
+    /*
+    | WITH DATATABLE EXPORT
+    */
+    public function datatableExportPaperOption()
+    {
+        return [
+            'size' => 'legal',
+            'orientation' => 'landscape',
+        ];
+    }
+
+    function datatableExportFileName(): string
+    {
+        return 'Laporan Stok Detail Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
+    }
+
+    function datatableExportFilter(): array
+    {
+        $productIds = collect($this->productIds)->map(function ($id) {
+            return Crypt::decrypt($id);
+        })->toArray();
+        $productNames = ProductRepository::getBy(whereClause: [['id', $productIds]], orderByClause: [['name', 'ASC']])->pluck('name')->implode(', ');
+
+        $categoryProductIds = collect($this->categoryProductIds)->map(function ($id) {
+            return Crypt::decrypt($id);
+        })->toArray();
+        $categoryProductNames = CategoryProductRepository::getBy(whereClause: [['id', $categoryProductIds]], orderByClause: [['name', 'ASC']])->pluck('name')->implode(', ');
+
+        $warehouseName = $this->warehouseId ? WarehouseRepository::find(Crypt::decrypt($this->warehouseId))->name : null;
+
+        return [
+            'Tanggal Mulai' => $this->dateStart,
+            'Tanggal Akhir' => $this->dateEnd,
+            'Produk' => $productNames,
+            'Kategori Produk' => $categoryProductNames,
+            'Gudang' => $warehouseName,
+            'Kata Kunci' => $this->search,
+        ];
+    }
+
+    function datatableExportEnableFooterTotal()
+    {
+        $colspan = 0;
+        if ($this->isInputProductCode) {
+            $colspan++;
+        }
+        if ($this->isInputProductExpiredDate) {
+            $colspan++;
+        }
+        if ($this->isInputProductBatch) {
+            $colspan++;
+        }
+        return [3 + $colspan, 4 + $colspan, 5 + $colspan, 6 + $colspan, 7 + $colspan, 8 + $colspan, 9 + $colspan, 10 + $colspan, 11 + $colspan, 12 + $colspan, 13 + $colspan, 14 + $colspan, 15 + $colspan];
     }
 }

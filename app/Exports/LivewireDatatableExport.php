@@ -6,7 +6,7 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class DatatableExport implements FromView, ShouldAutoSize
+class LivewireDatatableExport implements FromView, ShouldAutoSize
 {
     private $view;
     private $columns;
@@ -36,6 +36,7 @@ class DatatableExport implements FromView, ShouldAutoSize
             'type' => $this->type,
             'footerTotal' => $this->footerTotal,
             'fileName' => $this->fileName,
+            'numberFormat' => false,
         ]);
     }
 }

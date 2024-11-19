@@ -11,7 +11,7 @@ use App\Repositories\Purchasing\Report\PurchaseOrderProduct\PurchaseOrderProduct
 class DatatableHeader extends Component
 {
     use WithDatatableHeader;
-    
+
     public $search;
     public $dateStart;
     public $dateEnd;
@@ -19,15 +19,23 @@ class DatatableHeader extends Component
     public $productIds = [];
     public $categoryProductIds = [];
 
-    public function mount()
-    {
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
-    }
-
     public function getHeaderData()
     {
-        $data = PurchaseOrderProductRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->productIds, $this->categoryProductIds, $this->supplierIds)->get();
+        $data = PurchaseOrderProductRepository::datatable(
+            $this->search,
+            $this->dateStart,
+            $this->dateEnd,
+            productIds: collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            categoryProductIds: collect($this->categoryProductIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            supplierIds: collect($this->supplierIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray()
+        )->get();
+
         $total_purchase_order = collect($data)->unique('purchase_order_id')->count();
         $total_qty = $data->sum('converted_quantity');
         $total_value = $data->sum('value');

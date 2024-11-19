@@ -19,12 +19,18 @@ use Illuminate\Support\Facades\Hash;
 */
 
 Route::group([], __DIR__ . '/web/Core/Core.php');
+
+Route::group([], __DIR__ . '/web/Purchasing/Filter.php');
 Route::group([], __DIR__ . '/web/Purchasing/Master.php');
 Route::group([], __DIR__ . '/web/Purchasing/Report.php');
 Route::group([], __DIR__ . '/web/Purchasing/Transaction.php');
-Route::group([], __DIR__ . '/web/Document/Master.php');
-Route::group([], __DIR__ . '/web/Document/Transaction.php');
+
+Route::group([], __DIR__ . '/web/Logistic/Filter.php');
 Route::group([], __DIR__ . '/web/Logistic/Master.php');
 Route::group([], __DIR__ . '/web/Logistic/Transaction.php');
 Route::group([], __DIR__ . '/web/Logistic/Report.php');
+
 Route::group([], __DIR__ . '/web/Finance/Master.php');
+
+Route::group([], __DIR__ . '/web/Document/Master.php');
+Route::group([], __DIR__ . '/web/Document/Transaction.php');

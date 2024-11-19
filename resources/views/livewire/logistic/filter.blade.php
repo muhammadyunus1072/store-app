@@ -125,29 +125,6 @@
             </div>
         @endif
     </div>
-
-    {{-- EXPORT DATA --}}
-    @if ($showExport)
-        <div class="row col-12 my-3">
-            <div class="col-auto">
-                <label>Export Data:</label>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-light-success btn-sm"
-                    wire:click="$dispatch('datatable-export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_EXCEL }}' })">
-                    <i class="fa fa-file-excel"></i>
-                    Export Excel
-                </button>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-light-danger btn-sm"
-                    wire:click="$dispatch('datatable-export', { type: '{{ App\Helpers\General\ExportHelper::TYPE_PDF }}' })">
-                    <i class="fa fa-file-pdf"></i>
-                    Export PDF
-                </button>
-            </div>
-        </div>
-    @endif
 </div>
 
 @push('js')
@@ -158,7 +135,7 @@
                 placeholder: "Pilih Produk",
                 theme: 'bootstrap5',
                 ajax: {
-                    url: "{{ route('logistic.report.find.product') }}",
+                    url: "{{ route($prefixRoute . 'find.product') }}",
                     dataType: "json",
                     type: "GET",
                     data: function(params) {
@@ -189,7 +166,7 @@
                 placeholder: "Pilih Produk",
                 theme: 'bootstrap5',
                 ajax: {
-                    url: "{{ route('logistic.report.find.product') }}",
+                    url: "{{ route($prefixRoute . 'find.product') }}",
                     dataType: "json",
                     type: "GET",
                     data: function(params) {
@@ -210,13 +187,13 @@
                     },
                 }
             });
-            
+
             $('#select2-products').on('select2:select', function(e) {
-                @this.call('onSelectProduct', e.params.data.id)
+                @this.call('onSelect2Selected', 'productIds', e.params.data.id)
             });
 
             $('#select2-products').on('select2:unselect', function(e) {
-                @this.call('onUnselectProduct', e.params.data.id)
+                @this.call('onSelect2Unselected', 'productIds', e.params.data.id)
             });
 
             // SELECT2: CATEGORY PRODUCT MULTIPLE
@@ -224,7 +201,7 @@
                 placeholder: "Pilih Kategori Produk",
                 theme: 'bootstrap5',
                 ajax: {
-                    url: "{{ route('logistic.report.find.category_product') }}",
+                    url: "{{ route($prefixRoute . 'find.category_product') }}",
                     dataType: "json",
                     type: "GET",
                     data: function(params) {
@@ -246,11 +223,11 @@
             });
 
             $('#select2-category-products').on('select2:select', function(e) {
-                @this.call('onSelectCategoryProduct', e.params.data.id)
+                @this.call('onSelect2Selected', 'categoryProductIds', e.params.data.id)
             });
 
             $('#select2-category-products').on('select2:unselect', function(e) {
-                @this.call('onUnselectCategoryProduct', e.params.data.id)
+                @this.call('onSelect2Unselected', 'categoryProductIds', e.params.data.id)
             });
         })
     </script>

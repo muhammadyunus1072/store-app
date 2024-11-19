@@ -7,7 +7,7 @@ use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
 
 class PurchaseOrderProductRepository
 {
-    public static function datatable($search, $dateStart, $dateEnd, $products, $categoryProducts, $supplierIds)
+    public static function datatable($search, $dateStart, $dateEnd, $productIds, $categoryProductIds, $supplierIds)
     {
 
         return PurchaseOrderProduct::select(
@@ -30,17 +30,18 @@ class PurchaseOrderProductRepository
             ->when($supplierIds, function ($query) use ($supplierIds) {
                 $query->whereIn('purchase_orders.supplier_id', $supplierIds);
             })
-            ->when($products, function ($query) use ($products) {
-                $query->whereIn('purchase_order_products.product_id', $products);
+            ->when($productIds, function ($query) use ($productIds) {
+                $query->whereIn('purchase_order_products.product_id', $productIds);
             })
-            ->when($categoryProducts, function ($query) use ($categoryProducts) {
-                $query->whereHas('product.productCategories', function ($query) use ($categoryProducts) {
-                    $query->whereIn('category_product_id', $categoryProducts);
+            ->when($categoryProductIds, function ($query) use ($categoryProductIds) {
+                $query->whereHas('product.productCategories', function ($query) use ($categoryProductIds) {
+                    $query->whereIn('category_product_id', $categoryProductIds);
                 });
             })
             ->when($search, function ($query) use ($search) {
-                $query->orWhere('purchase_orders.number', env('QUERY_LIKE'), '%' . $search . '%')
-                    ->orWhere('purchase_orders.supplier_name', env('QUERY_LIKE'), '%' . $search . '%');
+                $query->where(function ($query) use ($search) {
+                    $query->orWhere('purchase_orders.number', env('QUERY_LIKE'), '%' . $search . '%');
+                });
             })
             ->groupBy(
                 'purchase_order_products.purchase_order_id',

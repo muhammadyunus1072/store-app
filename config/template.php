@@ -142,11 +142,11 @@ return [
                 ],
             ],
         ],
-        [
-            'text' => 'Pengaturan',
-            'route'  => 'setting_logistic.index',
-            'icon' => 'ki-duotone ki-setting-2',
-        ],
+        // [
+        //     'text' => 'Pengaturan',
+        //     'route'  => 'setting_logistic.index',
+        //     'icon' => 'ki-duotone ki-setting-2',
+        // ],
 
         /*
         | ======================================
@@ -199,11 +199,11 @@ return [
                 ],
             ],
         ],
-        [
-            'text' => 'Pengaturan',
-            'route'  => 'setting_purchasing.index',
-            'icon' => 'ki-duotone ki-setting-2',
-        ],
+        // [
+        //     'text' => 'Pengaturan',
+        //     'route'  => 'setting_purchasing.index',
+        //     'icon' => 'ki-duotone ki-setting-2',
+        // ],
 
         /*
         | ======================================
@@ -211,10 +211,10 @@ return [
         | ======================================
         */
         [
-            // 'id' => 'menu_admin'
             'header' => 'Dokumen',
         ],
         [
+            'id' => 'menu_approval',
             'text' => 'Persetujuan',
             'route' => 'approval.index',
             'icon' => 'ki-duotone ki-arrow-right',
@@ -271,14 +271,14 @@ return [
             'text' => 'Pengaturan',
             'icon' => 'ki-duotone ki-setting-2',
             'submenu' => [
-                [
-                    'text' => 'Pengaturan Global',
-                    'route' => 'setting_core.index',
-                ],
-                [
-                    'text' => 'Perusahaan',
-                    'route' => 'company.index',
-                ],
+                // [
+                //     'text' => 'Pengaturan Global',
+                //     'route' => 'setting_core.index',
+                // ],
+                // [
+                //     'text' => 'Perusahaan',
+                //     'route' => 'company.index',
+                // ],
                 [
                     'text' => 'Pengguna',
                     'route' => 'user.index',

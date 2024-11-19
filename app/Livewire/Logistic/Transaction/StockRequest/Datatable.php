@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Logistic\Transaction\StockRequest;
 
+use App\Helpers\Core\UserStateHandler;
 use Carbon\Carbon;
 use App\Helpers\General\Alert;
 use App\Permissions\AccessLogistic;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
 use App\Repositories\Logistic\Transaction\StockRequest\StockRequestRepository;
+use App\Settings\SettingCore;
 use App\Settings\SettingLogistic;
 
 class Datatable extends Component
@@ -22,11 +24,21 @@ class Datatable extends Component
     public $isCanUpdate;
     public $isCanDelete;
 
+    public $settingMultipleCompany;
     public $settingApprovalKeyStockRequest;
 
     // Delete Dialog
     public $targetDeleteId;
 
+    // Filter
+    public $dateStart;
+    public $dateEnd;
+    public $companyId;
+    public $warehouseId;
+
+    /*
+    | WITH DATATABLE
+    */
     public function onMount()
     {
         $this->sortDirection = 'desc';
@@ -35,40 +47,12 @@ class Datatable extends Component
         $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_UPDATE));
         $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::STOCK_REQUEST, PermissionHelper::TYPE_DELETE));
 
+        $this->settingMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
         $this->settingApprovalKeyStockRequest = SettingLogistic::get(SettingLogistic::APPROVAL_KEY_STOCK_REQUEST);
-    }
 
-    #[On('on-delete-dialog-confirm')]
-    public function onDialogDeleteConfirm()
-    {
-        if (!$this->isCanDelete || $this->targetDeleteId == null) {
-            return;
-        }
-
-        StockRequestRepository::delete(Crypt::decrypt($this->targetDeleteId));
-        Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
-    }
-
-    #[On('on-delete-dialog-cancel')]
-    public function onDialogDeleteCancel()
-    {
-        $this->targetDeleteId = null;
-    }
-
-    public function showDeleteDialog($id)
-    {
-        $this->targetDeleteId = $id;
-
-        Alert::confirmation(
-            $this,
-            Alert::ICON_QUESTION,
-            "Hapus Data",
-            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
-            "on-delete-dialog-confirm",
-            "on-delete-dialog-cancel",
-            "Hapus",
-            "Batal",
-        );
+        $userState = UserStateHandler::get();
+        $this->companyId = $userState['company_id'];
+        $this->warehouseId = $userState['warehouse_id'];
     }
 
     public function getColumns(): array
@@ -130,26 +114,58 @@ class Datatable extends Component
             [
                 'key' => 'number',
                 'name' => 'Nomor',
-            ],
-            [
-                'key' => 'transaction_date',
-                'name' => 'Tanggal Penerimaan',
-                'render' => function ($item) {
-                    return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
-                }
-            ],
-            [
-                'key' => 'note',
-                'name' => 'Catatan',
-            ],
-            [
+            ]
+        ];
+
+        $columns[] = [
+            'searchable' => false,
+            'key' => 'destination_warehouse_name',
+            'name' => 'Gudang Peminta',
+        ];
+
+        if ($this->settingMultipleCompany) {
+            $columns[] = [
                 'sortable' => false,
                 'searchable' => false,
-                'name' => 'Status Proses Stok',
-                'render' => function ($item) {
-                    return $item->transactionStockStatus();
-                }
-            ],
+                'key' => 'destination_company_name',
+                'name' => 'Perusahaan',
+            ];
+        }
+
+        $columns[] = [
+            'key' => 'source_warehouse_name',
+            'name' => 'Gudang Diminta',
+        ];
+
+        if ($this->settingMultipleCompany) {
+            $columns[] = [
+                'sortable' => false,
+                'searchable' => false,
+                'key' => 'source_company_name',
+                'name' => 'Perusahaan',
+            ];
+        }
+
+        $columns[] = [
+            'key' => 'transaction_date',
+            'name' => 'Tanggal Penerimaan',
+            'render' => function ($item) {
+                return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
+            }
+        ];
+
+        $columns[] = [
+            'key' => 'note',
+            'name' => 'Catatan',
+        ];
+
+        $columns[] = [
+            'sortable' => false,
+            'searchable' => false,
+            'name' => 'Status Proses Stok',
+            'render' => function ($item) {
+                return $item->transactionStockStatus();
+            }
         ];
 
         if ($this->settingApprovalKeyStockRequest) {
@@ -168,11 +184,52 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return StockRequestRepository::datatable();
+        return StockRequestRepository::datatable(
+            $this->dateStart,
+            $this->dateEnd,
+            warehouseId: $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null,
+            companyId: $this->companyId ? Crypt::decrypt($this->companyId) : null,
+        );
     }
 
     public function getView(): string
     {
         return 'livewire.logistic.transaction.stock-request.datatable';
+    }
+
+    /*
+    | DELETE DIALOGUE
+    */
+    #[On('on-delete-dialog-confirm')]
+    public function onDialogDeleteConfirm()
+    {
+        if (!$this->isCanDelete || $this->targetDeleteId == null) {
+            return;
+        }
+
+        StockRequestRepository::delete(Crypt::decrypt($this->targetDeleteId));
+        Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
+    }
+
+    #[On('on-delete-dialog-cancel')]
+    public function onDialogDeleteCancel()
+    {
+        $this->targetDeleteId = null;
+    }
+
+    public function showDeleteDialog($id)
+    {
+        $this->targetDeleteId = $id;
+
+        Alert::confirmation(
+            $this,
+            Alert::ICON_QUESTION,
+            "Hapus Data",
+            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
+            "on-delete-dialog-confirm",
+            "on-delete-dialog-cancel",
+            "Hapus",
+            "Batal",
+        );
     }
 }

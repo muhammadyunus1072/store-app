@@ -4,8 +4,6 @@ namespace App\Livewire\Logistic\Report\StockExpenseWarehouse;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use Livewire\Attributes\On;
-use App\Helpers\General\ExportHelper;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\Core\UserStateHandler;
 use App\Traits\Livewire\WithDatatable;
@@ -21,91 +19,35 @@ class Datatable extends Component
 {
     use WithDatatable, WithDatatableExport;
 
+    public $warehouseId;
+    public $companyId;
     public $dateStart;
     public $dateEnd;
     public $productIds = [];
     public $categoryProductIds = [];
 
-    public $header = [];
-    public $show_header = true;
-
-    // Helpers
-    public $isMultipleCompany = false;
-
-    public $companies = [];
-    public $warehouses = [];
-
-    public $warehouseId;
-    public $warehouseText;
-
-    public $companyId;
-    public $companyText;
-
     public function onMount()
     {
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
-      $this->loadUserState();
+        $this->loadUserState();
+    }
+
+    public function loadUserState()
+    {
+        $userState = UserStateHandler::get();
+        $this->companyId = $userState['company_id'];
+        $this->warehouseId = $userState['warehouse_id'];
     }
 
     public function updatedSearch()
     {
-        $this->dispatch('add-filter', [
+        $this->dispatch('on-search-updated', [
             'search' => $this->search,
         ]);
     }
 
-    #[On('add-filter')]
-    public function addFilter($filter)
-    {
-        foreach ($filter as $key => $value) {
-            $this->$key = $value;
-        }        
-    }
-    
-    public function loadUserState()
-    {
-        $userState = UserStateHandler::get();
-        if ($this->isMultipleCompany) {
-            $this->companies = $userState['companies'];
-            $this->companyId = $userState['company_id'];
-            $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = $userState['warehouse_id'];
-        } else {
-            $this->companyId = $userState['company_id'];
-            $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = Crypt::decrypt($userState['warehouse_id']);
-        }
-    }
-
-    function datatableExportFileName(): string
-    {
-        return 'Laporan Pengeluaran Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
-    }
-
-    function datatableExportFilter(): array
-    {
-        $productIds = collect($this->productIds)->map(function ($id) {
-            return ProductRepository::find($id)->name;
-        })->toArray();
-        $categoryProductIds = collect($this->categoryProductIds)->map(function ($id) {
-            return CategoryProductRepository::find($id)->name;
-        })->toArray();
-        return [
-            'Tanggal Mulai' => $this->dateStart,
-            'Tanggal Akhir' => $this->dateEnd,
-            'Produk' => implode(" , ", $productIds),
-            'Kategori Produk' => implode(" , ", $categoryProductIds),
-            'Gudang' => $this->warehouseId ? WarehouseRepository::find($this->warehouseId)->name : null,
-            'Kata Kunci' => $this->search,
-        ];
-    }
-
-    function datatableExportEnableFooterTotal()
-    {
-        return [5, 6, 7];
-    }
-    
+    /*
+    | WITH DATATABLE
+    */
     public function getColumns(): array
     {
         return [
@@ -113,8 +55,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'No',
-                'render' => function($item, $index)
-                {
+                'render' => function ($item, $index) {
                     return $index + 1;
                 }
             ],
@@ -122,8 +63,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Tanggal',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return Carbon::parse($item->transaction_date)->translatedFormat('d F Y');
                 }
             ],
@@ -131,8 +71,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Nomor',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return $item->number;
                 }
             ],
@@ -140,8 +79,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Produk',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return $item->product_name;
                 }
             ],
@@ -149,8 +87,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->quantity);
                 }
             ],
@@ -159,8 +96,7 @@ class Datatable extends Component
                 'searchable' => false,
                 'name' => 'Satuan',
                 'footer' => 'Total',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return $item->unit_detail_name;
                 }
             ],
@@ -168,8 +104,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Jumlah Konversi',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return NumberFormatter::format($item->converted_quantity);
                 }
             ],
@@ -178,8 +113,7 @@ class Datatable extends Component
                 'searchable' => false,
                 'name' => 'Satuan Konversi',
                 'footer' => '',
-                'render' => function($item)
-                {
+                'render' => function ($item) {
                     return $item->main_unit_detail_name;
                 }
             ],
@@ -188,11 +122,59 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return StockExpenseWarehouseRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->productIds, $this->categoryProductIds, $this->warehouseId);
+        return StockExpenseWarehouseRepository::datatable(
+            $this->search,
+            $this->dateStart,
+            $this->dateEnd,
+            productIds: collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            categoryProductIds: collect($this->categoryProductIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            warehouseId: $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null
+        );
     }
 
     public function getView(): string
     {
         return 'livewire.logistic.report.stock-expense-warehouse.datatable';
+    }
+
+    /*
+    | WITH DATATABLE EXPORT
+    */
+    function datatableExportFileName(): string
+    {
+        return 'Laporan Pengeluaran Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
+    }
+
+    function datatableExportFilter(): array
+    {
+        $productIds = collect($this->productIds)->map(function ($id) {
+            return Crypt::decrypt($id);
+        })->toArray();
+        $productNames = ProductRepository::getBy(whereClause: [['id', $productIds]], orderByClause: [['name', 'ASC']])->pluck('name')->implode(', ');
+
+        $categoryProductIds = collect($this->categoryProductIds)->map(function ($id) {
+            return Crypt::decrypt($id);
+        })->toArray();
+        $categoryProductNames = CategoryProductRepository::getBy(whereClause: [['id', $categoryProductIds]], orderByClause: [['name', 'ASC']])->pluck('name')->implode(', ');
+
+        $warehouseName = $this->warehouseId ? WarehouseRepository::find(Crypt::decrypt($this->warehouseId))->name : null;
+
+        return [
+            'Tanggal Mulai' => $this->dateStart,
+            'Tanggal Akhir' => $this->dateEnd,
+            'Produk' => $productNames,
+            'Kategori Produk' => $categoryProductNames,
+            'Gudang' => $warehouseName,
+            'Kata Kunci' => $this->search,
+        ];
+    }
+
+    function datatableExportEnableFooterTotal()
+    {
+        return [5, 6, 7];
     }
 }

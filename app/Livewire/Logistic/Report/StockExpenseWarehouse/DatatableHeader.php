@@ -12,50 +12,44 @@ use App\Repositories\Logistic\Report\StockExpenseWarehouse\StockExpenseWarehouse
 class DatatableHeader extends Component
 {
     use WithDatatableHeader;
-    
+
     public $search;
+    public $warehouseId;
+    public $companyId;
     public $dateStart;
     public $dateEnd;
     public $productIds = [];
     public $categoryProductIds = [];
 
-    // Helpers
-    public $isMultipleCompany = false;
-
-    public $companies = [];
-    public $warehouses = [];
-
-    public $warehouseId;
-    public $warehouseText;
-
-    public $companyId;
-    public $companyText;
     public function mount()
     {
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
         $this->loadUserState();
     }
 
     public function loadUserState()
     {
         $userState = UserStateHandler::get();
-        if ($this->isMultipleCompany) {
-            $this->companies = $userState['companies'];
-            $this->companyId = $userState['company_id'];
-            $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = $userState['warehouse_id'];
-        } else {
-            $this->companyId = $userState['company_id'];
-            $this->warehouses = $userState['warehouses'];
-            $this->warehouseId = Crypt::decrypt($userState['warehouse_id']);
-        }
+        $this->companyId = $userState['company_id'];
+        $this->warehouseId = $userState['warehouse_id'];
     }
 
     public function getHeaderData()
     {
-        $data = StockExpenseWarehouseRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->productIds, $this->categoryProductIds, $this->warehouseId)->get();
+        $data = StockExpenseWarehouseRepository::datatable(
+            $this->search,
+            $this->dateStart,
+            $this->dateEnd,
+            productIds: collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            categoryProductIds: collect($this->categoryProductIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            warehouseId: $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null
+        )->get();
+
         $total = $data->sum('converted_quantity');
+
         return [
             [
                 "col" => 3,

@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Livewire\Logistic\Report;
+namespace App\Livewire\Logistic;
 
-use Carbon\Carbon;
 use Livewire\Component;
-use Illuminate\Support\Facades\Crypt;
 use App\Helpers\Core\UserStateHandler;
 use App\Settings\SettingCore;
 use App\Settings\SettingLogistic;
 
 class Filter extends Component
 {
+    public $prefixRoute = 'logistic.filter.';
     public $dispatchEvent = 'datatable-add-filter';
 
     // Filter
+    public $companyId;
+    public $warehouseId;
     public $dateStart;
     public $dateEnd;
     public $entryDateStart;
@@ -23,8 +24,6 @@ class Filter extends Component
     public $productId;
     public $productIds = [];
     public $categoryProductIds = [];
-    public $companyId;
-    public $warehouseId;
 
     // Setting Filter
     public $filterWarehouse;
@@ -32,7 +31,6 @@ class Filter extends Component
     public $filterProduct;
     public $filterProductMultiple;
     public $filterCategoryProductMultiple;
-    public $filterSupplierMultiple;
     public $filterEntryDateStart;
     public $filterEntryDateEnd;
     public $filterExpiredDateStart;
@@ -46,7 +44,6 @@ class Filter extends Component
     public $infoProductBatch;
     public $infoProductAttachment;
     public $isMultipleCompany = false;
-    public $showExport = true;
 
     // Helpers
     public $companies = [];
@@ -56,9 +53,6 @@ class Filter extends Component
     {
         $this->loadUserState();
         $this->loadSetting();
-
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
 
         $this->filterCompany = $this->isMultipleCompany ? $this->filterCompany : false;
         $this->filterExpiredDateStart = $this->infoProductExpiredDate ? $this->filterExpiredDateStart : false;
@@ -98,63 +92,37 @@ class Filter extends Component
     private function dispatchFilter()
     {
         $this->dispatch($this->dispatchEvent, [
-            'productIds' => collect($this->productIds)->map(function ($id) {
-                return Crypt::decrypt($id);
-            }),
-            'categoryProductIds' => collect($this->categoryProductIds)->map(function ($id) {
-                return Crypt::decrypt($id);
-            }),
-            'productId' => $this->productId ? Crypt::decrypt($this->productId) : null,
-            'companyId' => $this->companyId ? Crypt::decrypt($this->companyId) : null,
-            'warehouseId' => $this->warehouseId ? Crypt::decrypt($this->warehouseId) : null,
+            'companyId' => $this->companyId,
+            'warehouseId' => $this->warehouseId,
             'dateStart' => $this->dateStart,
             'dateEnd' => $this->dateEnd,
             'expiredDateStart' => $this->expiredDateStart,
             'expiredDateEnd' => $this->expiredDateEnd,
             'entryDateStart' => $this->entryDateStart,
             'entryDateEnd' => $this->entryDateEnd,
-            'dispatchEvent' => $this->dispatchEvent,
+            'productId' => $this->productId,
+            'productIds' => $this->productIds,
+            'categoryProductIds' => $this->categoryProductIds,
         ]);
     }
 
-    /* 
-    | SELECT2 CATEGORY PRODUCT MULTIPLE
-    */
-    public function onSelectCategoryProduct($id)
+    public function onSelect2Selected($var, $id)
     {
-        $this->categoryProductIds[] = $id;
+        $this->$var[] = $id;
         $this->dispatchFilter();
     }
 
-    public function onUnselectCategoryProduct($id)
+    public function onSelect2Unselected($var, $id)
     {
-        $index = array_search($id['id'], $this->categoryProductIds);
+        $index = array_search($id, $this->$var);
         if ($index !== false) {
-            unset($this->categoryProductIds[$index]);
-            $this->dispatchFilter();
-        }
-    }
-
-    /* 
-    | SELECT2 PRODUCT MULTIPLE
-    */
-    public function onSelectProduct($id)
-    {
-        $this->productIds[] = $id;
-        $this->dispatchFilter();
-    }
-
-    public function onUnselectProduct($id)
-    {
-        $index = array_search($id, $this->productIds);
-        if ($index !== false) {
-            unset($this->productIds[$index]);
+            unset($this->$var[$index]);
             $this->dispatchFilter();
         }
     }
 
     public function render()
     {
-        return view('livewire.logistic.report.filter');
+        return view('livewire.logistic.filter');
     }
 }

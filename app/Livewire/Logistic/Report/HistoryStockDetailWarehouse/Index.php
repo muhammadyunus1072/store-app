@@ -8,6 +8,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Repositories\Logistic\Report\HistoryStockDetailWarehouse\HistoryStockDetailWarehouseRepository;
 use App\Settings\SettingLogistic;
+use Illuminate\Support\Facades\Crypt;
 
 class Index extends Component
 {
@@ -36,9 +37,6 @@ class Index extends Component
     public function mount()
     {
         $this->loadSetting();
-
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
     }
 
     public function loadSetting()
@@ -59,16 +57,19 @@ class Index extends Component
             return;
         }
 
+        $productId = Crypt::decrypt($this->productId);
+        $warehouseId = Crypt::decrypt($this->warehouseId);
+
         // PRODUCT INFO
-        $product = ProductRepository::find($this->productId);
+        $product = ProductRepository::find($productId);
         $this->productName = $product->name;
         $this->productUnitName = $product->unit->unitDetailMain->name;
 
         // START INFO
-        $startData = HistoryStockDetailWarehouseRepository::getStartInfo($this->productId, Carbon::parse($this->dateStart)->subDay()->format("Y-m-d"), $this->warehouseId);
+        $startData = HistoryStockDetailWarehouseRepository::getStartInfo($productId, Carbon::parse($this->dateStart)->subDay()->format("Y-m-d"), $warehouseId);
 
         // HISTORIES
-        $histories = HistoryStockDetailWarehouseRepository::getHistories($this->productId, $this->dateStart, $this->dateEnd, $this->warehouseId);
+        $histories = HistoryStockDetailWarehouseRepository::getHistories($productId, $this->dateStart, $this->dateEnd, $warehouseId);
 
         // GROUPING HISTORIES
         // Init Data
@@ -117,7 +118,7 @@ class Index extends Component
         return  "{$item->product_id}#{$item->price}#{$item->entry_date}#{$item->code}#{$item->batch}#{$item->expired_date}";
     }
 
-    #[On('add-filter')]
+    #[On('datatable-add-filter')]
     public function addFilter($filter)
     {
         foreach ($filter as $key => $value) {
@@ -126,7 +127,4 @@ class Index extends Component
 
         $this->getData();
     }
-
-    #[On('export')]
-    public function export($type) {}
 }

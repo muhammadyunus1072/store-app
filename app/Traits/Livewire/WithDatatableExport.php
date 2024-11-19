@@ -1,20 +1,18 @@
 <?php
 
-namespace App\Traits\Livewire;
-
-use Livewire\Attributes\On;
-use App\Helpers\General\ExportHelper;
+namespace App\Traits\Livewire;;
 
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\DatatableExport;
+use App\Exports\LivewireDatatableExport;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpWord\TemplateProcessor;
 
 trait WithDatatableExport
 {
-    public const TYPE_EXCEL = 'excel';
-    public const TYPE_PDF = 'pdf';
-    
+    const TYPE_EXCEL = 'excel';
+    const TYPE_PDF = 'pdf';
+
+    public $showExport = true;
+
     abstract public function datatableExportFileName(): string;
     abstract public function datatableExportFilter(): array;
 
@@ -31,19 +29,17 @@ trait WithDatatableExport
         return [];
     }
 
-    function calculateColspans() 
+    function calculateColspans()
     {
         $columns = $this->getColumns();
         $footerIndexes = $this->datatableExportEnableFooterTotal();
 
         $colspans = [];
         $totalColumns = count($columns);
-    
+
         foreach ($footerIndexes as $key => $footerIndex) {
             $nextIndex = isset($footerIndexes[$key + 1]) ? $footerIndexes[$key + 1] : $totalColumns;
-            
             $colspan = $nextIndex - $footerIndex + ((!$key) ? $footerIndex : 0);
-            
             $colspans[$footerIndex] = [
                 'colspan' => $colspan,
                 'value' => 0
@@ -53,24 +49,19 @@ trait WithDatatableExport
         return $colspans;
     }
 
-
-
-    #[On('datatable-export')]
-    public function datatableExport(
-        $type
-    ) {
+    public function datatableExport($type)
+    {
         $columns = $this->getColumns();
         $data = $this->datatableGetProcessedQuery()->get();
         $filters = $this->datatableExportFilter();
         $fileName = $this->datatableExportFileName();
         $paperOption = $this->datatableExportPaperOption();
         $footerTotal = $this->calculateColspans();
-        
-        $view = "app.layouts.export";
+
+        $view = "app.export.livewire-datatable";
         if (self::TYPE_EXCEL == $type) {
-            return Excel::download(new DatatableExport($view, $columns, $data, $filters, $type, $footerTotal, $fileName), "$fileName.xlsx");
-        } 
-        elseif (self::TYPE_PDF == $type) {
+            return Excel::download(new LivewireDatatableExport($view, $columns, $data, $filters, $type, $footerTotal, $fileName), "$fileName.xlsx");
+        } elseif (self::TYPE_PDF == $type) {
             $pdf = Pdf::loadview(
                 $view,
                 [
@@ -80,6 +71,7 @@ trait WithDatatableExport
                     'type' => $type,
                     'footerTotal' => $footerTotal,
                     'fileName' => $fileName,
+                    'numberFormat' => true,
                 ],
             );
 
@@ -94,7 +86,7 @@ trait WithDatatableExport
                 200,
                 [
                     'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'inline; filename="'.$fileName.'.pdf"',
+                    'Content-Disposition' => 'inline; filename="' . $fileName . '.pdf"',
                 ]
             );
         }

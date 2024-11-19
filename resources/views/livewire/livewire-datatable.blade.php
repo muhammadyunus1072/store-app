@@ -1,25 +1,31 @@
 <div>
-    {{-- CARD HEADER --}}
-    @if (isset($show_header) && $show_header)
-        <div class="row d-flex align-items-stretch my-4">
-            @foreach ($header as $item)
-                <div class="col-md-{{ $item['col'] }} mb-2">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-center">
-                            <h2 class="text-center pt-5">{{ $item['name'] }}</h2>
-                        </div>
-                        <div class="card-body text-white text-center">
-                            <h2>@currency($item['value'])</h2>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+    {{-- EXPORT DATA --}}
+    @if (isset($showExport) && $showExport)
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <label>Export Data:</label>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-light-success btn-sm"
+                    wire:click="datatableExport('{{ App\Helpers\General\ExportHelper::TYPE_EXCEL }}')">
+                    <i class="fa fa-file-excel"></i>
+                    Export Excel
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-light-danger btn-sm"
+                    wire:click="datatableExport('{{ App\Helpers\General\ExportHelper::TYPE_PDF }}')">
+                    <i class="fa fa-file-pdf"></i>
+                    Export PDF
+                </button>
+            </div>
         </div>
+        <hr>
     @endif
 
     {{-- DATATABLE --}}
     <div class="row justify-content-between mb-3">
-        <div class="col-auto mb-2 {{ !isset($showSelectPageLength) || $showSelectPageLength == true ? '' : 'd-none' }}">
+        <div class="col-auto mb-2 {{ $showSelectPageLength ? '' : 'd-none' }}">
             <label>Show</label>
             <select wire:model.change="length" class="form-select">
                 @foreach ($lengthOptions as $item)
@@ -27,8 +33,8 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-sm-6 mb-2 {{ !isset($showKeywordFilter) || $showKeywordFilter == true ? '' : 'd-none' }}">
-            <label>Kata Kunci</label>
+        <div class="col-sm-6 mb-2 {{ $showKeywordFilter ? '' : 'd-none' }}">
+            <label>Pencarian</label>
             <input wire:model.live.debounce.300ms="search" type="text" class="form-control">
         </div>
     </div>

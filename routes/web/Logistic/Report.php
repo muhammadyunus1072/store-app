@@ -2,10 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Logistic\Master\ProductController;
-use App\Http\Controllers\Logistic\Master\WarehouseController;
-use App\Http\Controllers\Logistic\Master\CategoryProductController;
-
 use App\Http\Controllers\Logistic\Report\CurrentStockController;
 use App\Http\Controllers\Logistic\Report\HistoryStockController;
 use App\Http\Controllers\Logistic\Report\StockExpenseController;
@@ -16,10 +12,6 @@ use App\Http\Controllers\Logistic\Report\HistoryStockWarehouseController;
 use App\Http\Controllers\Logistic\Report\StockExpenseWarehouseController;
 use App\Http\Controllers\Logistic\Report\CurrentStockDetailWarehouseController;
 use App\Http\Controllers\Logistic\Report\HistoryStockDetailWarehouseController;
-
-Route::get('logistic/report/product/get', [ProductController::class, 'search'])->name('logistic.report.find.product');
-Route::get('logistic/report/category_product/get', [CategoryProductController::class, 'search'])->name('logistic.report.find.category_product');
-Route::get('logistic/report/supplier/get', [WarehouseController::class, 'search'])->name('logistic.report.find.supplier');
 
 Route::middleware(['auth', 'access_permission'])->group(function () {
     Route::group(["controller" => CurrentStockController::class, "prefix" => "current_stock", "as" => "current_stock."], function () {

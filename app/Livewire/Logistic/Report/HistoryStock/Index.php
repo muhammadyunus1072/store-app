@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Report\HistoryStock\HistoryStockRepository;
+use Illuminate\Support\Facades\Crypt;
 
 class Index extends Component
 {
@@ -27,12 +28,6 @@ class Index extends Component
         return view('livewire.logistic.report.history-stock.index');
     }
 
-    public function mount()
-    {
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
-    }
-
     public function getData()
     {
         $this->histories = [];
@@ -43,21 +38,23 @@ class Index extends Component
             return;
         }
 
+        $productId = Crypt::decrypt($this->productId);
+
         // PRODUCT INFO
-        $product = ProductRepository::find($this->productId);
+        $product = ProductRepository::find($productId);
         $this->productName = $product->name;
         $this->productUnitName = $product->unit->unitDetailMain->name;
 
         // START INFO
-        $startInfo = HistoryStockRepository::getStartInfo($this->productId, Carbon::parse($this->dateStart)->subDay()->format("Y-m-d"));
+        $startInfo = HistoryStockRepository::getStartInfo($productId, Carbon::parse($this->dateStart)->subDay()->format("Y-m-d"));
         $this->startQuantity = $startInfo ? $startInfo->quantity : 0;
         $this->startValue = $startInfo ? $startInfo->value : 0;
 
         // HISTORIES
-        $this->histories = HistoryStockRepository::getHistories($this->productId, $this->dateStart, $this->dateEnd);
+        $this->histories = HistoryStockRepository::getHistories($productId, $this->dateStart, $this->dateEnd);
     }
 
-    #[On('add-filter')]
+    #[On('datatable-add-filter')]
     public function addFilter($filter)
     {
         foreach ($filter as $key => $value) {
@@ -65,11 +62,5 @@ class Index extends Component
         }
 
         $this->getData();
-    }
-
-    #[On('export')]
-    public function export($type)
-    {
-
     }
 }

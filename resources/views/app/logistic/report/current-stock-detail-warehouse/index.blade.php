@@ -22,18 +22,25 @@
 @section('content')
     <div class="card">
         <div class="card-header">
-            <livewire:logistic.report.filter 
-            dispatchEvent="add-filter"
+            <livewire:logistic.filter 
             :filterDateStart="true"
             :filterDateEnd="true"
             :filterProductMultiple="true" 
             :filterCategoryProductMultiple="true"
             :filterWarehouse="true"
-            >
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')">
         </div>
         <div class="card-body">
-            <livewire:logistic.report.current-stock-detail-warehouse.datatable-header lazy>
-            <livewire:logistic.report.current-stock-detail-warehouse.datatable lazy>
+            <livewire:logistic.report.current-stock-detail-warehouse.datatable-header 
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')"
+            lazy>
+
+            <livewire:logistic.report.current-stock-detail-warehouse.datatable 
+            :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
+            :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')"
+            lazy>
         </div>
     </div>
 @stop

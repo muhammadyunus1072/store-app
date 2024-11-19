@@ -28,7 +28,7 @@ class SettingPurchasing
         self::PURCHASE_ORDER_ADD_STOCK => true,
         self::PURCHASE_ORDER_ADD_STOCK_VALUE_INCLUDE_TAX_PPN  => true,
         self::TAX_PPN_ID => 1,
-        self::APPROVAL_KEY_PURCHASE_ORDER => "",
+        self::APPROVAL_KEY_PURCHASE_ORDER => "pembelian",
     ];
 
     public $parsedSetting;

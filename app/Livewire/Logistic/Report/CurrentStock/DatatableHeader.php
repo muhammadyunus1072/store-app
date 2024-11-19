@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Livewire\Component;
 use App\Traits\Livewire\WithDatatableHeader;
 use App\Repositories\Logistic\Report\CurrentStock\CurrentStockRepository;
+use Illuminate\Support\Facades\Crypt;
 
 class DatatableHeader extends Component
 {
@@ -17,15 +18,20 @@ class DatatableHeader extends Component
     public $productIds = [];
     public $categoryProductIds = [];
 
-    public function mount()
-    {
-        $this->dateStart = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateEnd = Carbon::now()->endOfMonth()->format('Y-m-d');
-    }
-
     public function getHeaderData()
     {
-        $data = CurrentStockRepository::datatable($this->search, $this->dateStart, $this->dateEnd, $this->productIds, $this->categoryProductIds)->get();
+        $data = CurrentStockRepository::datatable(
+            $this->search,
+            $this->dateStart,
+            $this->dateEnd,
+            productIds: collect($this->productIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+            categoryProductIds: collect($this->categoryProductIds)->map(function ($id) {
+                return Crypt::decrypt($id);
+            })->toArray(),
+        )->get();
+
         $stock_quantity = $data->sum('stock_quantity');
         $quantity_purchase_order = $data->sum('quantity_purchase_order');
         $quantity_stock_expense = $data->sum('quantity_stock_expense');

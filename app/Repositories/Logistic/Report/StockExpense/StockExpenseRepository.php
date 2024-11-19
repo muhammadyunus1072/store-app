@@ -6,7 +6,7 @@ use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 
 class StockExpenseRepository
 {
-    public static function datatable($search, $dateStart, $dateEnd, $products, $categoryProducts)
+    public static function datatable($search, $dateStart, $dateEnd, $productIds, $categoryProductIds)
     {
         return StockExpenseProduct::select(
             'stock_expenses.transaction_date',
@@ -24,17 +24,18 @@ class StockExpenseRepository
                     ->whereNull('stock_expenses.deleted_at');
             })
             ->whereBetween('stock_expenses.transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"])
-            ->when($products, function ($query) use ($products) {
-                $query->whereIn('stock_expense_products.product_id', $products);
+            ->when($productIds, function ($query) use ($productIds) {
+                $query->whereIn('stock_expense_products.product_id', $productIds);
             })
-            ->when($categoryProducts, function ($query) use ($categoryProducts) {
-                $query->whereHas('product.productCategories', function ($query) use ($categoryProducts) {
-                    $query->whereIn('category_product_id', $categoryProducts);
+            ->when($categoryProductIds, function ($query) use ($categoryProductIds) {
+                $query->whereHas('product.productCategories', function ($query) use ($categoryProductIds) {
+                    $query->whereIn('category_product_id', $categoryProductIds);
                 });
             })
             ->when($search, function ($query) use ($search) {
-                $query->where('stock_expense_products.product_name', env('QUERY_LIKE'), '%' . $search . '%')
-                    ->orWhere('stock_expenses.number', env('QUERY_LIKE'), '%' . $search . '%');
+                $query->where(function ($query) use ($search) {
+                    $query->orWhere('stock_expenses.number', env('QUERY_LIKE'), '%' . $search . '%');
+                });
             });
     }
 }
