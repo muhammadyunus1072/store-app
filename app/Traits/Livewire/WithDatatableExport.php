@@ -8,9 +8,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 trait WithDatatableExport
 {
-    const TYPE_EXCEL = 'excel';
-    const TYPE_PDF = 'pdf';
-
     public $showExport = true;
 
     abstract public function datatableExportFileName(): string;
@@ -59,9 +56,9 @@ trait WithDatatableExport
         $footerTotal = $this->calculateColspans();
 
         $view = "app.export.livewire-datatable";
-        if (self::TYPE_EXCEL == $type) {
+        if ('excel' == $type) {
             return Excel::download(new LivewireDatatableExport($view, $columns, $data, $filters, $type, $footerTotal, $fileName), "$fileName.xlsx");
-        } elseif (self::TYPE_PDF == $type) {
+        } elseif ('pdf' == $type) {
             $pdf = Pdf::loadview(
                 $view,
                 [

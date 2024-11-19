@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Logistic\Report\HistoryStockWarehouse;
 
+use App\Helpers\General\ExportHelper;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
+use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
 use App\Repositories\Logistic\Report\HistoryStockWarehouse\HistoryStockWarehouseRepository;
 use Illuminate\Support\Facades\Crypt;
 
@@ -15,6 +17,7 @@ class Index extends Component
     public $histories = [];
     public $startQuantity;
     public $startValue;
+    public $warehouseName;
     public $productName;
     public $productUnitName;
 
@@ -46,6 +49,10 @@ class Index extends Component
         $productId = Crypt::decrypt($this->productId);
         $warehouseId = Crypt::decrypt($this->warehouseId);
 
+        // WAREHOPUSE INFO
+        $warehouse = WarehouseRepository::find($warehouseId);
+        $this->warehouseName = $warehouse->name;
+
         // PRODUCT INFO
         $product = ProductRepository::find($productId);
         $this->productName = $product->name;
@@ -57,7 +64,11 @@ class Index extends Component
         $this->startValue = $startInfo ? $startInfo->value : 0;
 
         // HISTORIES
-        $this->histories = HistoryStockWarehouseRepository::getHistories($productId, $this->dateStart, $this->dateEnd, $warehouseId);
+        $histories = HistoryStockWarehouseRepository::getHistories($productId, $this->dateStart, $this->dateEnd, $warehouseId);
+        foreach ($histories as $index => $history) {
+            $histories[$index]->remarksUrlButton = $history->remarksUrlButton();
+        }
+        $this->histories = $histories->toArray();
     }
 
     #[On('datatable-add-filter')]
@@ -68,5 +79,26 @@ class Index extends Component
         }
 
         $this->getData();
+    }
+
+    public function export($type)
+    {
+        return ExportHelper::export(
+            type: $type,
+            fileName: "Kartu Stok - {$this->productName} - {$this->dateStart} sd {$this->dateEnd}",
+            view: 'app.logistic.report.history-stock.export',
+            data: [
+                'histories' => $this->histories,
+                'startQuantity' => $this->startQuantity,
+                'startValue' => $this->startValue,
+                'filters' => [
+                    'Gudang' => $this->warehouseName,
+                    'Produk' => $this->productName,
+                    'Satuan' => $this->productUnitName,
+                    'Tanggal Mulai' => $this->dateStart,
+                    'Tanggal Akhir' => $this->dateEnd,
+                ]
+            ]
+        );
     }
 }

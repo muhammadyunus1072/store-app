@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Logistic\Report\HistoryStockDetail;
 
+use App\Helpers\General\ExportHelper;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -100,7 +101,8 @@ class Index extends Component
                     'histories' => [],
                 ];
             }
-            $this->data[$key]['histories'][] = $item;
+            $item->remarksUrlButton = $item->remarksUrlButton();
+            $this->data[$key]['histories'][] = $item->toArray();
         }
 
         // Remove Last Stock = 0 with Empty Histories 
@@ -124,5 +126,27 @@ class Index extends Component
         }
 
         $this->getData();
+    }
+
+    public function export($type)
+    {
+        return ExportHelper::export(
+            type: $type,
+            fileName: "Kartu Stok Detail - {$this->productName} - {$this->dateStart} sd {$this->dateEnd}",
+            view: 'app.logistic.report.history-stock-detail.export',
+            data: [
+                'data' => $this->data,
+                'infoProductCode' => $this->infoProductCode,
+                'infoProductExpiredDate' => $this->infoProductExpiredDate,
+                'infoProductBatch' => $this->infoProductBatch,
+                'infoProductAttachment' => $this->infoProductAttachment,
+                'filters' => [
+                    'Produk' => $this->productName,
+                    'Satuan' => $this->productUnitName,
+                    'Tanggal Mulai' => $this->dateStart,
+                    'Tanggal Akhir' => $this->dateEnd,
+                ]
+            ]
+        );
     }
 }

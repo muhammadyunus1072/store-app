@@ -8,25 +8,16 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class CollectionExport implements FromView, ShouldAutoSize
 {
-    private $view;
-
-    private $collection;
-
-    private $request;
-
-    public function __construct($request, $collection, $view)
-    {
-        $this->request = $request;
-        $this->collection = $collection;
-        $this->view = $view;
-    }
+    public function __construct(
+        public $view,
+        public $data,
+    ) {}
 
     public function view(): View
     {
         return view($this->view, [
-            'request' => $this->request,
-            'collection' => $this->collection,
-            'number_format' => false,
+            'data' => $this->data,
+            'isNumberFormat' => false,
         ]);
     }
 }

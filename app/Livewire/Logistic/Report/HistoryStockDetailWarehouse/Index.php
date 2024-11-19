@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Logistic\Report\HistoryStockDetailWarehouse;
 
+use App\Helpers\General\ExportHelper;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
+use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -14,6 +16,7 @@ class Index extends Component
 {
     // Data
     public $data;
+    public $warehouseName;
     public $productName;
     public $productUnitName;
 
@@ -60,6 +63,10 @@ class Index extends Component
         $productId = Crypt::decrypt($this->productId);
         $warehouseId = Crypt::decrypt($this->warehouseId);
 
+        // WAREHOPUSE INFO
+        $warehouse = WarehouseRepository::find($warehouseId);
+        $this->warehouseName = $warehouse->name;
+
         // PRODUCT INFO
         $product = ProductRepository::find($productId);
         $this->productName = $product->name;
@@ -102,7 +109,8 @@ class Index extends Component
                     'histories' => [],
                 ];
             }
-            $this->data[$key]['histories'][] = $item;
+            $item->remarksUrlButton = $item->remarksUrlButton();
+            $this->data[$key]['histories'][] = $item->toArray();
         }
 
         // Remove Last Stock = 0 with Empty Histories 
@@ -126,5 +134,28 @@ class Index extends Component
         }
 
         $this->getData();
+    }
+
+    public function export($type)
+    {
+        return ExportHelper::export(
+            type: $type,
+            fileName: "Kartu Stok Detail - {$this->productName} - {$this->dateStart} sd {$this->dateEnd}",
+            view: 'app.logistic.report.history-stock-detail.export',
+            data: [
+                'data' => $this->data,
+                'infoProductCode' => $this->infoProductCode,
+                'infoProductExpiredDate' => $this->infoProductExpiredDate,
+                'infoProductBatch' => $this->infoProductBatch,
+                'infoProductAttachment' => $this->infoProductAttachment,
+                'filters' => [
+                    'Gudang' => $this->warehouseName,
+                    'Produk' => $this->productName,
+                    'Satuan' => $this->productUnitName,
+                    'Tanggal Mulai' => $this->dateStart,
+                    'Tanggal Akhir' => $this->dateEnd,
+                ]
+            ]
+        );
     }
 }
