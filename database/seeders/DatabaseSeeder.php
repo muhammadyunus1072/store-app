@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             WarehouseSeeder::class,
             CategoryProductSeeder::class,
             UnitSeeder::class,
-            ProductSeeder::class,
+            // ProductSeeder::class,
             Logistic\SettingSeeder::class,
         ]);
 

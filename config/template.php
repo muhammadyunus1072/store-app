@@ -291,6 +291,11 @@ return [
                     'text' => 'Akses',
                     'route' => 'permission.index',
                 ],
+                [
+                    'text' => 'Import Data',
+                    'route'  => 'import_data_logistic.index',
+                    'icon' => 'ki-duotone ki-setting-2',
+                ],
             ],
         ],
     ],

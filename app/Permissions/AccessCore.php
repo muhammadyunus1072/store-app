@@ -10,6 +10,7 @@ class AccessCore
     const PERMISSION = "permission";
     const ROLE = "role";
     const COMPANY = "company";
+    const IMPORT_DATA = "import_data_logistic";
 
     const ALL = [
         self::SETTING,
@@ -18,6 +19,7 @@ class AccessCore
         self::PERMISSION,
         self::ROLE,
         self::COMPANY,
+        self::IMPORT_DATA,
     ];
 
     const TYPE_ALL = [
@@ -27,6 +29,7 @@ class AccessCore
         self::ROLE => PermissionHelper::TYPE_ALL,
         self::PERMISSION => PermissionHelper::TYPE_ALL,
         self::COMPANY => PermissionHelper::TYPE_ALL,
+        self::IMPORT_DATA => [PermissionHelper::TYPE_READ],
     ];
 
     const TRANSLATE = [
@@ -36,5 +39,6 @@ class AccessCore
         self::PERMISSION => "Akses",
         self::ROLE => "Jabatan",
         self::COMPANY => "Perusahaan",
+        self::IMPORT_DATA => "Import Data",
     ];
 }
