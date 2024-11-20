@@ -7,10 +7,19 @@
             @error('import_excel.' . $index . '.data')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
+            
+            <button type="button" wire:click="storeImport('{{ $index }}')" class="btn btn-success mt-3"
+            wire:loading.attr="disabled">
+                <div wire:loading >
+                    <span class="spinner-border spinner-border-sm" role="status"
+                        aria-hidden="true"></span>
+                    Loading...
+                </div>
 
-            <button type="button" wire:click="storeImport('{{ $index }}')" class="btn btn-success mt-3">
-                <i class='ki-duotone ki-check fs-1'></i>
-                Simpan
+                <div wire:loading.class="d-none">
+                    <i class='ki-duotone ki-check fs-1'></i>
+                    Simpan
+                </div>
             </button>
         </div>
     @endforeach
