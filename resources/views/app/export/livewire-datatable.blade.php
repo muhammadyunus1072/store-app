@@ -112,7 +112,7 @@
                         @if (isset($col['render']) && is_callable($col['render']))
                             <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
                                 {!! $cell_style !!}>
-                                {!! call_user_func($col['render'], $item, $index) !!}
+                                {!! call_user_func($col['render'], $item, $index, $type) !!}
                             </td>
                         @elseif (isset($col['key']))
                             <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}

@@ -7,6 +7,11 @@
             @error('import_excel.' . $index . '.data')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
+
+            <button type="button" wire:click="storeImport('{{ $index }}')" class="btn btn-success mt-3">
+                <i class='ki-duotone ki-check fs-1'></i>
+                Simpan
+            </button>
         </div>
     @endforeach
 </div>

@@ -20,6 +20,16 @@ trait WithDatatableExport
         ];
     }
 
+    public function datatableExportCustomColumn()
+    {
+        return [];
+    }
+
+    public function datatableExportExcludeColumn()
+    {
+        return [];
+    }
+
     public function datatableExportEnableFooterTotal()
     {
         return [];
@@ -30,9 +40,8 @@ trait WithDatatableExport
         return [];
     }
 
-    function calculateColspans()
+    function calculateColspans($columns)
     {
-        $columns = $this->getColumns();
         $footerIndexes = $this->datatableExportEnableFooterTotal();
 
         $colspans = [];
@@ -52,12 +61,27 @@ trait WithDatatableExport
 
     public function datatableExport($type)
     {
-        $columns = $this->getColumns();
+        $columns = collect($this->getColumns());
+        $excludeColumn = $this->datatableExportExcludeColumn();
+        foreach ($excludeColumn as $index) {
+            $columns->forget($index);
+        }
+        $customColumns = $this->datatableExportCustomColumn();
+        foreach($customColumns as $customKey => $function)
+        {
+            $columns = $columns->transform(function ($item, $key) use ($function, $customKey) {
+                if ($key === $customKey) {
+                    $item['render'] = $function;
+                }
+                return $item;
+            });
+        }
+        
         $data = $this->datatableGetProcessedQuery()->get();
         $filters = $this->datatableExportFilter();
         $fileName = $this->datatableExportFileName();
         $paperOption = $this->datatableExportPaperOption();
-        $footerTotal = $this->calculateColspans();
+        $footerTotal = $this->calculateColspans($columns);
 
         $view = "app.export.livewire-datatable";
         if ('excel' == $type) {
