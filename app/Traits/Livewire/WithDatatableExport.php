@@ -11,7 +11,6 @@ trait WithDatatableExport
     public $showExport = true;
 
     abstract public function datatableExportFileName(): string;
-    abstract public function datatableExportFilter(): array;
 
     public function datatableExportPaperOption()
     {
@@ -22,6 +21,11 @@ trait WithDatatableExport
     }
 
     public function datatableExportEnableFooterTotal()
+    {
+        return [];
+    }
+
+    public function datatableExportFilter(): array
     {
         return [];
     }
