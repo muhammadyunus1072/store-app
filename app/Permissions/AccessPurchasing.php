@@ -9,9 +9,9 @@ class AccessPurchasing
     const CATEGORY_SUPPLIER = "category_supplier";
     const PURCHASE_ORDER = "purchase_order";
 
-    const PURCHASE_ORDER_REPORT = "purchase_order_report";
-    const PURCHASE_ORDER_PRODUCT_REPORT = "purchase_order_product_report";
-    const PURCHASE_ORDER_PRODUCT_DETAIL_REPORT = "purchase_order_product_detail_report";
+    const R_PURCHASE_ORDER = "r_purchase_order";
+    const R_PURCHASE_ORDER_PRODUCT = "r_purchase_order_product";
+    const R_PURCHASE_ORDER_PRODUCT_DETAIL = "r_purchase_order_product_detail";
 
     const ALL = [
         self::SETTING,
@@ -19,9 +19,9 @@ class AccessPurchasing
         self::CATEGORY_SUPPLIER,
         self::PURCHASE_ORDER,
 
-        self::PURCHASE_ORDER_REPORT,
-        self::PURCHASE_ORDER_PRODUCT_REPORT,
-        self::PURCHASE_ORDER_PRODUCT_DETAIL_REPORT,
+        self::R_PURCHASE_ORDER,
+        self::R_PURCHASE_ORDER_PRODUCT,
+        self::R_PURCHASE_ORDER_PRODUCT_DETAIL,
     ];
 
     const TYPE_ALL = [
@@ -30,9 +30,9 @@ class AccessPurchasing
         self::CATEGORY_SUPPLIER => PermissionHelper::TYPE_ALL,
         self::PURCHASE_ORDER => PermissionHelper::TYPE_ALL,
 
-        self::PURCHASE_ORDER_REPORT => [PermissionHelper::TYPE_READ],
-        self::PURCHASE_ORDER_PRODUCT_REPORT => [PermissionHelper::TYPE_READ],
-        self::PURCHASE_ORDER_PRODUCT_DETAIL_REPORT => [PermissionHelper::TYPE_READ],
+        self::R_PURCHASE_ORDER => [PermissionHelper::TYPE_READ],
+        self::R_PURCHASE_ORDER_PRODUCT => [PermissionHelper::TYPE_READ],
+        self::R_PURCHASE_ORDER_PRODUCT_DETAIL => [PermissionHelper::TYPE_READ],
     ];
 
     const TRANSLATE = [
@@ -41,8 +41,8 @@ class AccessPurchasing
         self::CATEGORY_SUPPLIER => "Kategori Supplier",
         self::PURCHASE_ORDER => "Pembelian",
 
-        self::PURCHASE_ORDER_REPORT => "Laporan Pembelian",
-        self::PURCHASE_ORDER_PRODUCT_REPORT => "Laporan Pembelian Barang",
-        self::PURCHASE_ORDER_PRODUCT_DETAIL_REPORT => "Laporan Pembelian Barang Detail",
+        self::R_PURCHASE_ORDER => "Laporan - Pembelian",
+        self::R_PURCHASE_ORDER_PRODUCT => "Laporan - Pembelian Barang",
+        self::R_PURCHASE_ORDER_PRODUCT_DETAIL => "Laporan - Pembelian Barang Detail",
     ];
 }
