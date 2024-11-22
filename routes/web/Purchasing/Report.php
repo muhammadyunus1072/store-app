@@ -15,13 +15,13 @@ Route::get('/warehouse/get', [WarehouseController::class, 'search'])->name('find
 Route::get('/supplier/get', [SupplierController::class, 'search'])->name('find.supplier');
 
 Route::middleware(['auth', 'access_permission'])->group(function () {
-    Route::group(["controller" => PurchaseOrderController::class, "prefix" => "purchase_order_report", "as" => "purchase_order_report."], function () {
+    Route::group(["controller" => PurchaseOrderController::class, "prefix" => "r_purchase_order", "as" => "r_purchase_order."], function () {
         Route::get('/', 'index')->name('index');
     });
-    Route::group(["controller" => PurchaseOrderProductController::class, "prefix" => "purchase_order_product_report", "as" => "purchase_order_product_report."], function () {
+    Route::group(["controller" => PurchaseOrderProductController::class, "prefix" => "r_purchase_order_product", "as" => "r_purchase_order_product."], function () {
         Route::get('/', 'index')->name('index');
     });
-    Route::group(["controller" => PurchaseOrderProductDetailController::class, "prefix" => "purchase_order_product_detail_report", "as" => "purchase_order_product_detail_report."], function () {
+    Route::group(["controller" => PurchaseOrderProductDetailController::class, "prefix" => "r_purchase_order_product_detail", "as" => "r_purchase_order_product_detail."], function () {
         Route::get('/', 'index')->name('index');
     });
 });

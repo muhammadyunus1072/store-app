@@ -12,18 +12,19 @@ class AccessLogistic
     const STOCK_REQUEST = "stock_request";
     const STOCK_EXPENSE = "stock_expense";
 
-    const CURRENT_STOCK = "current_stock";
-    const CURRENT_STOCK_DETAIL = "current_stock_detail";
-    const CURRENT_STOCK_WAREHOUSE = "current_stock_warehouse";
-    const CURRENT_STOCK_DETAIL_WAREHOUSE = "current_stock_detail_warehouse";
-    
-    const HISTORY_STOCK = "history_stock";
-    const HISTORY_STOCK_DETAIL = "history_stock_detail";
-    const HISTORY_STOCK_WAREHOUSE = "history_stock_warehouse";
-    const HISTORY_STOCK_DETAIL_WAREHOUSE = "history_stock_detail_warehouse";
+    const R_CURRENT_STOCK = "r_current_stock";
+    const R_CURRENT_STOCK_DETAIL = "r_current_stock_detail";
+    const R_HISTORY_STOCK = "r_history_stock";
+    const R_HISTORY_STOCK_DETAIL = "r_history_stock_detail";
+    const R_STOCK_EXPENSE = "r_stock_expense";
+    const R_STOCK_EXPIRED = "r_stock_expired";
 
-    const STOCK_EXPENSE_REPORT = "stock_expense_report";
-    const STOCK_EXPENSE_WAREHOUSE = "stock_expense_warehouse";
+    const R_CURRENT_STOCK_WAREHOUSE = "r_current_stock_warehouse";
+    const R_CURRENT_STOCK_DETAIL_WAREHOUSE = "r_current_stock_detail_warehouse";
+    const R_HISTORY_STOCK_WAREHOUSE = "r_history_stock_warehouse";
+    const R_HISTORY_STOCK_DETAIL_WAREHOUSE = "r_history_stock_detail_warehouse";
+    const R_STOCK_EXPENSE_WAREHOUSE = "r_stock_expense_warehouse";
+    const R_STOCK_EXPIRED_WAREHOUSE = "r_stock_expired_warehouse";
 
     const ALL = [
         self::SETTING,
@@ -34,18 +35,19 @@ class AccessLogistic
         self::STOCK_REQUEST,
         self::STOCK_EXPENSE,
 
-        self::CURRENT_STOCK,
-        self::CURRENT_STOCK_DETAIL,
-        self::CURRENT_STOCK_WAREHOUSE,
-        self::CURRENT_STOCK_DETAIL_WAREHOUSE,
+        self::R_CURRENT_STOCK,
+        self::R_CURRENT_STOCK_DETAIL,
+        self::R_HISTORY_STOCK,
+        self::R_HISTORY_STOCK_DETAIL,
+        self::R_STOCK_EXPENSE,
+        self::R_STOCK_EXPIRED,
 
-        self::HISTORY_STOCK,
-        self::HISTORY_STOCK_DETAIL,
-        self::HISTORY_STOCK_WAREHOUSE,
-        self::HISTORY_STOCK_DETAIL_WAREHOUSE,
-
-        self::STOCK_EXPENSE_REPORT,
-        self::STOCK_EXPENSE_WAREHOUSE,
+        self::R_CURRENT_STOCK_WAREHOUSE,
+        self::R_CURRENT_STOCK_DETAIL_WAREHOUSE,
+        self::R_HISTORY_STOCK_WAREHOUSE,
+        self::R_HISTORY_STOCK_DETAIL_WAREHOUSE,
+        self::R_STOCK_EXPENSE_WAREHOUSE,
+        self::R_STOCK_EXPIRED_WAREHOUSE,
     ];
 
     const TYPE_ALL = [
@@ -57,18 +59,19 @@ class AccessLogistic
         self::STOCK_REQUEST => PermissionHelper::TYPE_ALL,
         self::STOCK_EXPENSE => PermissionHelper::TYPE_ALL,
 
-        self::CURRENT_STOCK => [PermissionHelper::TYPE_READ],
-        self::CURRENT_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
-        self::CURRENT_STOCK_WAREHOUSE => [PermissionHelper::TYPE_READ],
-        self::CURRENT_STOCK_DETAIL_WAREHOUSE => [PermissionHelper::TYPE_READ],
-
-        self::HISTORY_STOCK => [PermissionHelper::TYPE_READ],
-        self::HISTORY_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
-        self::HISTORY_STOCK_WAREHOUSE => [PermissionHelper::TYPE_READ],
-        self::HISTORY_STOCK_DETAIL_WAREHOUSE => [PermissionHelper::TYPE_READ],
-
-        self::STOCK_EXPENSE_REPORT => [PermissionHelper::TYPE_READ],
-        self::STOCK_EXPENSE_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_CURRENT_STOCK => [PermissionHelper::TYPE_READ],
+        self::R_CURRENT_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
+        self::R_HISTORY_STOCK => [PermissionHelper::TYPE_READ],
+        self::R_HISTORY_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
+        self::R_STOCK_EXPENSE => [PermissionHelper::TYPE_READ],
+        self::R_STOCK_EXPIRED => [PermissionHelper::TYPE_READ],
+        
+        self::R_CURRENT_STOCK_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_CURRENT_STOCK_DETAIL_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_HISTORY_STOCK_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_HISTORY_STOCK_DETAIL_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_STOCK_EXPENSE_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_STOCK_EXPIRED_WAREHOUSE => [PermissionHelper::TYPE_READ],
     ];
 
     const TRANSLATE = [
@@ -80,17 +83,18 @@ class AccessLogistic
         self::STOCK_REQUEST => "Permintaan Barang",
         self::STOCK_EXPENSE => "Pengeluaran Barang",
 
-        self::CURRENT_STOCK => "Laporan Stok Akhir",
-        self::CURRENT_STOCK_DETAIL => "Laporan Stok Akhir Detail",
-        self::CURRENT_STOCK_WAREHOUSE => "Laporan Stok Akhir Gudang",
-        self::CURRENT_STOCK_DETAIL_WAREHOUSE => "Laporan Stok Akhir Detail Gudang",
+        self::R_CURRENT_STOCK => "Laporan - Stok Akhir",
+        self::R_CURRENT_STOCK_DETAIL => "Laporan - Stok Akhir Detail",
+        self::R_HISTORY_STOCK => "Laporan - Kartu Stok",
+        self::R_HISTORY_STOCK_DETAIL => "Laporan - Kartu Stok Detail",
+        self::R_STOCK_EXPENSE => "Laporan - Pengeluaran",
+        self::R_STOCK_EXPIRED => "Laporan - Stok Expired",
 
-        self::HISTORY_STOCK => "Laporan Kartu Stok",
-        self::HISTORY_STOCK_DETAIL => "Laporan Kartu Stok Detail",
-        self::HISTORY_STOCK_WAREHOUSE => "Laporan Kartu Stok Gudang",
-        self::HISTORY_STOCK_DETAIL_WAREHOUSE => "Laporan Kartu Stok Detail Gudang",
-
-        self::STOCK_EXPENSE_REPORT => "Laporan Pengeluaran",
-        self::STOCK_EXPENSE_WAREHOUSE => "Laporan Pengeluaran Gudang",
+        self::R_CURRENT_STOCK_WAREHOUSE => "Laporan - Stok Akhir (Per Gudang)",
+        self::R_CURRENT_STOCK_DETAIL_WAREHOUSE => "Laporan - Stok Akhir Detail (Per Gudang)",
+        self::R_HISTORY_STOCK_WAREHOUSE => "Laporan - Kartu Stok (Per Gudang)",
+        self::R_HISTORY_STOCK_DETAIL_WAREHOUSE => "Laporan - Kartu Stok Detail (Per Gudang)",
+        self::R_STOCK_EXPENSE_WAREHOUSE => "Laporan - Pengeluaran (Per Gudang)",
+        self::R_STOCK_EXPIRED_WAREHOUSE => "Laporan - Stok Expired (Per Gudang)",
     ];
 }

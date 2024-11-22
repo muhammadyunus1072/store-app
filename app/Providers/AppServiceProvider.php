@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
             database_path('migrations/purchasing/*'),
             database_path('migrations/sales/*'),
             database_path('migrations/finance/*'),
+            database_path('migrations/rsmh'),
         ]);
 
         Blade::directive('dateTime', function ($expression) {
