@@ -66,12 +66,13 @@
                 <tr>
                     @foreach ($columns as $i => $col)
                         @php
-                            if (!empty($footerTotal) && isset($footerTotal[$i])) {
-                                !isset($col['footer'])
+                            if (!empty($footerTotal) && isset($footerTotal[$i])) 
+                            {    
+                                (isset($col['export_footer_total']) && $col['export_footer_total'] == true)
                                     ? ($footerTotal[$i]['value'] += (float) str_replace(
                                         ['.', ','],
                                         ['', '.'],
-                                        $col['render']($item),
+                                        isset($col['render']) ? $col['render']($item) : $col['key'],
                                     ))
                                     : null;
                             }
@@ -109,7 +110,12 @@
                             }
                         @endphp
 
-                        @if (isset($col['render']) && is_callable($col['render']))
+                        @if(isset($col['export']) && is_callable($col['export']))
+                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
+                                {!! $cell_style !!}>
+                                {!! call_user_func($col['export'], $item, $index, $type) !!}
+                            </td>
+                        @elseif (isset($col['render']) && is_callable($col['render']))
                             <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
                                 {!! $cell_style !!}>
                                 {!! call_user_func($col['render'], $item, $index, $type) !!}
@@ -127,13 +133,20 @@
                 <td colspan="{{ count($columns) }}" style="border: 0px; padding:8px">
             </tr>
         </tbody>
-
         @if (!empty($footerTotal))
             <thead>
                 <tr>
                     @foreach ($footerTotal as $index => $col)
                         <th colspan="{{ $col['colspan'] }}">
-                            {{ isset($columns[$index]['footer']) ? $columns[$index]['footer'] : App\Helpers\General\NumberFormatter::format($col['value']) }}
+                            
+                            {{ isset($columns[$index]['export_footer_total']) 
+                                ? (is_callable($columns[$index]['export_footer_total']) 
+                                        ? $columns[$index]['export_footer_total']($col['value'], $index, $type) 
+                                        : ($columns[$index]['export_footer_total'] === true 
+                                            ? ($isNumberFormat ? number_format($col['value'], 0, '.', '.') : $col['value']) 
+                                            : $columns[$index]['export_footer_total'])
+                                    )
+                                : ($isNumberFormat ? number_format($col['value'], 0, '.', '.') : $col['value']) }}
                         </th>
                     @endforeach
                 </tr>

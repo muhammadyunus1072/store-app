@@ -20,21 +20,6 @@ trait WithDatatableExport
         ];
     }
 
-    public function datatableExportCustomColumn()
-    {
-        return [];
-    }
-
-    public function datatableExportExcludeColumn()
-    {
-        return [];
-    }
-
-    public function datatableExportEnableFooterTotal()
-    {
-        return [];
-    }
-
     public function datatableExportFilter(): array
     {
         return [];
@@ -42,7 +27,9 @@ trait WithDatatableExport
 
     function calculateColspans($columns)
     {
-        $footerIndexes = $this->datatableExportEnableFooterTotal();
+        $footerIndexes = $columns->keys()->filter(function ($key) use ($columns) {
+            return isset($columns[$key]['export_footer_total']) && $columns[$key]['export_footer_total'] !== false;
+        })->values()->toArray();
 
         $colspans = [];
         $totalColumns = count($columns);
@@ -61,28 +48,17 @@ trait WithDatatableExport
 
     public function datatableExport($type)
     {
-        $columns = collect($this->getColumns());
-        $excludeColumn = $this->datatableExportExcludeColumn();
-        foreach ($excludeColumn as $index) {
-            $columns->forget($index);
-        }
-        $customColumns = $this->datatableExportCustomColumn();
-        foreach($customColumns as $customKey => $function)
-        {
-            $columns = $columns->transform(function ($item, $key) use ($function, $customKey) {
-                if ($key === $customKey) {
-                    $item['render'] = $function;
-                }
-                return $item;
-            });
-        }
+        
+        $columns = collect($this->getColumns())->filter(function ($item) {
+            return !isset($item['export']) || $item['export'] !== false;
+        })->values();
         
         $data = $this->datatableGetProcessedQuery()->get();
         $filters = $this->datatableExportFilter();
         $fileName = $this->datatableExportFileName();
         $paperOption = $this->datatableExportPaperOption();
         $footerTotal = $this->calculateColspans($columns);
-
+        
         $view = "app.export.livewire-datatable";
         if ('excel' == $type) {
             return Excel::download(new LivewireDatatableExport($view, $columns, $data, $filters, $type, $footerTotal, $fileName), "$fileName.xlsx");

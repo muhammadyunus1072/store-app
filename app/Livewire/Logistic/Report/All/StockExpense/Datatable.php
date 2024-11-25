@@ -87,10 +87,10 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Satuan',
-                'footer' => 'Total',
                 'render' => function ($item) {
                     return $item->unit_detail_name;
-                }
+                },
+                'export_footer_total' => 'Total',
             ],
             [
                 'sortable' => false,
@@ -98,7 +98,8 @@ class Datatable extends Component
                 'name' => 'Jumlah Konversi',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->converted_quantity);
-                }
+                },
+                'export_footer_total' => true,
             ],
             [
                 'sortable' => false,
@@ -107,7 +108,8 @@ class Datatable extends Component
                 'footer' => '',
                 'render' => function ($item) {
                     return $item->main_unit_detail_name;
-                }
+                },
+                'export_footer_total' => ' ',
             ],
         ];
     }
@@ -159,10 +161,5 @@ class Datatable extends Component
             'Kategori Produk' => $categoryProductNames,
             'Kata Kunci' => $this->search,
         ];
-    }
-
-    function datatableExportEnableFooterTotal()
-    {
-        return [6, 7, 8];
     }
 }

@@ -67,10 +67,10 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Supplier',
-                'footer' => 'Total',
                 'render' => function ($item) {
                     return $item->supplier_name;
-                }
+                },
+                'export_footer_total' => 'Total',
             ],
             [
                 'sortable' => false,
@@ -78,7 +78,8 @@ class Datatable extends Component
                 'name' => 'Nilai',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value);
-                }
+                },
+                'export_footer_total' => true,
             ],
         ];
     }
@@ -117,10 +118,5 @@ class Datatable extends Component
             'Supplier' => $supplierNames,
             'Kata Kunci' => $this->search,
         ];
-    }
-
-    function datatableExportEnableFooterTotal()
-    {
-        return [3, 4];
     }
 }
