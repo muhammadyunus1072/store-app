@@ -3,14 +3,15 @@
 namespace App\Livewire\Core\ImportData;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Log;
 use App\Traits\Livewire\WithImportExcel;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
+use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
-use App\Repositories\Logistic\Master\Unit\UnitRepository;
 
-class Index extends Component
+class MasterData extends Component
 {
     use WithImportExcel;
 
@@ -199,13 +200,8 @@ class Index extends Component
         };
     }
 
-    public function store()
-    {
-        $this->storeImport();
-    }
-
     public function render()
     {
-        return view('livewire.core.import-data.index');
+        return view('livewire.core.import-data.master-data');
     }
 }

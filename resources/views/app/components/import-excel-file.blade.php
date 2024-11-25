@@ -8,7 +8,7 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
             
-            <button type="button" wire:click="storeImport('{{ $index }}')" class="btn btn-success mt-3"
+            <button type="button" wire:click="{{ ( isset($excel['storeHandler']) && $excel['storeHandler']) ? $excel['storeHandler'] : 'storeImport'}}('{{ $index }}')" class="btn btn-success mt-3"
             wire:loading.attr="disabled">
                 <div wire:loading >
                     <span class="spinner-border spinner-border-sm" role="status"

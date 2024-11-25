@@ -21,7 +21,10 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <livewire:core.import-data.index>
+            <livewire:core.import-data.master-data>
+        </div>
+        <div class="card-body">
+            <livewire:core.import-data.start-stock>
         </div>
     </div>
 @stop

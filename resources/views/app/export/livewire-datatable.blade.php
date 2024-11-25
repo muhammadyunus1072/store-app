@@ -134,7 +134,7 @@
             </tr>
         </tbody>
         @if (!empty($footerTotal))
-            <thead>
+            <tbody>
                 <tr>
                     @foreach ($footerTotal as $index => $col)
                         <th colspan="{{ $col['colspan'] }}">
@@ -150,7 +150,7 @@
                         </th>
                     @endforeach
                 </tr>
-            </thead>
+            </tbody>
         @endif
     </table>
 </body>

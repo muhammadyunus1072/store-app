@@ -52,9 +52,6 @@ class Datatable extends Component
                 'searchable' => false,
                 'key' => 'name',
                 'name' => 'Nama Produk',
-                'export' => function($item, $index, $exportType){
-                    return $exportType;
-                },
                 'export_footer_total' => 'Total'
             ],
             [
