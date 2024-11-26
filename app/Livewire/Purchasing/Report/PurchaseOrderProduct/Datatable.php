@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Purchasing\Report\PurchaseOrderProduct;
 
+use App\Exports\LivewireDatatableExport;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -99,7 +100,6 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return $item->unit_detail_name;
                 },
-                'export_footer_total' => 'Total',
             ],
             [
                 'sortable' => false,
@@ -108,7 +108,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->converted_quantity);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->converted_quantity) : $item->converted_quantity;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->converted_quantity;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -118,7 +129,6 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return $item->main_unit_detail_name;
                 },
-                'export_footer_total' => ' ',
             ],
             [
                 'sortable' => false,
@@ -127,7 +137,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->value) : $item->value;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->value;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
         ];
     }
@@ -158,7 +179,12 @@ class Datatable extends Component
         return 'Laporan Pembelian Barang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
     }
 
-    function datatableExportFilter(): array
+    function datatableExportTitle(): string
+    {
+        return 'Laporan Pembelian Barang';
+    }
+
+    function datatableExportSubtitle(): array
     {
         $productIds = collect($this->productIds)->map(function ($id) {
             return Crypt::decrypt($id);

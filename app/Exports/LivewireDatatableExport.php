@@ -8,35 +8,30 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class LivewireDatatableExport implements FromView, ShouldAutoSize
 {
-    private $view;
-    private $columns;
-    private $data;
-    private $filters;
-    private $type;
-    private $footerTotal;
-    private $fileName;
+    const EXPORT_PDF = "pdf";
+    const EXPORT_EXCEL = "excel";
 
-    public function __construct($view, $columns, $data, $filters, $type, $footerTotal, $fileName)
-    {
-        $this->view = $view;
-        $this->columns = $columns;
-        $this->data = $data;
-        $this->filters = $filters;
-        $this->type = $type;
-        $this->footerTotal = $footerTotal;
-        $this->fileName = $fileName;
-    }
+    const FOOTER_TYPE_SUM = "sum";
+
+    public function __construct(
+        public $view,
+        public $title,
+        public $subtitles,
+        public $columns,
+        public $data,
+    ) {}
 
     public function view(): View
     {
-        return view($this->view, [
-            'columns' => $this->columns,
-            'data' => $this->data,
-            'filters' => $this->filters,
-            'type' => $this->type,
-            'footerTotal' => $this->footerTotal,
-            'fileName' => $this->fileName,
-            'numberFormat' => false,
-        ]);
+        return view(
+            $this->view,
+            [
+                'title' => $this->title,
+                'subtitles' => $this->subtitles,
+                'columns' => $this->columns,
+                'data' => $this->data,
+                'type' => self::EXPORT_EXCEL,
+            ]
+        );
     }
 }
