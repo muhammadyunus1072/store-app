@@ -70,6 +70,7 @@ class StartStock extends Component
 
         $this->storeImport($index);
     }
+
     public function loadUserState()
     {
         $userState = UserStateHandler::get();
@@ -94,13 +95,13 @@ class StartStock extends Component
             $product_quantity = $row[2];
             $product_total_price = $row[3];
             $product_price = $product_total_price / $product_quantity;
-         
+
             $product = ProductRepository::findBy(whereClause: [
                 ['kode_simrs', $product_kode_simrs]
             ]);
 
-            if(!$product)
-            {
+            if (!$product) {
+                Log::debug("GIZI - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
                 return null;
             }
 
@@ -117,6 +118,7 @@ class StartStock extends Component
             );
         };
     }
+
     public function formatImportStartStockProductRumahTangga()
     {
         return function ($row) {
@@ -124,15 +126,14 @@ class StartStock extends Component
             $product_kode_simrs = $row[0];
             $product_name = $row[1];
             $product_quantity = $row[2];
-            $product_unit_name = isset(UnitDetail::TRANSLATE_UNIT[strtoupper($row[3])]) ? UnitDetail::TRANSLATE_UNIT[strtoupper($row[3])] : strtoupper($row[3]);
+            $product_unit_name = isset(MasterData::TRANSLATE_UNIT[strtoupper($row[3])]) ? MasterData::TRANSLATE_UNIT[strtoupper($row[3])] : strtoupper($row[3]);
             $product_price = $row[4];
             $unit_detail = UnitDetailRepository::findBy(whereClause: [
                 ['name', strtoupper($product_unit_name)]
             ]);
 
             if (!$unit_detail) {
-
-                $title_unit = isset(UnitDetail::TITLE_UNIT[$product_unit_name]) ? UnitDetail::TITLE_UNIT[$product_unit_name] : $product_unit_name;
+                $title_unit = isset(MasterData::TITLE_UNIT[$product_unit_name]) ? MasterData::TITLE_UNIT[$product_unit_name] : $product_unit_name;
                 $unit = UnitRepository::findBy(whereClause: [
                     ['title', $title_unit]
                 ]);
@@ -148,7 +149,6 @@ class StartStock extends Component
                     'name' => $product_unit_name,
                     'value' => 1,
                 ]);
-
             } else {
                 $unit = UnitRepository::findBy(whereClause: [
                     ['id', $unit_detail->unit_id]
@@ -159,19 +159,20 @@ class StartStock extends Component
                 ['kode_simrs', $product_kode_simrs]
             ]);
 
-            if(!$product)
-            {
-                $product = ProductRepository::create([
-                    'unit_id' => $unit->id,
-                    'name' => $product_name,
-                    'type' => Product::TYPE_PRODUCT_WITH_STOCK,
-                    'kode_simrs' => $product_kode_simrs,
-                    'kode_sakti' => null,
-                ]);
+            if (!$product) {
+                Log::debug("RT - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+                return null;
+                // $product = ProductRepository::create([
+                //     'unit_id' => $unit->id,
+                //     'name' => $product_name,
+                //     'type' => Product::TYPE_PRODUCT_WITH_STOCK,
+                //     'kode_simrs' => $product_kode_simrs,
+                //     'kode_sakti' => null,
+                // ]);
             }
 
             $resultConvert = StockHandler::convertUnitPrice($product_quantity, $product_price, $unit_detail->id);
-           
+
             StockHandler::createStock(
                 $product->id,
                 1,

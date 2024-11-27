@@ -25,10 +25,9 @@ trait WithImportExcel
 
     public function storeImport($index)
     {
-
         try {
             DB::beginTransaction();
-            
+
             if (!isset($this->import_excel[$index])) {
                 Alert::fail($this, "Gagal", "Gagal Menyimpan Data");
                 return;

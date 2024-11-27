@@ -116,6 +116,14 @@ class Datatable extends Component
                 'name' => 'Nama Produk',
             ],
             [
+                'key' => 'kode_simrs',
+                'name' => 'Kode SIMRS',
+            ],
+            [
+                'key' => 'kode_sakti',
+                'name' => 'Kode SAKTI',
+            ],
+            [
                 'key' => 'type',
                 'name' => 'Tipe Produk',
                 'render' => function($item)

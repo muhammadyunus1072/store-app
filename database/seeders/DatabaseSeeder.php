@@ -48,8 +48,6 @@ class DatabaseSeeder extends Seeder
 
         // Logistic Seeder
         $this->call([
-            SupplierSeeder::class,
-            CategorySupplierSeeder::class,
             WarehouseSeeder::class,
             CategoryProductSeeder::class,
             UnitSeeder::class,
@@ -59,6 +57,8 @@ class DatabaseSeeder extends Seeder
 
         // Purchasing Seeder
         $this->call([
+            SupplierSeeder::class,
+            CategorySupplierSeeder::class,
             Purchasing\SettingSeeder::class,
         ]);
     }
