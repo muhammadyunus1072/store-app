@@ -187,9 +187,29 @@ class Datatable extends Component
             [
                 'sortable' => false,
                 'searchable' => false,
-                'name' => 'Total',
+                'name' => 'Nilai Sebelum Pajak',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value);
+                },
+                'export_footer_total' => true,
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Nilai Pajak',
+                'render' => function ($item) {
+                    $tax = ($item->tax_value) ? $item->value * $item->tax_value / 100 : 0;
+                    return NumberFormatter::format($tax);
+                },
+                'export_footer_total' => true,
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Total',
+                'render' => function ($item) {
+                    $tax = ($item->tax_value) ? $item->value * $item->tax_value / 100 : 0;
+                    return NumberFormatter::format($item->value + $tax);
                 },
                 'export_footer_total' => true,
             ]

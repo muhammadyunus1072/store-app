@@ -25,10 +25,15 @@ class PurchaseOrderProductDetailRepository
             'purchase_order_products.batch',
             'purchase_order_products.code',
             DB::raw('SUM(purchase_order_products.quantity * purchase_order_products.price) as value'),
+            'purchase_order_product_taxes.tax_value',
         )
             ->join('purchase_orders', function ($join) {
                 $join->on('purchase_orders.id', '=', 'purchase_order_products.purchase_order_id')
                     ->whereNull('purchase_orders.deleted_at');
+            })
+            ->leftJoin('purchase_order_product_taxes', function ($join) {
+                $join->on('purchase_order_product_taxes.purchase_order_product_id', '=', 'purchase_order_products.id')
+                    ->whereNull('purchase_order_product_taxes.deleted_at');
             })
             ->whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"])
             ->when($supplierIds, function ($query) use ($supplierIds) {
@@ -45,6 +50,7 @@ class PurchaseOrderProductDetailRepository
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->orWhere('purchase_orders.number', env('QUERY_LIKE'), '%' . $search . '%');
+                    $query->orWhere('purchase_order_products.product_name', env('QUERY_LIKE'), '%' . $search . '%');
                 });
             })
             ->groupBy(
@@ -61,6 +67,7 @@ class PurchaseOrderProductDetailRepository
                 'purchase_order_products.expired_date',
                 'purchase_order_products.batch',
                 'purchase_order_products.code',
+                'purchase_order_product_taxes.tax_value',
             );
     }
 }

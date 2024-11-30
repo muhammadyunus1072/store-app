@@ -4,6 +4,7 @@ use App\Http\Controllers\Core\CompanyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Logistic\Master\ProductController;
 use App\Http\Controllers\Logistic\Master\WarehouseController;
+use App\Http\Controllers\Logistic\Transaction\ImportDataStockExpenseController;
 use App\Http\Controllers\Logistic\Transaction\StockExpenseController;
 use App\Http\Controllers\Logistic\Transaction\StockRequestController;
 
@@ -26,5 +27,11 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
         Route::get('{id}/show', 'show')->name('show');
 
         Route::get('/product/get', [ProductController::class, 'search'])->name('get.product');
+    });
+
+    Route::group(["controller" => ImportDataStockExpenseController::class, "prefix" => "i_stock_expense", "as" => "i_stock_expense."], function () {
+        Route::get('/', 'index')->name('index');
+
+        Route::get('/warehouse/get', [WarehouseController::class, 'search'])->name('get.warehouse');
     });
 });

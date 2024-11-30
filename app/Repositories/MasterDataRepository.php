@@ -18,8 +18,7 @@ abstract class MasterDataRepository
         $query = app(static::className())->query();
         foreach ($whereClause as $clause) {
             $column = isset($clause['column']) ? $clause['column'] : $clause[0];
-
-            if (isset($clause['operator']) || in_array($clause[1], self::OPERATOR)) {
+            if (isset($clause['operator']) || in_array($clause[1], self::OPERATOR, true)) {
                 $operator = isset($clause['operator']) ? $clause['operator'] : $clause[1];
                 $value = isset($clause['value']) ? $clause['value'] : $clause[2];
                 $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[3]) ? $clause[3] : null);

@@ -52,6 +52,11 @@ return [
             'icon' => 'ki-duotone ki-arrow-right',
         ],
         [
+            'text' => 'Import Data - Pengeluaran',
+            'route' => 'i_stock_expense.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
             // 'id' => 'menu_admin'
             'text' => 'Master Data',
             'icon' => 'ki-duotone ki-category',
@@ -172,6 +177,11 @@ return [
         [
             'text' => 'Pembelian',
             'route' => 'purchase_order.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
+            'text' => 'Import Data - Pembelian',
+            'route' => 'i_purchase_order.index',
             'icon' => 'ki-duotone ki-arrow-right',
         ],
         [

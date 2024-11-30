@@ -5,8 +5,9 @@ namespace App\Imports;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 
-class ImportExcel implements ToCollection
+class ImportExcel implements ToCollection, WithCalculatedFormulas
 {
     private $formatCallback;
     private $skip_rows;
