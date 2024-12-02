@@ -20,7 +20,12 @@ class ProductRepository extends MasterDataRepository
 
     public static function search($request)
     {
-        $data = Product::select('id', 'name')
+        $data = Product::select(
+            'id',
+            'name',
+            'kode_simrs',
+            'kode_sakti',
+        )
             ->when($request->product_stock, function ($query) {
                 $query->where('type', Product::TYPE_PRODUCT_WITH_STOCK);
             })
@@ -34,7 +39,7 @@ class ProductRepository extends MasterDataRepository
 
         foreach ($data as $index => $item) {
             $data[$index]['id'] = Crypt::encrypt($item['id']);
-            $data[$index]['text'] = $item['name'];
+            $data[$index]['text'] = "{$item['name']} / {$item['kode_simrs']} / {$item['kode_sakti']}";
         }
 
         return json_encode($data);

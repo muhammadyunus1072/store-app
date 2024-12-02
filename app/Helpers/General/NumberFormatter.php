@@ -4,7 +4,7 @@ namespace App\Helpers\General;
 
 class NumberFormatter
 {
-    const DECIMAL_POIN = 3;
+    const DECIMAL_POIN = 2;
 
     public static function format($number, $decimalPoin = self::DECIMAL_POIN)
     {
@@ -20,6 +20,11 @@ class NumberFormatter
     public static function valueToImask($data)
     {
         return str($data)->replace('.', ',')->toString();
+    }
+
+    public static function round($data)
+    {
+        return floor($data * pow(10, self::DECIMAL_POIN)) / pow(10, self::DECIMAL_POIN);
     }
 
     public static function denominator($nilai)

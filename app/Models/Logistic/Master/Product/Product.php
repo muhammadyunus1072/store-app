@@ -65,6 +65,11 @@ class Product extends Model
         return true;
     }
 
+    public function getText()
+    {
+        return "{$this->name} / {$this->kode_simrs} / {$this->kode_sakti}";
+    }
+
     public function getTranslatedType()
     {
         return self::translateType($this->type);

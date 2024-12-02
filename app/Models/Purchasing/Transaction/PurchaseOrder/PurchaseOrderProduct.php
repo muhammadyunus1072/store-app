@@ -76,6 +76,11 @@ class PurchaseOrderProduct extends Model
         });
     }
 
+    public function getText()
+    {
+        return "{$this->product_name} / {$this->product_kode_simrs} / {$this->product_kode_sakti}";
+    }
+
     public function isDeletable()
     {
         return true;
