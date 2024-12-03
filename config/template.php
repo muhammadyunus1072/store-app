@@ -275,6 +275,10 @@ return [
                     'text' => 'Pajak',
                     'route' => 'tax.index',
                 ],
+                [
+                    'text' => 'Table Editor - Pajak',
+                    'route' => 'tax_editor.index',
+                ],
             ],
         ],
 
