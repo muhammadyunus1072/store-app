@@ -236,8 +236,8 @@
         window.addEventListener('beforeunload', (event) => {
             
             let data = JSON.parse(JSON.stringify(@this.get('row_updates')));
-            
-            if (data && Object.keys(data).length > 0) {
+            let newData = JSON.parse(JSON.stringify(@this.get('tableData')));
+            if ((data && Object.keys(data).length > 0) || (Object.keys(newData).some(key => isNaN(key)))) {
                 event.preventDefault();
             }
         });
