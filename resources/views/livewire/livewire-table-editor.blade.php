@@ -1,5 +1,5 @@
 <div>
-    {{-- MODAL --}}
+    {{-- MODAL UPDATE --}}
     <div class="modal fade" id="modalUpdate" data-backdrop="static" data-keyboard="false" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog">
             <div class="modal-content">
@@ -65,6 +65,7 @@
             </div>
         </div>
     </div>
+    
 
     {{-- DATATABLE --}}
     <div class="row justify-content-between mb-3">
@@ -76,6 +77,17 @@
                 @endforeach
             </select>
         </div>
+        <div class="col row align-items-end">
+            <button type="button" class="btn btn-success mb-2 w-auto" wire:click="addData"><i class="fa fa-plus"></i>Tambah Data</button>
+        </div>
+        <div class="col row align-items-end">
+            @php
+                $newData = collect($tableData)->filter(function ($value, $key) {
+                    return !is_numeric($key);
+                })->toArray();
+            @endphp     
+            <button type="button" class="btn btn-success mb-2 w-auto {{(empty($row_updates) && empty($newData)) ? 'd-none' : ''}}" wire:click="save">Simpan Perubahan</button>
+        </div>
         <div class="col-sm-6 mb-2 {{ $showKeywordFilter ? '' : 'd-none' }}">
             <label>Pencarian</label>
             <input wire:model.live.debounce.300ms="search" type="text" class="form-control">
@@ -83,7 +95,7 @@
     </div>
 
     <div class="position-relative">
-        <div wire:loading>
+        <div wire:loading wire:target="previousPage, nextPage, gotoPage, save">
             <div class="position-absolute w-100 h-100">
                 <div class="w-100 h-100" style="background-color: grey; opacity:0.2"></div>
             </div>
@@ -131,6 +143,41 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach ($tableData as $index => $item)
+                        @if (!is_numeric($index))
+                            <tr wire:key='datatable_new_row_{{ $index }}'>
+                                @foreach ($columns as $name => $col)
+                                    @php
+                                        $cell_style = '';
+                                        if (isset($col['style'])) {
+                                            $cell_style = is_callable($col['style'])
+                                                ? call_user_func($col['style'], $item, $index)
+                                                : $col['style'];
+                                            $cell_style = "style='{$cell_class}'";
+                                        }
+
+                                        $cell_class = '';
+                                        if (isset($col['class'])) {
+                                            $cell_class = is_callable($col['class'])
+                                                ? call_user_func($col['class'], $item, $index)
+                                                : $col['class'];
+                                            $cell_class = "class='{$cell_class}'";
+                                        }
+                                    @endphp
+
+                                    @if (isset($col['render']) && is_callable($col['render']))
+                                        <td {!! $cell_class !!} {!! $cell_style !!}>
+                                            {!! call_user_func($col['render'], $item, $name, $index) !!}
+                                        </td>
+                                    @else
+                                        <td {!! $cell_class !!} {!! $cell_style !!}>
+                                            {!! "<input type='text' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.$item->id.".$name."\"/>"  !!}
+                                        </td>
+                                    @endif
+                                @endforeach
+                            </tr>
+                        @endif
+                    @endforeach
                     @foreach ($data as $index => $item)
                     
                     
@@ -185,7 +232,14 @@
     <script>
         Livewire.on('onSuccessStore', function() {
             let a = bootstrap.Modal.getInstance($('#modalUpdate'));
-            console.log(a);
+        });
+        window.addEventListener('beforeunload', (event) => {
+            
+            let data = JSON.parse(JSON.stringify(@this.get('row_updates')));
+            
+            if (data && Object.keys(data).length > 0) {
+                event.preventDefault();
+            }
         });
     </script>
 @endpush

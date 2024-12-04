@@ -3,6 +3,7 @@
 namespace App\Traits\Livewire;
 
 use Exception;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use App\Helpers\General\Alert;
@@ -27,6 +28,8 @@ trait WithTableEditor
     public $tableName = [];
     public $allColumns = [];
     public $tableData = [];
+    public $newData = [];
+    public $originalData = [];
     
     public $row_updates = [];
     public $updatedKey;
@@ -37,11 +40,13 @@ trait WithTableEditor
 
     abstract protected static function className() : string;
 
-    public function onMount() {}
+    public function onMount() {
 
-    public function mount()
-    {
-        $columns = $this->columns();
+        $this->tableName = app(static::className())->getTable();
+        $this->allColumns = Schema::getColumnListing($this->tableName);
+        $this->getTableData();
+        $this->originalData = $this->tableData;
+        $columns = $this->getColumns();
         $this->loading = true;
         if ('' == $this->sortBy && count($columns) > 0) {
             foreach ($columns as $key => $col) {
@@ -50,17 +55,17 @@ trait WithTableEditor
                     break;
                 }
             }
-        }
-
-        $this->tableName = app(static::className())->getTable();
-        $this->allColumns = Schema::getColumnListing($this->tableName);
-        $this->tableData = $this->getTableData($this->datatableGetProcessedQuery()->get()->keyBy('id')->toArray());
-        $this->onMount();
+        } 
     }
 
-    public function getTableData($data)
+    public function getTableData()
     {
-        return $data;
+        $this->tableData = $this->datatableGetProcessedQuery()->get()->keyBy('id')->toArray();
+    }
+
+    public function mount()
+    {
+        $this->onMount();
     }
 
     public function get(): array
@@ -102,7 +107,7 @@ trait WithTableEditor
         $sortDirection = $this->sortDirection;
         
         $columnsToExclude = collect($columns)
-            ->filter(fn($col) => !$col['show'])
+            ->filter(fn($col) => isset($col['show']) && !$col['show'])
             ->pluck('name')
             ->toArray();
 
@@ -147,7 +152,26 @@ trait WithTableEditor
     {
         $elements = explode('.', $element);
         if ($elements[0] == 'tableData') {
+            if(!is_numeric($elements[1]))
+            {
+                return;
+            }
             $this->row_updates[$elements[1]][$elements[2]] = $value;
+
+            $isRollback = true;
+            foreach($this->row_updates[$elements[1]] as $key => $item)
+            {
+                if($item != $this->originalData[$elements[1]][$elements[2]])
+                {
+                    $isRollback = false;
+                    break;
+                }
+            }
+
+            if($isRollback)
+            {
+                unset($this->row_updates[$elements[1]]);
+            }
         }
     }
 
@@ -155,7 +179,6 @@ trait WithTableEditor
     {
         $allColumns = [];
         $columns = $this->columns();
-        $excludeColumns = $this->excludeColumns();
         
         $allColumns[] = [
             'name' => 'Nomor',
@@ -163,7 +186,7 @@ trait WithTableEditor
             'searchable' => false,
             'render' => function($item, $name, $index)
             {
-                return $index + 1;
+                return is_numeric($index) ? $index + 1 : '-';
             }
         ];
         foreach ($this->allColumns as $key => $value) {
@@ -173,7 +196,8 @@ trait WithTableEditor
                 $allColumns[$value] = isset($columns[$value]) ? $columns[$value] : [
                     'render' => function($item, $name)
                     {
-                        $html = "<input type='text' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.$item->id.".$name."\"/> ";
+                        $id = $item['id'];
+                        $html = "<input type='text' class='form-control' wire:key=\"$name"."_".$id."\" wire:model.blur=\"tableData.$id.".$name."\"/> ";
                         return $html;
                     }
                 ];
@@ -188,13 +212,18 @@ trait WithTableEditor
             'render' => function($item, $name, $index)
             {
                 $action = "";
-                if (isset($this->row_updates[$item->id])) {
-                    foreach ($this->row_updates[$item->id] as $key => $value) {
-                        if ($item->$key != $value) {
-                            $action .= "<button type=\"button\" class=\"btn btn-success btn-sm\" wire:click=\"save($item->id)\">Simpan</button>";
-                            break;
-                        }
-                    }
+                $id = $item['id'];
+                if (!is_numeric($id)) {
+                    $action .= "<button type=\"button\" class=\"btn btn-danger btn-sm\" wire:click=\"deleteNewData('$id')\">
+                            <i class='ki-duotone ki-trash fs-1'>
+                                <span class='path1'></span>
+                                <span class='path2'></span>
+                                <span class='path3'></span>
+                                <span class='path4'></span>
+                                <span class='path5'></span>
+                            </i>
+                                Hapus</button>";
+                    
                 }
 
                 return $action;
@@ -203,20 +232,67 @@ trait WithTableEditor
        return $allColumns;
     }
 
-    public function save($id)
+    public function addData()
+    {
+        $columns = $this->getColumns();
+        $newData = [];
+        foreach($columns as $key => $value)
+        {
+            $newData[$key] = isset($value['default']) ? $value['default'] : null;
+        }
+        $id = Str::random(30);
+        if(!isset($columns['id']))
+        {
+            $newData['id'] = $id;
+        }
+        $this->tableData[$id] = $newData;
+
+    }
+
+    public function deleteNewData($id)
+    {
+        unset($this->tableData[$id]);
+    }
+
+    public function save()
     {
         try {
             DB::beginTransaction();
-            
-            $obj = app(static::className())->find($id);
-            foreach ($this->tableData[$id] as $key => $value) {
-                $obj->{$key} = $value;
+
+            // CREATE
+            foreach ($this->tableData as $key => $newItem) {
+                if(!is_numeric($key))
+                {
+                    if (isset($newItem['id'])) {
+                        unset($newItem['id']);
+                    }
+                    unset($newItem['0']);
+                    unset($newItem['1']);
+                    $obj = app(static::className())->newInstance();
+                    $obj->forceFill($newItem);
+                    $obj->save();
+                }
+            }            
+
+            // // UPDATE
+            $updatedRecords = app(static::className())
+                ->whereIn('id', array_keys($this->row_updates))
+                ->get();
+
+            foreach ($updatedRecords as $obj) {
+                if (isset($this->row_updates[$obj->id])) {
+                    foreach ($this->row_updates[$obj->id] as $key => $value) {
+                        $obj->{$key} = $value;
+                    }
+
+                    $obj->save();
+                }
             }
-            
-            $obj->save();
 
             DB::commit();
             Alert::success($this, "Berhasil", "Data Berhasil Disimpan");
+            $this->row_updates = [];
+            $this->getTableData();
 
         } catch (Exception $e) {
             DB::rollBack();
@@ -253,30 +329,6 @@ trait WithTableEditor
     public function columns(): array
     {
         return [];
-    }
-
-    public function excludeColumns(): array
-    {
-        return [
-            'created_by' => [
-                'show' => false,
-            ],
-            'created_at' => [
-                'show' => false,
-            ],
-            'updated_at' => [
-                'show' => false,
-            ],
-            'updated_by' => [
-                'show' => false,
-            ],
-            'deleted_at' => [
-                'show' => false,
-            ],
-            'deleted_by' => [
-                'show' => false,
-            ],
-        ];
     }
 
     public function showData($key)

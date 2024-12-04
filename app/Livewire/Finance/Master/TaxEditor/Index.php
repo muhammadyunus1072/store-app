@@ -22,37 +22,41 @@ class Index extends Component
             'id' => [
                 'show' => false,
             ],
-            'created_at' => [
-                'show' => true,
-                'render' => function($item, $name, $index)
-                {
-                    return "<input type='date' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.$item->id.".$name."\"/> ";
-                }
-            ],
             'name' => [
                 'show' => true,
                 'render' => function($item, $name)
                 {
-                    return "<input type='text' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.$item->id.".$name."\"/> ";
+
+                    $id = $item['id'];
+                    return "<input type='text' class='form-control' wire:key=\"$name"."_"."$id\" wire:model.blur=\"tableData.$id.".$name."\"/> ";
                 }
             ],
-        ];
-    }
-    public function getTableData($data)
-    {
-        foreach ($data as $key => $value) {
-            if (isset($value['created_at'])) {
-                $data[$key]['created_at'] = Carbon::parse($value['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d');
-            }
-        }
-        return $data;
-    }
-
-    public function excludeColumns(): array
-    {
-        return [
+            'is_active' => [
+                'show' => true,
+                'default' => false,
+                'render' => function($item, $name)
+                {
+                    
+                    $id = $item['id'];
+                    return "<input class='form-check-input' type='checkbox'
+                    wire:model.blur=\"tableData.$id.".$name."\"
+                    id=\"tableData.$id.".$name."\">
+                <label class='form-check-label ms-2 mt-1' for=\"tableData.$id.".$name."\">
+                    Aktif
+                </label>";
+                }
+            ],
             'created_by' => [
                 'show' => false,
+            ],
+            'created_at' => [
+                'show' => true,
+                'render' => function($item, $name, $index)
+                {
+                    $this->tableData[$item['id']][$name] = Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d');
+                    $id = $item['id'];
+                    return "<input type='date' class='form-control' wire:key=\"$name"."_"."$id\" wire:model.blur=\"tableData.$id.".$name."\"/> ";
+                }
             ],
             'updated_at' => [
                 'show' => false,
