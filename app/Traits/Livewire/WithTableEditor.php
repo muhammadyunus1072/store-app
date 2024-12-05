@@ -9,7 +9,6 @@ use Livewire\WithPagination;
 use App\Helpers\General\Alert;
 use App\Models\Finance\Master\Tax;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Schema;
 
 trait WithTableEditor
@@ -45,8 +44,17 @@ trait WithTableEditor
 
     abstract protected static function className() : string;
 
-    public function onMount() {
+    public function onMount() 
+    {
+    }
 
+    public function getTableData()
+    {
+        $this->tableData = $this->datatableGetProcessedQuery()->get()->keyBy('id')->toArray();
+    }
+
+    public function mount()
+    {
         $this->tableName = app(static::className())->getTable();
         $this->allColumns = Schema::getColumnListing($this->tableName);
         $this->getTableData();
@@ -68,36 +76,14 @@ trait WithTableEditor
                 $this->searches[$key] = isset($col['searchDefault']) ? $col['searchDefault'] : null;
             }
         }
-    }
-
-    public function getTableData()
-    {
-        $this->tableData = $this->datatableGetProcessedQuery()->get()->keyBy('id')->toArray();
-    }
-
-    public function mount()
-    {
         $this->onMount();
     }
-
-    public function get(): array
-    {
-        return [
-            [
-                'key' => 'name',
-                'name' => 'Golongan',
-                'render' => function ($item) {
-                    return $item->name;
-                }
-            ],
-        ];
-    }
-
+    
     public function updatingSearch()
     {
         $this->resetPage();
     }
-    public function updatingSearches($value)
+    public function updatingSearches()
     {
         $this->resetPage();
     }
@@ -189,17 +175,17 @@ trait WithTableEditor
             }
             $this->row_updates[$elements[1]][$elements[2]] = $value;
 
-            $isRollback = true;
+            $isNoUpdate = true;
             foreach($this->row_updates[$elements[1]] as $key => $item)
             {
                 if($item != $this->originalData[$elements[1]][$elements[2]])
                 {
-                    $isRollback = false;
+                    $isNoUpdate = false;
                     break;
                 }
             }
 
-            if($isRollback)
+            if($isNoUpdate)
             {
                 unset($this->row_updates[$elements[1]]);
             }
