@@ -21,7 +21,7 @@ trait WithTableEditor
     public $length = 10;
     public $search;
     public $searches = [];
-    public $sortBy = '';
+    public $sortBy = 'id';
     public $sortDirection = 'asc';
     public $loading = false;
     public $showKeywordFilter = true;
@@ -384,5 +384,8 @@ trait WithTableEditor
     public function showData($key)
     {
         $this->updatedKey = $key;
+        $columns = $this->getColumns();
+        
+        $this->value = isset($columns[$key]['default']) ? $columns[$key]['default'] : null;
     }
 }

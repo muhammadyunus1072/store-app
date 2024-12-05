@@ -51,7 +51,21 @@
                         <div class="row">
                             <div class="col">
                                 <label>Nilai</label>
-                                <input type="text" class="form-control" wire:model.blur="value" />
+                                <br>
+                                @php
+                                     $bulkItem = [];
+                                    foreach($columns as $key => $value)
+                                    {
+                                        $bulkItem[$key] = isset($value['default']) ? $value['default'] : null;
+                                    }
+                                    $id = Str::random(30);
+                                    $bulkItem['id'] = $id;
+                                @endphp             
+                                @if (isset($columns[$updatedKey]['render']) && is_callable($columns[$updatedKey]['render']))
+                                    {!! call_user_func($columns[$updatedKey]['render'], $bulkItem, $updatedKey, 0, 'newData', "value" ) !!}
+                                @else
+                                    <input type="text" class="form-control" wire:model.blur="value" />
+                                @endif
                             </div>
                         </div>
                         
@@ -112,9 +126,9 @@
                                 @if (!is_numeric($name) && (!isset($col['searchable']) || $col['searchable'] == true))
                                     <th>
                                         @if (isset($col['searchRender']) && is_callable($col['searchRender']))
-                                            {!! call_user_func($col['searchRender'], $item, $name) !!}
+                                            {!! call_user_func($col['searchRender'], $item, $name, "searches.$name") !!}
                                         @else
-                                            {!! "<input type='text' class='form-control' placeholder='".ucwords(str_replace('_', ' ', $name))."' wire:model.live.debounce.300ms=\"searches.".$name."\"/>"  !!}
+                                            {!! "<input type='text' class='form-control' placeholder='".ucwords(str_replace('_', ' ', $name))."' wire:model.live.debounce.300ms=\"searches.$name\"/>"  !!}
                                         @endif
                                     </th>
                                 @else
@@ -186,11 +200,12 @@
 
                                     @if (isset($col['render']) && is_callable($col['render']))
                                         <td {!! $cell_class !!} {!! $cell_style !!}>
-                                            {!! call_user_func($col['render'], $item, $name, $index) !!}
+                                            {{json_encode($item);}}
+                                            {{-- {!! call_user_func($col['render'], $item, $name, $index, $name."_".$item['id'], "tableData.".$item['id'].".$name" ) !!} --}}
                                         </td>
                                     @else
                                         <td {!! $cell_class !!} {!! $cell_style !!}>
-                                            {!! "<input type='text' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.$item->id.".$name."\"/>"  !!}
+                                            {!! "<input type='text' class='form-control' wire:key=\"$name"."_".$item['id']."\" wire:model.live=\"tableData.".$item['id'].".$name\"/>"  !!}
                                         </td>
                                     @endif
                                 @endforeach
@@ -220,11 +235,11 @@
 
                                 @if (isset($col['render']) && is_callable($col['render']))
                                     <td {!! $cell_class !!} {!! $cell_style !!}>
-                                        {!! call_user_func($col['render'], $item, $name, $index) !!}
+                                        {!! call_user_func($col['render'], $item, $name, $index, $name."_".$item['id'], "tableData.".$item['id'].".$name") !!}
                                     </td>
                                 @else
                                     <td {!! $cell_class !!} {!! $cell_style !!}>
-                                        {!! "<input type='text' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.$item->id.".$name."\"/>"  !!}
+                                        {!! "<input type='text' class='form-control' wire:key=\"$name"."_"."$item->id\" wire:model.live=\"tableData.".$item->id.".$name\"/>"  !!}
                                     </td>
                                 @endif
                             @endforeach

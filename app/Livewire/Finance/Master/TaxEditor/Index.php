@@ -24,35 +24,35 @@ class Index extends Component
             ],
             'name' => [
                 'show' => true,
-                'render' => function($item, $name)
+                'render' => function($item, $name, $index, $key, $model)
                 {
 
                     $id = $item['id'];
-                    return "<input type='text' class='form-control' wire:key=\"$name"."_"."$id\" wire:model.blur=\"tableData.$id.".$name."\"/> ";
+                    return "<input type='text' class='form-control' wire:key=\"$key\" wire:model.blur=\"$model\"/> ";
                 }
             ],
             'is_active' => [
                 'show' => true,
                 'default' => false,
-                'render' => function($item, $name)
+                'render' => function($item, $name, $index, $key, $model)
                 {
-                    
                     $id = $item['id'];
                     return "<input class='form-check-input' type='checkbox'
-                    wire:model.blur=\"tableData.$id.".$name."\"
-                    id=\"tableData.$id.".$name."\">
-                <label class='form-check-label ms-2 mt-1' for=\"tableData.$id.".$name."\">
+                    wire:model.blur=\"$model\"
+                    wire:key=\"$key\"
+                    id=\"$model\">
+                <label class='form-check-label ms-2 mt-1' for=\"$model\">
                     Aktif
                 </label>";
                 },
                 'searchOperator' => '=',
                 'searchDefault' => false,
-                'searchRender' => function($item, $name)
+                'searchRender' => function($item, $name, $model)
                 {
                     return "<input class='form-check-input' type='checkbox'
-                        wire:model.live.debounce.300ms=\"searches.".$name."\"
-                        id=\"searches.".$name."\">
-                    <label class='form-check-label ms-2 mt-1' for=\"searches.".$name."\">
+                        wire:model.live.debounce.300ms=\"$model\"
+                        id=\"$model\">
+                    <label class='form-check-label ms-2 mt-1' for=\"$model\">
                         Aktif
                     </label>";
                 },
@@ -62,11 +62,15 @@ class Index extends Component
             ],
             'created_at' => [
                 'show' => true,
-                'render' => function($item, $name, $index)
+                'render' => function($item, $name, $index, $key, $model)
                 {
-                    $this->tableData[$item['id']][$name] = Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d');
+                    
+                    if(is_numeric($item['id']))
+                    {
+                        $this->tableData[$item['id']][$name] = Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d');
+                    }
                     $id = $item['id'];
-                    return "<input type='date' class='form-control' wire:key=\"$name"."_"."$id\" wire:model.blur=\"tableData.$id.".$name."\"/> ";
+                    return "<input type='date' class='form-control' wire:key=\"$key\" wire:model.blur=\"$model\"/> ";
                 }
             ],
             'updated_at' => [
