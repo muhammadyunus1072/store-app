@@ -105,6 +105,24 @@
 
         <div class="table-responsive">
             <table class="table table-bordered text-nowrap w-100 h-100">
+
+                <thead>
+                    <tr wire:key='datatable_footer'>
+                        @foreach ($columns as $name => $col)
+                                @if (!is_numeric($name) && (!isset($col['searchable']) || $col['searchable'] == true))
+                                    <th>
+                                        @if (isset($col['searchRender']) && is_callable($col['searchRender']))
+                                            {!! call_user_func($col['searchRender'], $item, $name) !!}
+                                        @else
+                                            {!! "<input type='text' class='form-control' placeholder='".ucwords(str_replace('_', ' ', $name))."' wire:model.live.debounce.300ms=\"searches.".$name."\"/>"  !!}
+                                        @endif
+                                    </th>
+                                @else
+                                    <th></th>
+                                @endif
+                        @endforeach
+                    </tr>
+                </thead>
                 <thead>
                     <tr>
                         @foreach ($columns as $key => $col)
@@ -142,6 +160,7 @@
                         @endforeach
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach ($tableData as $index => $item)
                         @if (!is_numeric($index))
@@ -179,8 +198,6 @@
                         @endif
                     @endforeach
                     @foreach ($data as $index => $item)
-                    
-                    
                         <tr wire:key='datatable_row_{{ $index }}'>
                             @foreach ($columns as $name => $col)
                                 @php
@@ -214,6 +231,11 @@
                         </tr>
                     @endforeach
                 </tbody>
+            </table>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered text-nowrap w-100 h-100">
+
             </table>
         </div>
     </div>

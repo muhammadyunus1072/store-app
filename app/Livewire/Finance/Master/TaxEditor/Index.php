@@ -44,7 +44,18 @@ class Index extends Component
                 <label class='form-check-label ms-2 mt-1' for=\"tableData.$id.".$name."\">
                     Aktif
                 </label>";
-                }
+                },
+                'searchOperator' => '=',
+                'searchDefault' => false,
+                'searchRender' => function($item, $name)
+                {
+                    return "<input class='form-check-input' type='checkbox'
+                        wire:model.live.debounce.300ms=\"searches.".$name."\"
+                        id=\"searches.".$name."\">
+                    <label class='form-check-label ms-2 mt-1' for=\"searches.".$name."\">
+                        Aktif
+                    </label>";
+                },
             ],
             'created_by' => [
                 'show' => false,

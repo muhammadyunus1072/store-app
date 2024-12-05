@@ -9,6 +9,7 @@ use Livewire\WithPagination;
 use App\Helpers\General\Alert;
 use App\Models\Finance\Master\Tax;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Schema;
 
 trait WithTableEditor
@@ -20,7 +21,8 @@ trait WithTableEditor
     public $lengthOptions = [10, 25, 50, 100];
     public $length = 10;
     public $search;
-    public $sortBy = 'id';
+    public $searches = [];
+    public $sortBy = '';
     public $sortDirection = 'asc';
     public $loading = false;
     public $showKeywordFilter = true;
@@ -38,6 +40,9 @@ trait WithTableEditor
     public $rangeEnd = 0;
     public $value;
 
+    // Delete Dialog
+    public $targetDeleteId;
+
     abstract protected static function className() : string;
 
     public function onMount() {
@@ -46,8 +51,8 @@ trait WithTableEditor
         $this->allColumns = Schema::getColumnListing($this->tableName);
         $this->getTableData();
         $this->originalData = $this->tableData;
-        $columns = $this->getColumns();
         $this->loading = true;
+        $columns = $this->getColumns();
         if ('' == $this->sortBy && count($columns) > 0) {
             foreach ($columns as $key => $col) {
                 if (!isset($col['sortable']) || $col['sortable']) {
@@ -56,6 +61,13 @@ trait WithTableEditor
                 }
             }
         } 
+        
+        foreach ($columns as $key => $col) {
+            if(!is_numeric($key) && (!isset($col['searchable']) || $col['searchable'] == true))
+            {
+                $this->searches[$key] = isset($col['searchDefault']) ? $col['searchDefault'] : null;
+            }
+        }
     }
 
     public function getTableData()
@@ -85,6 +97,10 @@ trait WithTableEditor
     {
         $this->resetPage();
     }
+    public function updatingSearches($value)
+    {
+        $this->resetPage();
+    }
 
     public function datatableSort($field)
     {
@@ -103,6 +119,7 @@ trait WithTableEditor
     { 
         $columns = $this->columns();
         $search = $this->search;
+        $searches = $this->searches;
         $sortBy = $this->sortBy;
         $sortDirection = $this->sortDirection;
         
@@ -126,6 +143,20 @@ trait WithTableEditor
                         (!isset($col['searchable']) || (isset($col['searchable']) && $col['searchable']))
                     ) {
                         $query->orWhere($key, env('QUERY_LIKE'), "%$search%");
+                    }
+                }
+            });
+        });
+
+        $query->when($searches, function ($query) use ($searches, $columns) {
+            $query->where(function ($query) use ($columns, $searches) {
+                foreach ($this->getColumns() as $key => $col) {
+                
+                    if(!isset($col['searchable']) || (isset($col['searchable']) && $col['searchable']))
+                    {
+                        $operator = isset($col['searchOperator']) ? $col['searchOperator'] : env('QUERY_LIKE');
+                        $data = isset($col['searchOperator']) ? $this->searches[$key] : "%".$this->searches[$key]."%";
+                        $query->where($key, $operator, $data);
                     }
                 }
             });
@@ -213,23 +244,56 @@ trait WithTableEditor
             {
                 $action = "";
                 $id = $item['id'];
-                if (!is_numeric($id)) {
-                    $action .= "<button type=\"button\" class=\"btn btn-danger btn-sm\" wire:click=\"deleteNewData('$id')\">
-                            <i class='ki-duotone ki-trash fs-1'>
-                                <span class='path1'></span>
-                                <span class='path2'></span>
-                                <span class='path3'></span>
-                                <span class='path4'></span>
-                                <span class='path5'></span>
-                            </i>
-                                Hapus</button>";
-                    
-                }
+                $event = !is_numeric($id) ? 'deleteNewData' : 'showDeleteDialog';
+                $action .= "<button type=\"button\" class=\"btn btn-danger btn-sm\" wire:click=\"$event('$id')\">
+                        <i class='ki-duotone ki-trash fs-1'>
+                            <span class='path1'></span>
+                            <span class='path2'></span>
+                            <span class='path3'></span>
+                            <span class='path4'></span>
+                            <span class='path5'></span>
+                        </i>
+                            Hapus</button>";
 
                 return $action;
             }
         ];
        return $allColumns;
+    }
+
+    #[On('on-delete-dialog-confirm')]
+    public function onDialogDeleteConfirm()
+    {
+        if ($this->targetDeleteId == null) {
+            return;
+        }
+        $obj = app(static::className())
+        ->find($this->targetDeleteId);
+        
+        empty($obj) ? null : $obj->delete();
+        Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
+    }
+
+    #[On('on-delete-dialog-cancel')]
+    public function onDialogDeleteCancel()
+    {
+        $this->targetDeleteId = null;
+    }
+
+    public function showDeleteDialog($id)
+    {
+        $this->targetDeleteId = $id;
+
+        Alert::confirmation(
+            $this,
+            Alert::ICON_QUESTION,
+            "Hapus Data",
+            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
+            "on-delete-dialog-confirm",
+            "on-delete-dialog-cancel",
+            "Hapus",
+            "Batal",
+        );
     }
 
     public function addData()
