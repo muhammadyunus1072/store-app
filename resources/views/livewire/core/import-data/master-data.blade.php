@@ -1,4 +1,14 @@
 <div class="">
+    <div class="row mb-3">
+        <div class="col-auto">
+            <button type="button" wire:click="syncSupplier" class="btn btn-primary mt-3"
+            {{$isSyncProgress ? 'disabled' : null}}>
+                <i class="fa fa-sync"></i>
+                Sync Supplier
+            </button>
+        </div>
+    </div>
+
     <h4>Import Master Data</h4>
     <hr>
 

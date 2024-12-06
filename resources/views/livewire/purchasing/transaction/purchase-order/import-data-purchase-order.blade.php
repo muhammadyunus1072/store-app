@@ -1,4 +1,32 @@
 <div class="">
+
+    <h4>Sync Data Pembelian Rumah Tangga</h4>
+    <hr>
+    <div class="row mb-3 align-items-end">
+        {{-- SELECT WAREHOUSE --}}
+        <div class="col-md-4 mb-3">
+            <label>Gudang</label>
+            <select class="form-select w-100" wire:model.live='pembelianRTWarehouseId'>
+                @php $isFound = false; @endphp
+    
+                @foreach ($warehouses as $warehouse)
+                    @php $isFound = $isFound || $warehouse['id'] == $pembelianRTWarehouseId; @endphp
+                    <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
+                @endforeach
+    
+                @if (!$isFound && !empty($pembelianRTWarehouseId))
+                    <option value="{{ $pembelianRTWarehouseId }}" selected>{{ $warehouseText }}</option>
+                @endif
+            </select>
+        </div>
+        <div class="col-auto mb-3">
+            <button type="button" wire:click="syncPembelianRT2024" class="btn btn-primary"
+            {{$isSyncProgress ? 'disabled' : null}}>
+                <i class="fa fa-sync"></i>
+                Sync Pembelian Rumah Tangga 2024
+            </button>
+        </div>
+    </div>
     <h4>Import Data Pembelian</h4>
     <hr>
 

@@ -116,6 +116,10 @@ class Datatable extends Component
                 'name' => 'Nama Supplier',
             ],
             [
+                'key' => 'kode_simrs',
+                'name' => 'Kode Simrs',
+            ],
+            [
                 'sortable' => false,
                 'searchable' => false,
                 'name' => 'Kategori Supplier',

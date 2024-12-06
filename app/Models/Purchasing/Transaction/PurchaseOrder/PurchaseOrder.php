@@ -32,6 +32,7 @@ class PurchaseOrder extends Model
         'warehouse_id',
         'transaction_date',
         'note',
+        'no_spk',
     ];
 
     protected $guarded = ['id'];

@@ -79,6 +79,19 @@
                 @enderror
             </div>
 
+            {{-- NO SPK --}}
+            <div class="col-md-4 mb-3">
+                <label>No SPK</label>
+                <input type="text" class="form-control @error('no_spk') is-invalid @enderror"
+                    wire:model="no_spk" {{ $isShow ? 'disabled' : '' }} />
+
+                @error('no_spk')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
             {{-- NOTE --}}
             <div class="col-md-12 mb-3">
                 <label>Catatan</label>

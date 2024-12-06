@@ -20,6 +20,8 @@ class Detail extends Component
     #[Validate('required', message: 'Nama Supplier Harus Diisi', onUpdate: false)]
     public $name;
 
+    public $kode_simrs;
+
     public $supplierCategories = [];
 
     public function mount()
@@ -81,6 +83,7 @@ class Detail extends Component
 
         $validatedData = [
             'name' => $this->name,
+            'kode_simrs' => $this->kode_simrs,
         ];
 
         try {

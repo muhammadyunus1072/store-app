@@ -14,6 +14,7 @@ class Supplier extends Model
 
     protected $fillable = [
         'name',
+        'kode_simrs',
     ];
 
     protected $guarded = ['id'];
@@ -28,6 +29,7 @@ class Supplier extends Model
     public function saveInfo($object, $prefix = "supplier")
     {
         $object[$prefix . "_name"] = $this->name;
+        $object[$prefix . "_kode_simrs"] = $this->kode_simrs;
 
         return $object;
     }

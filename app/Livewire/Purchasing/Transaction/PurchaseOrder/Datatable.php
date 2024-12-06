@@ -131,6 +131,10 @@ class Datatable extends Component
                 'key' => 'supplier_name',
                 'name' => 'Supplier',
             ],
+            [
+                'key' => 'no_spk',
+                'name' => 'No SPK',
+            ],
         ];
 
         if ($this->settingMultipleCompany) {

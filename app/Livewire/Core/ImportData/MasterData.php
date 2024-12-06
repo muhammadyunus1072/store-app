@@ -2,21 +2,30 @@
 
 namespace App\Livewire\Core\ImportData;
 
+use Exception;
 use Livewire\Component;
-use Illuminate\Support\Facades\Log;
+use App\Helpers\General\Alert;
+use Illuminate\Support\Facades\DB;
 use App\Traits\Livewire\WithImportExcel;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
+use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository ;
+use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
 
 class MasterData extends Component
 {
     use WithImportExcel;
 
+    public $isSyncProgress = false;
+
     public function mount()
     {
+        $this->isSyncProgress = SyncSupplierRepository::findBy(whereClause:[
+            ['is_done', false]
+        ]);
         $this->import_excel = [
             [
                 "data" => null,
@@ -198,6 +207,37 @@ class MasterData extends Component
                 ]);
             }
         };
+    }
+
+    public function syncSupplier()
+    {
+        try {
+            DB::beginTransaction();
+            
+            $countSupplier = SuplierRepository::count();
+
+            $validatedData = [
+                'total' => $countSupplier,
+            ];
+
+            $obj = SyncSupplierRepository::create($validatedData);
+            $this->isSyncProgress = $obj;
+            DB::commit();
+
+            Alert::confirmation(
+                $this,
+                Alert::ICON_SUCCESS,
+                "Berhasil",
+                "Data Berhasil Diperbarui",
+                "on-dialog-confirm",
+                "on-dialog-cancel",
+                "Oke",
+                "Tutup",
+            );
+        } catch (Exception $e) {
+            DB::rollBack();
+            Alert::fail($this, "Gagal", $e->getMessage());
+        }
     }
 
     public function render()
