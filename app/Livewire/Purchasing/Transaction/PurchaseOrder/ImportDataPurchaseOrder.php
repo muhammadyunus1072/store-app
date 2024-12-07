@@ -112,6 +112,7 @@ class ImportDataPurchaseOrder extends Component
             $note = 'Import Data';
 
             $product_kode_simrs = $row[2];
+            $product_type = $row[3] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_habis_pakai = $row[3]; // YA, TIDAK
             $product_name = $row[4];
             $product_unit_name = isset(UnitDetail::TRANSLATE_UNIT[strtoupper($row[5])]) ? UnitDetail::TRANSLATE_UNIT[strtoupper($row[5])] : strtoupper($row[5]);;
@@ -122,9 +123,6 @@ class ImportDataPurchaseOrder extends Component
             {
                 return null;
             }
-            $unit_detail = UnitDetailRepository::findBy(whereClause: [
-                ['name', strtoupper($product_unit_name)]
-            ]);
 
             $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
             $taxPpnId = $taxPpn->id;
@@ -132,9 +130,45 @@ class ImportDataPurchaseOrder extends Component
             $product = ProductRepository::findBy(whereClause: [
                 ['kode_simrs', $product_kode_simrs]
             ]);
+
+            $unit_detail = UnitDetailRepository::findBy(whereClause: [
+                ['name', strtoupper($product_unit_name)]
+            ]);
+
             if(!$product)
             {
-                return null;
+                if (!$unit_detail) {
+                    $title_unit = isset(UnitDetail::TITLE_UNIT[$product_unit_name]) ? UnitDetail::TITLE_UNIT[$product_unit_name] : $product_unit_name;
+                    $unit = UnitRepository::findBy(whereClause: [
+                        ['title', $title_unit]
+                    ]);
+    
+                    if (!$unit) {
+                        $unit = UnitRepository::create([
+                            'title' => $title_unit,
+                        ]);
+                    }
+    
+                    $unit_detail = UnitDetailRepository::create([
+                        'unit_id' => $unit->id,
+                        'is_main' => true,
+                        'name' => $product_unit_name,
+                        'value' => 1,
+                    ]);
+                } else{
+                    $unit = UnitRepository::findBy(whereClause: [
+                        ['id', $unit_detail->unit_id]
+                    ]);
+                }
+                
+                
+                $product = ProductRepository::create([
+                    'unit_id' => $unit->id,
+                    'name' => $product_name,
+                    'type' => $product_type,
+                    'kode_simrs' => $product_kode_simrs,
+                    'kode_sakti' => null,
+                ]);
             }
 
             for ($i=1; $i <= 31; $i++) { 
@@ -152,13 +186,12 @@ class ImportDataPurchaseOrder extends Component
                     $purchaseOrder = PurchaseOrderRepository::create($validatedData);
                     $objId = $purchaseOrder->id;
     
-    
                     $validatedData = [
                         'purchase_order_id' => $objId,
                         'product_id' => $product->id,
                         'unit_detail_id' => $unit_detail->id,
                         'quantity' => $qty,
-                        'price' => $product_price,
+                        'price' => $product_price ? $product_price : $product_price_ppn,
                         'code' => null,
                         'batch' => null,
                         'expired_date' => null
@@ -167,7 +200,7 @@ class ImportDataPurchaseOrder extends Component
                     $object = PurchaseOrderProductRepository::create($validatedData);
                     $purchaseOrderProductId = $object->id;
 
-                    if ($product_price_ppn != $product_price) {
+                    if ($product_price_ppn != $product_price && $product_price) {
 
                         PurchaseOrderProductTaxRepository::create([
                             'purchase_order_product_id' => $purchaseOrderProductId,
