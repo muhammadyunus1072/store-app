@@ -25,6 +25,8 @@ class AccessLogistic
     const R_HISTORY_STOCK_DETAIL_WAREHOUSE = "r_history_stock_detail_warehouse";
     const R_STOCK_EXPENSE_WAREHOUSE = "r_stock_expense_warehouse";
     const R_STOCK_EXPIRED_WAREHOUSE = "r_stock_expired_warehouse";
+    const R_STOCK_REQUEST_IN_WAREHOUSE = "r_stock_request_in_warehouse";
+    const R_STOCK_REQUEST_OUT_WAREHOUSE = "r_stock_request_out_warehouse";
 
     const ALL = [
         self::SETTING,
@@ -48,6 +50,8 @@ class AccessLogistic
         self::R_HISTORY_STOCK_DETAIL_WAREHOUSE,
         self::R_STOCK_EXPENSE_WAREHOUSE,
         self::R_STOCK_EXPIRED_WAREHOUSE,
+        self::R_STOCK_REQUEST_IN_WAREHOUSE,
+        self::R_STOCK_REQUEST_OUT_WAREHOUSE,
     ];
 
     const TYPE_ALL = [
@@ -72,6 +76,8 @@ class AccessLogistic
         self::R_HISTORY_STOCK_DETAIL_WAREHOUSE => [PermissionHelper::TYPE_READ],
         self::R_STOCK_EXPENSE_WAREHOUSE => [PermissionHelper::TYPE_READ],
         self::R_STOCK_EXPIRED_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_STOCK_REQUEST_IN_WAREHOUSE => [PermissionHelper::TYPE_READ],
+        self::R_STOCK_REQUEST_OUT_WAREHOUSE => [PermissionHelper::TYPE_READ],
     ];
 
     const TRANSLATE = [
@@ -96,5 +102,7 @@ class AccessLogistic
         self::R_HISTORY_STOCK_DETAIL_WAREHOUSE => "Laporan - Kartu Stok Detail (Per Gudang)",
         self::R_STOCK_EXPENSE_WAREHOUSE => "Laporan - Pengeluaran (Per Gudang)",
         self::R_STOCK_EXPIRED_WAREHOUSE => "Laporan - Stok Expired (Per Gudang)",
+        self::R_STOCK_REQUEST_IN_WAREHOUSE => "Laporan - Transfer Masuk (Per Gudang)",
+        self::R_STOCK_REQUEST_OUT_WAREHOUSE => "Laporan - Transfer Keluar (Per Gudang)",
     ];
 }

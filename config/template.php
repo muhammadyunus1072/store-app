@@ -147,6 +147,16 @@ return [
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
+                    'text' => 'Permintaan Masuk',
+                    'route'  => 'r_stock_request_in_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Permintaan Keluar',
+                    'route'  => 'r_stock_request_out_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
                     'id' => 'submenu_r_stock_expired_warehouse',
                     'text' => 'Stok Expired',
                     'route'  => 'r_stock_expired_warehouse.index',

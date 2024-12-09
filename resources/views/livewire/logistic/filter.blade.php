@@ -83,12 +83,26 @@
         {{-- SELECT WAREHOUSE --}}
         @if ($filterWarehouse)
             <div class="col-md-4 mb-3">
-                <label>Gudang</label>
+                <label>{{ $filterWarehouseLabel }}</label>
                 <select class="form-select w-100" wire:model.live='warehouseId'>
                     @foreach ($warehouses as $warehouse)
                         <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
                     @endforeach
                 </select>
+            </div>
+        @endif
+
+        {{-- SELECT WAREHOUSE MULTIPLE --}}
+        @if ($filterWarehouseMultiple)
+            <div class="col-md-4 mb-3">
+                <label>{{ $filterWarehouseMultipleLabel }}</label>
+                <div class="d-flex">
+                    <select class="form-select w-100" id='select2-warehouses'>
+                    </select>
+                    <button class="btn btn-danger ms-2" onclick="$('#select2-warehouses').val('').trigger('change')">
+                        Reset
+                    </button>
+                </div>
             </div>
         @endif
 
@@ -230,5 +244,39 @@
                 @this.call('onSelect2Unselected', 'categoryProductIds', e.params.data.id)
             });
         })
+
+        // SELECT2 : WAREHOUSE MULTIPLE
+        $('#select2-warehouses').select2({
+            placeholder: "Pilih Gudang",
+            theme: 'bootstrap5',
+            ajax: {
+                url: "{{ route($prefixRoute . 'find.warehouse') }}",
+                dataType: "json",
+                type: "GET",
+                data: function(params) {
+                    return {
+                        search: params.term,
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                "id": item.id,
+                                "text": item.text,
+                            }
+                        })
+                    };
+                },
+            }
+        });
+
+        $('#select2-warehouses').on('select2:select', function(e) {
+            @this.call('onSelect2Selected', 'warehouseIds', e.params.data.id)
+        });
+
+        $('#select2-warehouses').on('select2:unselect', function(e) {
+            @this.call('onSelect2Unselected', 'warehouseIds', e.params.data.id)
+        });
     </script>
 @endpush

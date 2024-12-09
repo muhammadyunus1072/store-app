@@ -25,7 +25,6 @@ class PurchaseOrder extends Model
     use HasFactory, SoftDeletes, HasTrackHistory, HasApproval, HasTransactionStock;
 
     protected $fillable = [
-        'purchase_order_id',
         'company_id',
         'supplier_id',
         'supplier_invoice_number',

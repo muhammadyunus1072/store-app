@@ -15,6 +15,7 @@ class Filter extends Component
     // Filter
     public $companyId;
     public $warehouseId;
+    public $warehouseIds = [];
     public $dateStart;
     public $dateEnd;
     public $entryDateStart;
@@ -27,6 +28,7 @@ class Filter extends Component
 
     // Setting Filter
     public $filterWarehouse;
+    public $filterWarehouseMultiple;
     public $filterCompany;
     public $filterProduct;
     public $filterProductMultiple;
@@ -46,6 +48,8 @@ class Filter extends Component
     public $isMultipleCompany = false;
 
     // Helpers
+    public $filterWarehouseLabel = "Gudang";
+    public $filterWarehouseMultipleLabel = "Gudang";
     public $companies = [];
     public $warehouses = [];
 
@@ -94,6 +98,7 @@ class Filter extends Component
         $this->dispatch($this->dispatchEvent, [
             'companyId' => $this->companyId,
             'warehouseId' => $this->warehouseId,
+            'warehouseIds' => $this->warehouseIds,
             'dateStart' => $this->dateStart,
             'dateEnd' => $this->dateEnd,
             'expiredDateStart' => $this->expiredDateStart,

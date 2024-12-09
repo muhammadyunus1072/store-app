@@ -72,6 +72,14 @@ class Datatable extends Component
             [
                 'sortable' => false,
                 'searchable' => false,
+                'name' => 'Tanggal Masuk',
+                'render' => function ($item) {
+                    return Carbon::parse($item->entry_date)->format("Y-m-d");
+                }
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
                 'name' => 'Harga',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->price);
