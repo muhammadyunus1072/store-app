@@ -30,6 +30,7 @@ Route::group([], __DIR__ . '/web/Logistic/Master.php');
 Route::group([], __DIR__ . '/web/Logistic/Transaction.php');
 Route::group([], __DIR__ . '/web/Logistic/ReportAll.php');
 Route::group([], __DIR__ . '/web/Logistic/ReportWarehouse.php');
+Route::group([], __DIR__ . '/web/Logistic/Import.php');
 
 Route::group([], __DIR__ . '/web/Finance/Master.php');
 

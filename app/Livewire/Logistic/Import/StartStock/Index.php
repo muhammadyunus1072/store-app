@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Livewire\Core\ImportData;
+namespace App\Livewire\Logistic\Import\StartStock;
 
 use Carbon\Carbon;
 use Livewire\Component;
 use App\Helpers\General\Alert;
-use App\Settings\SettingLogistic;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\Core\UserStateHandler;
+use App\Helpers\General\ImportDataHelper;
 use App\Traits\Livewire\WithImportExcel;
 use App\Helpers\Logistic\Stock\StockHandler;
 use App\Models\Logistic\Master\Product\Product;
-use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 
-class StartStock extends Component
+class Index extends Component
 {
     use WithImportExcel;
 
@@ -126,14 +125,14 @@ class StartStock extends Component
             $product_kode_simrs = $row[0];
             $product_name = $row[1];
             $product_quantity = $row[2];
-            $product_unit_name = isset(MasterData::TRANSLATE_UNIT[strtoupper($row[3])]) ? MasterData::TRANSLATE_UNIT[strtoupper($row[3])] : strtoupper($row[3]);
+            $product_unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[3])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[3])] : strtoupper($row[3]);
             $product_price = $row[4];
             $unit_detail = UnitDetailRepository::findBy(whereClause: [
                 ['name', strtoupper($product_unit_name)]
             ]);
 
             if (!$unit_detail) {
-                $title_unit = isset(MasterData::TITLE_UNIT[$product_unit_name]) ? MasterData::TITLE_UNIT[$product_unit_name] : $product_unit_name;
+                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$product_unit_name]) ? ImportDataHelper::TITLE_UNIT[$product_unit_name] : $product_unit_name;
                 $unit = UnitRepository::findBy(whereClause: [
                     ['title', $title_unit]
                 ]);
@@ -189,6 +188,6 @@ class StartStock extends Component
 
     public function render()
     {
-        return view('livewire.core.import-data.start-stock');
+        return view('livewire.logistic.import.start-stock.index');
     }
 }

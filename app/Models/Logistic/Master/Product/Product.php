@@ -49,8 +49,6 @@ class Product extends Model
     {
         $object[$prefix . "_name"] = $this->name;
         $object[$prefix . "_type"] = $this->type;
-        $object[$prefix . "_kode_simrs"] = $this->kode_simrs;
-        $object[$prefix . "_kode_sakti"] = $this->kode_sakti;
 
         return $object;
     }

@@ -13,6 +13,13 @@ class SupplierRepository extends MasterDataRepository
         return Supplier::class;
     }
 
+    public static function createOrUpdate($validatedData)
+    {
+        $obj = Supplier::where('kode_simrs', $validatedData['kode_simrs'])->first();
+
+        return empty($obj) ? Supplier::create($validatedData) : $obj->update($validatedData);
+    }
+
     public static function search($search)
     {
         $data = Supplier::select('id', 'name as text')

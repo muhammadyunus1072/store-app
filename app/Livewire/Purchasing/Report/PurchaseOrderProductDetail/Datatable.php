@@ -197,22 +197,31 @@ class Datatable extends Component
             [
                 'sortable' => false,
                 'searchable' => false,
-                'name' => 'Total',
+                'name' => 'Nilai Sebelum Pajak',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value);
                 },
-
-                // EXPORT ATTRIBUTE
-                'export' => function ($item, $index, $exportType) {
-                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->value) : $item->value;
+                'export_footer_total' => true,
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Nilai Pajak',
+                'render' => function ($item) {
+                    $tax = ($item->tax_value) ? $item->value * $item->tax_value / 100 : 0;
+                    return NumberFormatter::format($tax);
                 },
-                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
-                'export_footer_data' => function ($item) {
-                    return $item->value;
+                'export_footer_total' => true,
+            ],
+            [
+                'sortable' => false,
+                'searchable' => false,
+                'name' => 'Total',
+                'render' => function ($item) {
+                    $tax = ($item->tax_value) ? $item->value * $item->tax_value / 100 : 0;
+                    return NumberFormatter::format($item->value + $tax);
                 },
-                'export_footer_format' => function ($footerValue, $exportType) {
-                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
-                },
+                'export_footer_total' => true,
             ]
         );
 

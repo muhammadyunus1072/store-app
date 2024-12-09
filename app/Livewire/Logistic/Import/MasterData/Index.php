@@ -1,158 +1,25 @@
 <?php
 
-namespace App\Livewire\Core\ImportData;
+namespace App\Livewire\Logistic\Import\MasterData;
 
+use Exception;
 use Livewire\Component;
+use App\Helpers\General\Alert;
+use App\Helpers\General\ImportDataHelper;
+use Illuminate\Support\Facades\DB;
 use App\Traits\Livewire\WithImportExcel;
 use App\Models\Logistic\Master\Product\Product;
-use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
+use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository;
+use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
 
-class MasterData extends Component
+class Index extends Component
 {
     use WithImportExcel;
 
-    const TRANSLATE_UNIT = [
-        'BUAH',
-        'KOTAK',
-        'LEMBAR',
-        'ROLL',
-        'BOTOL',
-        'PAK' => 'PACK',
-        'BUNGKUS',
-        'RIM',
-        'TUBE',
-        'SET',
-        'BOX',
-        'UNIT',
-        'KALENG',
-        'KG',
-        'PASANG',
-        'SACHET',
-        'JERIGEN',
-        'LITER',
-        'BUKU',
-        'BATANG',
-        'KEPING',
-        'METER',
-        'LUSIN',
-        'PCS',
-        'DUS',
-        'TABUNG',
-        'PACK',
-        'PAKET',
-        'METER PERSE' => 'METER PERSEGI',
-        'BALL',
-        'DOOS',
-        'KARUNG',
-        'SAK',
-        'DRUM',
-        'LS',
-        'PAIL',
-        'GALON',
-        'STEL',
-        'POTONG',
-        'EXEMPLAR',
-        'BAG',
-        'LUNI',
-        'IKAT',
-        'HURUF',
-        'KUBIK',
-        'ZAK',
-        'METER CUBIC',
-        'HIACE',
-        'YARD',
-        'CAN',
-        'EMBER',
-        'DUZ',
-        'GULUNG',
-        'KANTONG',
-        'BKS' => 'BUNGKUS',
-        'BTR' => 'BUTIR',
-        'BH' => 'BUAH',
-        'SISIR',
-        'KTK' => 'KOTAK',
-        'IKT' => 'IKAT',
-        'BIJI',
-        'KLG' => 'KALENG',
-        'BTL' => 'BOTOL',
-        'PCH',
-        'GLN' => 'GALON',
-        'CUP',
-        'SCT' => 'SACHET',
-        'SCH' => 'SACHET',
-        'LBR' => 'LEMBAR',
-        'GLG',
-        'PC',
-        'BKH',
-        'PSG' => 'PASANG',
-    ];
-
-    const TITLE_UNIT = [
-        'BUAH',
-        'KOTAK',
-        'LEMBAR',
-        'ROLL',
-        'BOTOL',
-        'PACK',
-        'BUNGKUS',
-        'RIM',
-        'TUBE',
-        'SET',
-        'BOX',
-        'UNIT',
-        'KALENG',
-        'KG' => 'BERAT',
-        'PASANG',
-        'SACHET',
-        'JERIGEN',
-        'LITER',
-        'BUKU',
-        'BATANG',
-        'KEPING',
-        'METER' => 'PANJANG',
-        'LUSIN',
-        'PCS',
-        'DUS',
-        'TABUNG',
-        'PAKET',
-        'METER PERSEGI',
-        'BALL',
-        'DOOS',
-        'KARUNG',
-        'SAK',
-        'DRUM',
-        'LS',
-        'PAIL',
-        'GALON',
-        'STEL',
-        'POTONG',
-        'EXEMPLAR',
-        'BAG',
-        'LUNI',
-        'IKAT',
-        'HURUF',
-        'KUBIK',
-        'ZAK',
-        'METER CUBIC',
-        'HIACE',
-        'YARD',
-        'CAN',
-        'EMBER',
-        'DUZ',
-        'GULUNG',
-        'KANTONG',
-        'BUTIR',
-        'SISIR',
-        'BIJI',
-        'PCH',
-        'CUP',
-        'GLG',
-        'PC',
-        'BKH',
-    ];
+    public $isSyncProgress = false;
 
     public function mount()
     {
@@ -182,12 +49,16 @@ class MasterData extends Component
                 "format" => "formatImportMasterDataProductGiziKatering"
             ],
         ];
+
+        $this->isSyncProgress = SyncSupplierRepository::findBy(whereClause: [
+            ['is_done', false]
+        ]);
     }
 
     public function formatImportMasterDataProductRumahTangga()
     {
         return function ($row) {
-            $unit_name = isset(self::TRANSLATE_UNIT[strtoupper($row[2])]) ? self::TRANSLATE_UNIT[strtoupper($row[2])] : strtoupper($row[2]);
+            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])] : strtoupper($row[2]);
             $product_name = $row[1];
             $product_type = Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[0];
@@ -197,7 +68,7 @@ class MasterData extends Component
             ]);
 
             if (!$unit_detail) {
-                $title_unit = isset(self::TITLE_UNIT[$unit_name]) ? self::TITLE_UNIT[$unit_name] : $unit_name;
+                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$unit_name]) ? ImportDataHelper::TITLE_UNIT[$unit_name] : $unit_name;
                 $unit = UnitRepository::findBy(whereClause: [
                     ['title', $title_unit]
                 ]);
@@ -247,7 +118,7 @@ class MasterData extends Component
     public function formatImportMasterDataProductGiziKatering()
     {
         return function ($row) {
-            $unit_name = isset(self::TRANSLATE_UNIT[strtoupper($row[4])]) ? self::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
+            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
             $product_name = $row[3];
             $product_type = $row[0] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[1];
@@ -257,7 +128,7 @@ class MasterData extends Component
             ]);
 
             if (!$unit_detail) {
-                $title_unit = isset(self::TITLE_UNIT[$unit_name]) ? self::TITLE_UNIT[$unit_name] : $unit_name;
+                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$unit_name]) ? ImportDataHelper::TITLE_UNIT[$unit_name] : $unit_name;
                 $unit = UnitRepository::findBy(whereClause: [
                     ['title', $title_unit]
                 ]);
@@ -299,7 +170,7 @@ class MasterData extends Component
     public function formatImportMasterDataProductGiziPasien()
     {
         return function ($row) {
-            $unit_name = isset(self::TRANSLATE_UNIT[strtoupper($row[4])]) ? self::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
+            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
             $product_name = $row[3];
             $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[0];
@@ -309,7 +180,7 @@ class MasterData extends Component
             ]);
 
             if (!$unit_detail) {
-                $title_unit = isset(self::TITLE_UNIT[$unit_name]) ? self::TITLE_UNIT[$unit_name] : $unit_name;
+                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$unit_name]) ? ImportDataHelper::TITLE_UNIT[$unit_name] : $unit_name;
                 $unit = UnitRepository::findBy(whereClause: [
                     ['title', $title_unit]
                 ]);
@@ -348,8 +219,34 @@ class MasterData extends Component
         };
     }
 
+    public function syncSupplier()
+    {
+        try {
+            DB::beginTransaction();
+            $obj = SyncSupplierRepository::create([
+                'total' => SuplierRepository::count(),
+            ]);
+            $this->isSyncProgress = $obj;
+            DB::commit();
+
+            Alert::confirmation(
+                $this,
+                Alert::ICON_SUCCESS,
+                "Berhasil",
+                "Data Berhasil Diperbarui",
+                "on-dialog-confirm",
+                "on-dialog-cancel",
+                "Oke",
+                "Tutup",
+            );
+        } catch (Exception $e) {
+            DB::rollBack();
+            Alert::fail($this, "Gagal", $e->getMessage());
+        }
+    }
+
     public function render()
     {
-        return view('livewire.core.import-data.master-data');
+        return view('livewire.logistic.import.master-data.index');
     }
 }

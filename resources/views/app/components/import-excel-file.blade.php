@@ -1,7 +1,8 @@
 <div class="row">
     @foreach ($import_excel as $index => $excel)
-        <div class="mb-4 {{ $excel['class'] }}" wire:key="import_excel_{{ $index }}">
+        <div class="mb-4 border rounded p-4 {{ $excel['class'] }}" wire:key="import_excel_{{ $index }}">
             <label for="import_excel_{{ $index }}" class="form-label">{{ $excel['name'] }}</label>
+            <hr>
             <input type="file" wire:model="import_excel.{{ $index }}.data" id="import_excel_{{ $index }}"
                 class="form-control">
 
@@ -17,7 +18,7 @@
                     Loading...
                 </div>
 
-                <div wire:loading.class="d-none">
+                <div class='d-flex align-items-center' wire:loading.class="d-none">
                     <i class='ki-duotone ki-check fs-1'></i>
                     Simpan
                 </div>

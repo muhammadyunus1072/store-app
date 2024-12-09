@@ -12,6 +12,9 @@ class AccessLogistic
     const STOCK_REQUEST = "stock_request";
     const STOCK_EXPENSE = "stock_expense";
 
+    const I_STOCK_EXPENSE = "i_stock_expense";
+    const I_MASTER_DATA = "i_master_data_logistic";
+
     const R_CURRENT_STOCK = "r_current_stock";
     const R_CURRENT_STOCK_DETAIL = "r_current_stock_detail";
     const R_HISTORY_STOCK = "r_history_stock";
@@ -36,6 +39,9 @@ class AccessLogistic
         self::WAREHOUSE,
         self::STOCK_REQUEST,
         self::STOCK_EXPENSE,
+
+        self::I_STOCK_EXPENSE,
+        self::I_MASTER_DATA,
 
         self::R_CURRENT_STOCK,
         self::R_CURRENT_STOCK_DETAIL,
@@ -63,13 +69,16 @@ class AccessLogistic
         self::STOCK_REQUEST => PermissionHelper::TYPE_ALL,
         self::STOCK_EXPENSE => PermissionHelper::TYPE_ALL,
 
+        self::I_MASTER_DATA => [PermissionHelper::TYPE_READ],
+        self::I_STOCK_EXPENSE => [PermissionHelper::TYPE_READ],
+
         self::R_CURRENT_STOCK => [PermissionHelper::TYPE_READ],
         self::R_CURRENT_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
         self::R_HISTORY_STOCK => [PermissionHelper::TYPE_READ],
         self::R_HISTORY_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
         self::R_STOCK_EXPENSE => [PermissionHelper::TYPE_READ],
         self::R_STOCK_EXPIRED => [PermissionHelper::TYPE_READ],
-        
+
         self::R_CURRENT_STOCK_WAREHOUSE => [PermissionHelper::TYPE_READ],
         self::R_CURRENT_STOCK_DETAIL_WAREHOUSE => [PermissionHelper::TYPE_READ],
         self::R_HISTORY_STOCK_WAREHOUSE => [PermissionHelper::TYPE_READ],
@@ -88,6 +97,9 @@ class AccessLogistic
         self::WAREHOUSE => "Gudang",
         self::STOCK_REQUEST => "Permintaan Barang",
         self::STOCK_EXPENSE => "Pengeluaran Barang",
+
+        self::I_MASTER_DATA => "Import Data - Master Data",
+        self::I_STOCK_EXPENSE => "Import Data - Pengeluaran Barang",
 
         self::R_CURRENT_STOCK => "Laporan - Stok Akhir",
         self::R_CURRENT_STOCK_DETAIL => "Laporan - Stok Akhir Detail",

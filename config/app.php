@@ -163,6 +163,7 @@ return [
         /*
          * Application Service Providers...
          */
+        Yajra\Oci8\Oci8ServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,

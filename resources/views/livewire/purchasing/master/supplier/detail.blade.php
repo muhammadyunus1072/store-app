@@ -10,6 +10,16 @@
                 </div>
             @enderror
         </div>
+        <div class="col-md-6 mb-4">
+            <label>Kode Simrs</label>
+            <input type="text" class="form-control @error('kode_simrs') is-invalid @enderror" wire:model.blur="kode_simrs" />
+
+            @error('kode_simrs')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
 
         <div class="col-md-12 mb-4">
             <div class="w-100" wire:ignore>

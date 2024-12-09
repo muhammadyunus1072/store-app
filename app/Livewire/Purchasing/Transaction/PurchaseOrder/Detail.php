@@ -37,6 +37,7 @@ class Detail extends Component
     #[Validate('required', message: 'Tanggal Penerimaan Harus Diisi', onUpdate: false)]
     public $transactionDate;
     public $supplierInvoiceNumber;
+    public $no_spk;
     public $note;
 
     public $companyId;
@@ -82,6 +83,7 @@ class Detail extends Component
             $this->number = $purchaseOrder->number;
             $this->transactionDate = Carbon::parse($purchaseOrder->transaction_date)->format("Y-m-d");
             $this->supplierInvoiceNumber = $purchaseOrder->supplier_invoice_number;
+            $this->no_spk = $purchaseOrder->no_spk;
             $this->note = $purchaseOrder->note;
 
             $this->supplierId = Crypt::encrypt($purchaseOrder->supplier_id);
@@ -216,6 +218,7 @@ class Detail extends Component
             'company_id' => Crypt::decrypt($this->companyId),
             'warehouse_id' => Crypt::decrypt($this->warehouseId),
             'transaction_date' => $this->transactionDate,
+            'no_spk' => $this->no_spk,
             'note' => $this->note,
             'supplier_invoice_number' => $this->supplierInvoiceNumber,
         ];

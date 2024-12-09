@@ -21,22 +21,5 @@ class UserWarehouseSeeder extends Seeder
             'user_id' => 1,
             'warehouse_id' => 2,
         ]);
-        UserWarehouseRepository::create([
-            'user_id' => 1,
-            'warehouse_id' => 3,
-        ]);
-
-        UserWarehouseRepository::create([
-            'user_id' => 2,
-            'warehouse_id' => 1,
-        ]);
-        UserWarehouseRepository::create([
-            'user_id' => 2,
-            'warehouse_id' => 2,
-        ]);
-        UserWarehouseRepository::create([
-            'user_id' => 2,
-            'warehouse_id' => 3,
-        ]);
     }
 }

@@ -39,6 +39,10 @@ class DatatableHeader extends Component
         $total_purchase_order = collect($data)->unique('purchase_order_id')->count();
         $total_qty = $data->sum('converted_quantity');
         $total_value = $data->sum('value');
+        $total_tax = collect($data)->map(function ($item) {
+            $tax = $item->tax_value ? $item->value * $item->tax_value / 100 : 0;
+            return $tax;
+        })->sum();
         return [
             [
                 "col" => 3,
@@ -52,8 +56,18 @@ class DatatableHeader extends Component
             ],
             [
                 "col" => 3,
-                "name" => "Total Nilai",
+                "name" => "Total Sebelum Pajak",
                 "value" => $total_value
+            ],
+            [
+                "col" => 3,
+                "name" => "Total Pajak",
+                "value" => $total_tax
+            ],
+            [
+                "col" => 3,
+                "name" => "Total Keseluruhan",
+                "value" => $total_value + $total_tax
             ],
         ];
     }
