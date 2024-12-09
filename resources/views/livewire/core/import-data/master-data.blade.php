@@ -2,9 +2,16 @@
     <div class="row mb-3">
         <div class="col-auto">
             <button type="button" wire:click="syncSupplier" class="btn btn-primary mt-3"
-            {{$isSyncProgress ? 'disabled' : null}}>
+            {{$isSyncSupplier ? 'disabled' : null}}>
                 <i class="fa fa-sync"></i>
                 Sync Supplier
+            </button>
+        </div>
+        <div class="col-auto">
+            <button type="button" wire:click="syncWarehouse" class="btn btn-primary mt-3"
+            {{$isSyncWarehouse ? 'disabled' : null}}>
+                <i class="fa fa-sync"></i>
+                Sync Warehouse
             </button>
         </div>
     </div>

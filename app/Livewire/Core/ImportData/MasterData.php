@@ -12,18 +12,24 @@ use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
+use App\Repositories\Rsmh\GudangLog\SubBagian\SubBagianRepository;
 use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository ;
 use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
+use App\Repositories\Rsmh\Sync\SyncWarehouse\SyncWarehouseRepository;
 
 class MasterData extends Component
 {
     use WithImportExcel;
 
-    public $isSyncProgress = false;
+    public $isSyncSupplier = false;
+    public $isSyncWarehouse = false;
 
     public function mount()
     {
-        $this->isSyncProgress = SyncSupplierRepository::findBy(whereClause:[
+        $this->isSyncSupplier = SyncSupplierRepository::findBy(whereClause:[
+            ['is_done', false]
+        ]);
+        $this->isSyncWarehouse = SyncWarehouseRepository::findBy(whereClause:[
             ['is_done', false]
         ]);
         $this->import_excel = [
@@ -209,6 +215,37 @@ class MasterData extends Component
         };
     }
 
+    public function syncWarehouse()
+    {
+        try {
+            DB::beginTransaction();
+            
+            $countSubBagian = SubBagianRepository::count();
+
+            $validatedData = [
+                'total' => $countSubBagian,
+            ];
+
+            $obj = SyncWarehouseRepository::create($validatedData);
+            $this->isSyncWarehouse = $obj;
+            DB::commit();
+
+            Alert::confirmation(
+                $this,
+                Alert::ICON_SUCCESS,
+                "Berhasil",
+                "Data Berhasil Diperbarui",
+                "on-dialog-confirm",
+                "on-dialog-cancel",
+                "Oke",
+                "Tutup",
+            );
+        } catch (Exception $e) {
+            DB::rollBack();
+            Alert::fail($this, "Gagal", $e->getMessage());
+        }
+    }
+
     public function syncSupplier()
     {
         try {
@@ -221,7 +258,7 @@ class MasterData extends Component
             ];
 
             $obj = SyncSupplierRepository::create($validatedData);
-            $this->isSyncProgress = $obj;
+            $this->isSyncSupplier = $obj;
             DB::commit();
 
             Alert::confirmation(

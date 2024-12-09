@@ -115,6 +115,18 @@ class Datatable extends Component
                 'key' => 'name',
                 'name' => 'Nama Gudang',
             ],
+            [
+                'key' => 'id_sub',
+                'name' => 'ID Sub',
+            ],
+            [
+                'key' => 'id_bagian',
+                'name' => 'ID Bagian',
+            ],
+            [
+                'key' => 'id_direktorat',
+                'name' => 'ID DIrektorat',
+            ],
         ];
     }
 
