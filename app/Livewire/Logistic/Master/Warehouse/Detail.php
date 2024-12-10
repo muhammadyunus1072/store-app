@@ -21,6 +21,10 @@ class Detail extends Component
     #[Validate('required', message: 'Nama Kategori Harus Diisi', onUpdate: false)]
     public $name;
 
+    public $id_sub;
+    public $id_bagian;
+    public $id_direktorat;
+
     public function mount()
     {
         if ($this->objId) {
@@ -28,6 +32,9 @@ class Detail extends Component
             $warehouse = WarehouseRepository::find($id);
 
             $this->name = $warehouse->name;
+            $this->id_sub = $warehouse->id_sub;
+            $this->id_bagian = $warehouse->id_bagian;
+            $this->id_direktorat = $warehouse->id_direktorat;
         }
     }
 
@@ -53,6 +60,9 @@ class Detail extends Component
 
         $validatedData = [
             'name' => $this->name,
+            'id_sub' => $this->id_sub,
+            'id_bagian' => $this->id_bagian,
+            'id_direktorat' => $this->id_direktorat,
         ];
 
         try {

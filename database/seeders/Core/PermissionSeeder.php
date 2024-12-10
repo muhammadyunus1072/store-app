@@ -19,9 +19,13 @@ class PermissionSeeder extends Seeder
         // create permissions
         foreach (PermissionHelper::ACCESS_TYPE_ALL as $access => $types) {
             foreach ($types as $type) {
-                $permission = Permission::where('name', PermissionHelper::transform($access, $type))->first();
+                $permissionText = PermissionHelper::transform($access, $type);
+                $permission = Permission::where('name', $permissionText)->first();
                 if (empty($permission)) {
-                    Permission::create(['name' => PermissionHelper::transform($access, $type)]);
+                    Permission::create(['name' => $permissionText]);
+                    $this->command->outputComponents()->info("PERMISSION: $permissionText (NEW)");
+                } else {
+                    $this->command->outputComponents()->info("PERMISSION: $permissionText");
                 }
             }
         }

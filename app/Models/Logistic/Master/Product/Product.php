@@ -86,9 +86,4 @@ class Product extends Model
     {
         return $this->hasMany(ProductCategory::class, 'product_id', 'id');
     }
-
-    public function unitDetailChoices()
-    {
-        return $this->hasMany(UnitDetail::class, 'unit_id', 'unit_id');
-    }
 }

@@ -43,6 +43,17 @@ class WarehouseRepository extends MasterDataRepository
         return json_encode($data);
     }
 
+    public static function createOrUpdate($validatedData)
+    {
+        $obj = Warehouse::where('name', $validatedData['name'])
+            ->where('id_sub', $validatedData['id_sub'])
+            ->where('id_bagian', $validatedData['id_bagian'])
+            ->where('id_direktorat', $validatedData['id_direktorat'])
+            ->first();
+
+        return empty($obj) ? Warehouse::create($validatedData) : $obj->update($validatedData);
+    }
+
     public static function datatable()
     {
         return Warehouse::query();

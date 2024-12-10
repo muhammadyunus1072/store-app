@@ -5,12 +5,12 @@ namespace App\Models\Rsmh\GudangLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Suplier extends Model
+class Bagian extends Model
 {
     use HasFactory;
 
     protected $connection = 'oracle';
-    protected $table = 'GUDANGLOG.SUPLIER';
+    protected $table = 'GUDANGLOG.BAGIAN';
 
     protected $guarded = ['id'];
 

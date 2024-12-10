@@ -15,7 +15,7 @@ class UnitRepository extends MasterDataRepository
 
     public static function createByUnitDetailName($unitDetailName)
     {
-        $unitDetailName = empty($unitDetailName) ? "SATUAN" : "";
+        $unitDetailName = empty($unitDetailName) ? "SATUAN" : $unitDetailName;
         $unitDetail = UnitDetailRepository::findBy(whereClause: [['name', $unitDetailName]]);
 
         if (empty($unitDetail)) {

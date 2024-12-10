@@ -11,14 +11,17 @@ use App\Traits\Livewire\WithImportExcel;
 use App\Models\Logistic\Master\Product\Product;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
+use App\Repositories\Rsmh\GudangLog\SubBagian\SubBagianRepository;
 use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository;
 use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
+use App\Repositories\Rsmh\Sync\SyncWarehouse\SyncWarehouseRepository;
 
 class Index extends Component
 {
     use WithImportExcel;
 
     public $syncSupplier = false;
+    public $syncWarehouse = false;
 
     public function render()
     {
@@ -129,10 +132,34 @@ class Index extends Component
     {
         try {
             DB::beginTransaction();
-            $obj = SyncSupplierRepository::create([
+            $this->syncSupplier = SyncSupplierRepository::create([
                 'total' => SuplierRepository::count(),
             ]);
-            $this->syncSupplier = $obj;
+            DB::commit();
+
+            Alert::confirmation(
+                $this,
+                Alert::ICON_SUCCESS,
+                "Berhasil",
+                "Proses Sinkronisasi Berhasil Dijalankan, Silahkan Tunggu Hingga Selesai",
+                "on-dialog-confirm",
+                "on-dialog-cancel",
+                "Oke",
+                "Tutup",
+            );
+        } catch (Exception $e) {
+            DB::rollBack();
+            Alert::fail($this, "Gagal", $e->getMessage());
+        }
+    }
+
+    public function syncWarehouse()
+    {
+        try {
+            DB::beginTransaction();
+            $this->syncWarehouse = SyncWarehouseRepository::create([
+                'total' => SubBagianRepository::count(),
+            ]);
             DB::commit();
 
             Alert::confirmation(

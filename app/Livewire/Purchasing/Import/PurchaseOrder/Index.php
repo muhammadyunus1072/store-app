@@ -5,18 +5,15 @@ namespace App\Livewire\Purchasing\Import\PurchaseOrder;
 use Carbon\Carbon;
 use Livewire\Component;
 use App\Helpers\General\Alert;
+use App\Helpers\Core\UserStateHandler;
+use App\Traits\Livewire\WithImportExcel;
+use App\Settings\SettingPurchasing;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
-use App\Settings\SettingPurchasing;
 use Illuminate\Support\Facades\Crypt;
-use App\Helpers\Core\UserStateHandler;
-use App\Helpers\General\ImportDataHelper;
-use App\Traits\Livewire\WithImportExcel;
-use App\Models\Logistic\Master\Product\Product;
+use Illuminate\Support\Facades\Log;
 use App\Repositories\Finance\Master\Tax\TaxRepository;
-use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
-use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Rsmh\GudangLog\PembelianRt\PembelianRtRepository;
 use App\Repositories\Rsmh\Sync\SyncPembelianRt\SyncPembelianRtRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
@@ -27,16 +24,16 @@ class Index extends Component
 {
     use WithImportExcel;
 
-    #[Validate('required', message: 'Gudang Harus Diisi', onUpdate: false)]
-    public $pembelianRTWarehouseId;
-
+    // Gizi
     #[Validate('required', message: 'Gudang Harus Diisi', onUpdate: false)]
     public $warehouseId;
     #[Validate('required', message: 'Tanggal Harus Diisi', onUpdate: false)]
-    public $transactionDate;
-
+    public $periode;
     public $supplierId;
-    public $supplierText;
+
+    // Rumah Tangga
+    #[Validate('required', message: 'Gudang Harus Diisi', onUpdate: false)]
+    public $pembelianRTWarehouseId;
 
     // Sync
     public $syncPembelianRT = false;
@@ -46,24 +43,27 @@ class Index extends Component
     public $companies = [];
     public $warehouses = [];
 
+    public function render()
+    {
+        return view('livewire.purchasing.import.purchase-order.index');
+    }
+
     public function mount()
     {
-        $this->syncPembelianRT = SyncPembelianRTRepository::findBy(whereClause: [
-            ['is_done', false]
-        ]);
-
         $this->import_excel = [
             [
                 "data" => null,
                 "skip_rows" => 8,
                 "class" => 'col-4',
-                "name" => "Import Data Pembelian",
-                "format" => "formatImportDataPembelian",
+                "name" => "Import Data Pembelian Gizi",
+                "format" => "importPembelianGIzi",
                 'storeHandler' => 'store'
             ],
         ];
 
-        $this->transactionDate = Carbon::now()->format("Y-m");
+        $this->syncPembelianRT = SyncPembelianRTRepository::findBy(whereClause: [['is_done', false]]);
+        $this->periode = Carbon::now()->format("Y-m");
+
         $this->loadUserState();
     }
 
@@ -98,102 +98,66 @@ class Index extends Component
         }
     }
 
-    public function formatImportDataPembelian()
+    public function importPembelianGizi()
     {
-        return function ($row) {
-            $companyId = 1;
-            $note = 'Import Data';
+        $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
+        $taxPpnId = $taxPpn->id;
 
-            $product_kode_simrs = $row[2];
-            $product_type = $row[3] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
-            $product_habis_pakai = $row[3]; // YA, TIDAK
-            $product_name = $row[4];
-            $product_unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[5])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[5])] : strtoupper($row[5]);;
-            $product_price = $row[7];
-            $product_price_ppn = $row[8];
+        $companyId = 1;
+        $supplierId = Crypt::decrypt($this->supplierId);
+        $warehouseId = Crypt::decrypt($this->warehouseId);
+        $periode = $this->periode;
+        $note = 'Import Data Gizi';
 
-            if (!$product_kode_simrs) {
+        // Create Purchase Order
+        $purchaseOrder = PurchaseOrderRepository::findBy(whereClause: [['transaction_date', $transactionDate], ['note', $note]]);
+        if (empty($purchaseOrder)) {
+            $purchaseOrder = PurchaseOrderRepository::create([
+                'company_id' => $companyId,
+                'supplier_id' => $supplierId,
+                'warehouse_id' => $warehouseId,
+                'transaction_date' => $transactionDate,
+                'note' => $note,
+            ]);
+        }
+
+        return function ($row) use ($taxPpnId, $companyId, $supplierId, $warehouseId, $periode, $note) {
+            if (!$row[2]) {
                 return null;
             }
 
-            $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
-            $taxPpnId = $taxPpn->id;
+            $product_kode_simrs = $row[2];
+            $product_price = $row[7];
+            $product_price_ppn = $row[8];
 
-            $product = ProductRepository::findBy(whereClause: [
-                ['kode_simrs', $product_kode_simrs]
-            ]);
-
-            $unit_detail = UnitDetailRepository::findBy(whereClause: [
-                ['name', strtoupper($product_unit_name)]
-            ]);
-
-            if (!$product) {
-                if (!$unit_detail) {
-                    $title_unit = isset(ImportDataHelper::TITLE_UNIT[$product_unit_name]) ? ImportDataHelper::TITLE_UNIT[$product_unit_name] : $product_unit_name;
-                    $unit = UnitRepository::findBy(whereClause: [
-                        ['title', $title_unit]
-                    ]);
-
-                    if (!$unit) {
-                        $unit = UnitRepository::create([
-                            'title' => $title_unit,
-                        ]);
-                    }
-
-                    $unit_detail = UnitDetailRepository::create([
-                        'unit_id' => $unit->id,
-                        'is_main' => true,
-                        'name' => $product_unit_name,
-                        'value' => 1,
-                    ]);
-                } else {
-                    $unit = UnitRepository::findBy(whereClause: [
-                        ['id', $unit_detail->unit_id]
-                    ]);
-                }
-
-
-                $product = ProductRepository::create([
-                    'unit_id' => $unit->id,
-                    'name' => $product_name,
-                    'type' => $product_type,
-                    'kode_simrs' => $product_kode_simrs,
-                    'kode_sakti' => null,
-                ]);
+            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+            if (empty($product)) {
+                Log::debug("GIZI - PEMBELIAN - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+                return null;
             }
 
             for ($i = 1; $i <= 31; $i++) {
+                $transactionDate = "$periode-" . str_pad($i, 2, '0', STR_PAD_LEFT);
+
+
+
+                // Create Purchase Order Product
                 $qty = $row[8 + (($i - 1) * 14) + 13];
                 if ($qty) {
-                    $validatedData = [
-                        'supplier_id' => Crypt::decrypt($this->supplierId),
-                        'company_id' => $companyId,
-                        'warehouse_id' => Crypt::decrypt($this->warehouseId),
-                        'transaction_date' => $this->transactionDate . "-" . str_pad($i, 2, '0', STR_PAD_LEFT),
-                        'note' => $note,
-                        'supplier_invoice_number' => null,
-                    ];
-                    $purchaseOrder = PurchaseOrderRepository::create($validatedData);
-                    $objId = $purchaseOrder->id;
-
-                    $validatedData = [
-                        'purchase_order_id' => $objId,
+                    $purchaseOrderProduct = PurchaseOrderProductRepository::create([
+                        'purchase_order_id' => $purchaseOrder->id,
                         'product_id' => $product->id,
-                        'unit_detail_id' => $unit_detail->id,
+                        'unit_detail_id' => $product->unit->unitDetailMain->id,
                         'quantity' => $qty,
                         'price' => $product_price ? $product_price : $product_price_ppn,
                         'code' => null,
                         'batch' => null,
                         'expired_date' => null
-                    ];
+                    ]);
 
-                    $object = PurchaseOrderProductRepository::create($validatedData);
-                    $purchaseOrderProductId = $object->id;
-
-                    if ($product_price_ppn != $product_price && $product_price) {
-
+                    if ($product_price_ppn != $product_price) {
                         PurchaseOrderProductTaxRepository::create([
-                            'purchase_order_product_id' => $purchaseOrderProductId,
+                            'purchase_order_product_id' => $purchaseOrderProduct->id,
                             'tax_id' => $taxPpnId,
                         ]);
                     }
@@ -229,10 +193,5 @@ class Index extends Component
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
-    }
-
-    public function render()
-    {
-        return view('livewire.purchasing.import.purchase-order.index');
     }
 }

@@ -13,6 +13,7 @@ class AccessLogistic
     const STOCK_EXPENSE = "stock_expense";
 
     const I_STOCK_EXPENSE = "i_stock_expense";
+    const I_STOCK_REQUEST = "i_stock_request";
     const I_MASTER_DATA = "i_master_data_logistic";
 
     const R_CURRENT_STOCK = "r_current_stock";
@@ -41,6 +42,7 @@ class AccessLogistic
         self::STOCK_EXPENSE,
 
         self::I_STOCK_EXPENSE,
+        self::I_STOCK_REQUEST,
         self::I_MASTER_DATA,
 
         self::R_CURRENT_STOCK,
@@ -71,6 +73,7 @@ class AccessLogistic
 
         self::I_MASTER_DATA => [PermissionHelper::TYPE_READ],
         self::I_STOCK_EXPENSE => [PermissionHelper::TYPE_READ],
+        self::I_STOCK_REQUEST => [PermissionHelper::TYPE_READ, PermissionHelper::TYPE_DELETE],
 
         self::R_CURRENT_STOCK => [PermissionHelper::TYPE_READ],
         self::R_CURRENT_STOCK_DETAIL => [PermissionHelper::TYPE_READ],
@@ -100,6 +103,7 @@ class AccessLogistic
 
         self::I_MASTER_DATA => "Import Data - Master Data",
         self::I_STOCK_EXPENSE => "Import Data - Pengeluaran Barang",
+        self::I_STOCK_REQUEST => "Import Data - Permintaan Barang",
 
         self::R_CURRENT_STOCK => "Laporan - Stok Akhir",
         self::R_CURRENT_STOCK_DETAIL => "Laporan - Stok Akhir Detail",

@@ -1,4 +1,49 @@
 <div>
+    {{-- GIZI --}}
+    <h4>Import Data Pembelian Gizi</h4>
+    <hr>
+    <div class="row">
+        {{-- SELECT WAREHOUSE --}}
+        <div class="col-md-4 mb-3">
+            <label>Gudang</label>
+            <select class="form-select w-100" wire:model.live='warehouseId'>
+                @php $isFound = false; @endphp
+
+                @foreach ($warehouses as $warehouse)
+                    @php $isFound = $isFound || $warehouse['id'] == $warehouseId; @endphp
+                    <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
+                @endforeach
+
+                @if (!$isFound && !empty($warehouseId))
+                    <option value="{{ $warehouseId }}" selected>{{ $warehouseText }}</option>
+                @endif
+            </select>
+        </div>
+
+        {{-- SELECT SUPPLIER --}}
+        <div class="col-md-4 mb-3" wire:ignore>
+            <label>Supplier</label>
+            <select id="select2-supplier" class="form-select w-100">
+            </select>
+        </div>
+
+        {{-- TRANSACTION DATE --}}
+        <div class="col-md-4 mb-3">
+            <label>Tahun Bulan</label>
+            <input type="month" class="form-control @error('transactionDate') is-invalid @enderror"
+                wire:model.live="periode" />
+
+            @error('periode')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+    </div>
+    @include('livewire.components.import-excel-file', ['import_excel' => $import_excel])
+
+
+    {{-- RUMAH TANGGA --}}
     <h4>Sync Data Pembelian Rumah Tangga</h4>
     <hr>
     <div class="row mb-3 align-items-end">
@@ -32,51 +77,6 @@
             </button>
         </div>
     </div>
-
-    <h4>Import Data Pembelian</h4>
-    <hr>
-    <div class="row">
-        {{-- SELECT WAREHOUSE --}}
-        <div class="col-md-4 mb-3">
-            <label>Gudang</label>
-            <select class="form-select w-100" wire:model.live='warehouseId'>
-                @php $isFound = false; @endphp
-
-                @foreach ($warehouses as $warehouse)
-                    @php $isFound = $isFound || $warehouse['id'] == $warehouseId; @endphp
-                    <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
-                @endforeach
-
-                @if (!$isFound && !empty($warehouseId))
-                    <option value="{{ $warehouseId }}" selected>{{ $warehouseText }}</option>
-                @endif
-            </select>
-        </div>
-
-        {{-- SELECT SUPPLIER --}}
-        <div class="col-md-4 mb-3" wire:ignore>
-            <label>Supplier</label>
-            <select id="select2-supplier" class="form-select w-100">
-                @if ($supplierId)
-                    <option value="{{ $supplierId }}">{{ $supplierText }}</option>
-                @endif
-            </select>
-        </div>
-
-        {{-- TRANSACTION DATE --}}
-        <div class="col-md-4 mb-3">
-            <label>Tanggal</label>
-            <input type="month" class="form-control @error('transactionDate') is-invalid @enderror"
-                wire:model.live="transactionDate" />
-
-            @error('transactionDate')
-                <div class="invalid-feedback">
-                    {{ $message }}
-                </div>
-            @enderror
-        </div>
-    </div>
-    @include('livewire.components.import-excel-file', ['import_excel' => $import_excel])
 </div>
 
 @push('css')

@@ -52,6 +52,11 @@ return [
             'icon' => 'ki-duotone ki-arrow-right',
         ],
         [
+            'text' => 'Import Data - Permintaan',
+            'route' => 'i_stock_request.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
             'text' => 'Import Data - Pengeluaran',
             'route' => 'i_stock_expense.index',
             'icon' => 'ki-duotone ki-arrow-right',

@@ -14,6 +14,9 @@ class Warehouse extends Model
 
     protected $fillable = [
         'name',
+        'id_sub',
+        'id_bagian',
+        'id_direktorat',
     ];
 
     protected $guarded = ['id'];
@@ -21,6 +24,9 @@ class Warehouse extends Model
     public function saveInfo($object, $prefix = "warehouse")
     {
         $object[$prefix . "_name"] = $this->name;
+        // $object[$prefix . "_id_sub"] = $this->id_sub;
+        // $object[$prefix . "_id_bagian"] = $this->id_bagian;
+        // $object[$prefix . "_id_direktorat"] = $this->id_direktorat;
 
         return $object;
     }

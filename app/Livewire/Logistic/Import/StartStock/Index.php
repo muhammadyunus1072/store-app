@@ -101,7 +101,7 @@ class Index extends Component
 
             $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
             if (empty($product)) {
-                Log::debug("GIZI - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+                Log::debug("GIZI - STOK AWAL - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
                 return null;
             }
 
@@ -133,7 +133,7 @@ class Index extends Component
 
             $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
             if (empty($product)) {
-                Log::debug("RT - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+                Log::debug("RT - STOK AWAL - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
                 return null;
             }
 
