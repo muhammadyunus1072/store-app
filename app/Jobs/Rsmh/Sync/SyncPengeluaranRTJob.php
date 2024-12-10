@@ -88,7 +88,7 @@ class SyncPengeluaranRTJob implements ShouldQueue
     
                     $object = StockRequestProductRepository::create($validatedData);
                 }else{
-                    Log::info("No Product : ".$value['id_barang']);
+                    Log::info("No Product ".$value['product_name']." kode ".$value['id_barang']);
                 }
                 SyncPengeluaranRt::onJobSuccess($this->syncPengeluaranRTId);
             }

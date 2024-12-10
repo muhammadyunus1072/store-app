@@ -19,6 +19,7 @@ class PengeluaranRTRepository extends MasterDataRepository
             'TANGGAL as transaction_date',
             'NO_BON as note',
             'ID_BARANG',
+            'NM_BARANG as product_name',
             'JML as quantity',
         )
         ->limit($limit)

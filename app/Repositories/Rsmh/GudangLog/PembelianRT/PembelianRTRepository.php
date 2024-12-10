@@ -19,6 +19,7 @@ class PembelianRTRepository extends MasterDataRepository
             'NO_SPK as no_spk',
             'TGL_TERIMA_FAKTUR as transaction_date',
             'ID_BARANG as id_barang',
+            'NM_BARANG as product_name',
             'Satuan as unit_name',
             'JML_BARANG_MSK as quantity',
             'HRGSAT_STLHPPN as price',

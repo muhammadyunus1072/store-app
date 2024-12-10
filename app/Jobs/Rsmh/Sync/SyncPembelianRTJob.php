@@ -52,6 +52,7 @@ class SyncPembelianRTJob implements ShouldQueue
                 if(!$supplier)
                 {
                     Log::info("No Supplier ".$value['kode_simrs']);
+                    syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
                     continue;
                 }
                 
@@ -79,12 +80,14 @@ class SyncPembelianRTJob implements ShouldQueue
                 ]);
                 if(!$product)
                 {
-                    Log::info("No Product ".$value['id_barang']);
+                    Log::info("No Product ".$value['product_name']." kode ".$value['id_barang']);
+                    syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
                     continue;
                 } 
                 if(!$unit_detail)
                 {                        
                     Log::info("No UNIT ".$value['unit_name']);
+                    syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
                     continue;
                 }
 

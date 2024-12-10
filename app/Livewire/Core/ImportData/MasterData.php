@@ -6,14 +6,15 @@ use Exception;
 use Livewire\Component;
 use App\Helpers\General\Alert;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Traits\Livewire\WithImportExcel;
 use App\Models\Logistic\Master\Product\Product;
 use App\Models\Logistic\Master\Unit\UnitDetail;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
-use App\Repositories\Rsmh\GudangLog\SubBagian\SubBagianRepository;
 use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository ;
+use App\Repositories\Rsmh\GudangLog\SubBagian\SubBagianRepository;
 use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
 use App\Repositories\Rsmh\Sync\SyncWarehouse\SyncWarehouseRepository;
 
@@ -51,7 +52,7 @@ class MasterData extends Component
             ],
             [
                 "data" => null,
-                "skip_rows" => 1,
+                "skip_rows" => 0,
                 "class" => 'col-4',
                 "className" => Product::class,
                 "name" => "Import Master Data Produk (Gizi - Katering)",
@@ -68,6 +69,10 @@ class MasterData extends Component
             $product_type = Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[0];
             $product_kode_sakti = $row[3];
+            if(!$product_kode_simrs)
+            {
+                return null;
+            }
             $unit_detail = UnitDetailRepository::findBy(whereClause: [
                 ['name', $unit_name]
             ]);
@@ -96,7 +101,7 @@ class MasterData extends Component
                 ]);
             }
             $product = ProductRepository::findBy(whereClause: [
-                ['name', $product_name]
+                ['kode_simrs', $product_kode_simrs]
             ]);
 
             if (!$product) {
@@ -119,6 +124,12 @@ class MasterData extends Component
             $product_type = $row[0] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[1];
             $product_kode_sakti = $row[2];
+
+            if(!$product_kode_simrs)
+            {
+                return null;
+            }
+            
             $unit_detail = UnitDetailRepository::findBy(whereClause: [
                 ['name', $unit_name]
             ]);
@@ -148,10 +159,11 @@ class MasterData extends Component
             }
 
             $product = ProductRepository::findBy(whereClause: [
-                ['name', $product_name]
+                ['kode_simrs', $product_kode_simrs]
             ]);
 
             if (!$product) {
+                Log::info("NEW $product_kode_simrs");
                 ProductRepository::create([
                     'unit_id' => $unit->id,
                     'name' => $product_name,
@@ -159,6 +171,8 @@ class MasterData extends Component
                     'kode_simrs' => $product_kode_simrs,
                     'kode_sakti' => $product_kode_sakti,
                 ]);
+            }else{
+                Log::info("OLD $product_kode_simrs");
             }
         };
     }
@@ -171,6 +185,11 @@ class MasterData extends Component
             $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[0];
             $product_kode_sakti = $row[1];
+
+            if(!$product_kode_simrs)
+            {
+                return null;
+            }
             $unit_detail = UnitDetailRepository::findBy(whereClause: [
                 ['name', $unit_name]
             ]);
@@ -200,7 +219,7 @@ class MasterData extends Component
             }
 
             $product = ProductRepository::findBy(whereClause: [
-                ['name', $product_name]
+                ['kode_simrs', $product_kode_simrs]
             ]);
 
             if (!$product) {
