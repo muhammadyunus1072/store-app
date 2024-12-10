@@ -55,9 +55,10 @@ class Index extends Component
                 "data" => null,
                 "skip_rows" => 8,
                 "class" => 'col-4',
+                'storeHandler' => 'store',
                 "name" => "Import Data Pembelian Gizi",
-                "format" => "importPembelianGIzi",
-                'storeHandler' => 'store'
+                "format" => "importPembelianGizi",
+                'onImportDone' => 'onImportPembelianGiziDone',
             ],
         ];
 
@@ -98,6 +99,14 @@ class Index extends Component
         }
     }
 
+    /*
+    | IMPORT GIZI
+    */
+    public function onImportPembelianGiziDone()
+    {
+        PurchaseOrderRepository::deleteWithEmptyProducts();
+    }
+
     public function importPembelianGizi()
     {
         $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
@@ -110,18 +119,26 @@ class Index extends Component
         $note = 'Import Data Gizi';
 
         // Create Purchase Order
-        $purchaseOrder = PurchaseOrderRepository::findBy(whereClause: [['transaction_date', $transactionDate], ['note', $note]]);
-        if (empty($purchaseOrder)) {
-            $purchaseOrder = PurchaseOrderRepository::create([
-                'company_id' => $companyId,
-                'supplier_id' => $supplierId,
-                'warehouse_id' => $warehouseId,
-                'transaction_date' => $transactionDate,
-                'note' => $note,
-            ]);
+        $purchaseOrders = [];
+        $dateStart = Carbon::parse("$periode-01")->startOfMonth();
+        $dateEnd = Carbon::parse("$periode-01")->endOfMonth();
+        while ($dateStart->lte($dateEnd)) {
+            $transactionDate = $dateStart->format('Y-m-d');
+            $purchaseOrder = PurchaseOrderRepository::findBy(whereClause: [['transaction_date', $transactionDate], ['note', $note]]);
+            if (empty($purchaseOrder)) {
+                $purchaseOrder = PurchaseOrderRepository::create([
+                    'company_id' => $companyId,
+                    'supplier_id' => $supplierId,
+                    'warehouse_id' => $warehouseId,
+                    'transaction_date' => $transactionDate,
+                    'note' => $note,
+                ]);
+            }
+            $purchaseOrders[$transactionDate] = $purchaseOrder;
+            $dateStart->addDay();
         }
 
-        return function ($row) use ($taxPpnId, $companyId, $supplierId, $warehouseId, $periode, $note) {
+        return function ($row) use ($purchaseOrders, $taxPpnId, $periode) {
             if (!$row[2]) {
                 return null;
             }
@@ -138,8 +155,7 @@ class Index extends Component
 
             for ($i = 1; $i <= 31; $i++) {
                 $transactionDate = "$periode-" . str_pad($i, 2, '0', STR_PAD_LEFT);
-
-
+                $purchaseOrder = $purchaseOrders[$transactionDate];
 
                 // Create Purchase Order Product
                 $qty = $row[8 + (($i - 1) * 14) + 13];
@@ -166,6 +182,9 @@ class Index extends Component
         };
     }
 
+    /*
+    | IMPORT RUMAH TANGGA
+    */
     public function syncPembelianRT2024()
     {
         try {

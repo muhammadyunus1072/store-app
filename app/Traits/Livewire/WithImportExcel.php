@@ -30,18 +30,27 @@ trait WithImportExcel
                 return;
             }
 
-            $import_excel = $this->import_excel[$index];
-            if ($import_excel['data']) {
-                $path = $import_excel['data']->store('temp');
+            $importItem = $this->import_excel[$index];
 
-                $formatFunction = $this->{$import_excel['format']}();
+            if (isset($importItem['onImportStart']) && is_callable($importItem['onImportStart'])) {
+                call_user_func($importItem['onImportStart']);
+            }
+
+            if ($importItem['data']) {
+                $path = $importItem['data']->store('temp');
+
+                $formatFunction = $this->{$importItem['format']}();
                 $importInstance = new ImportExcel(
                     $formatFunction,
-                    isset($import_excel['skip_rows']) ? $import_excel['skip_rows'] : null
+                    isset($importItem['skip_rows']) ? $importItem['skip_rows'] : null
                 );
 
                 Excel::import($importInstance, Storage::path($path));
                 Storage::delete($path);
+            }
+
+            if (isset($importItem['onImportDone']) && is_callable($importItem['onImportDone'])) {
+                call_user_func($importItem['onImportDone']);
             }
 
             DB::commit();

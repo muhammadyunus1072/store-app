@@ -68,7 +68,7 @@ class StockRequestProduct extends Model
     
     public function getText()
     {
-        return "{$this->product_name} / {$this->product_kode_simrs} / {$this->product_kode_sakti}";
+        return "{$this->product_name} / {$this->product->kode_simrs} / {$this->product->kode_sakti}";
     }
 
     public function saveConvertResult()
@@ -97,7 +97,7 @@ class StockRequestProduct extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id', 'id');
+        return $this->belongsTo(Product::class, 'product_id', 'id')->withTrashed();
     }
 
     public function unitDetail()
