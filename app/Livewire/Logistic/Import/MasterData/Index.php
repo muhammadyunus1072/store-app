@@ -11,7 +11,6 @@ use App\Traits\Livewire\WithImportExcel;
 use App\Models\Logistic\Master\Product\Product;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
-use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository;
 use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
 
@@ -19,7 +18,12 @@ class Index extends Component
 {
     use WithImportExcel;
 
-    public $isSyncProgress = false;
+    public $syncSupplier = false;
+
+    public function render()
+    {
+        return view('livewire.logistic.import.master-data.index');
+    }
 
     public function mount()
     {
@@ -30,7 +34,7 @@ class Index extends Component
                 "class" => 'col-4',
                 "className" => Product::class,
                 "name" => "Import Master Data Produk (Rumah Tangga)",
-                "format" => "formatImportMasterDataProductRumahTangga"
+                "format" => "importRumahTangga"
             ],
             [
                 "data" => null,
@@ -38,7 +42,7 @@ class Index extends Component
                 "class" => 'col-4',
                 "className" => Product::class,
                 "name" => "Import Master Data Produk (Gizi Pasien)",
-                "format" => "formatImportMasterDataProductGiziPasien"
+                "format" => "importGiziPasien"
             ],
             [
                 "data" => null,
@@ -46,116 +50,47 @@ class Index extends Component
                 "class" => 'col-4',
                 "className" => Product::class,
                 "name" => "Import Master Data Produk (Gizi - Katering)",
-                "format" => "formatImportMasterDataProductGiziKatering"
+                "format" => "importGiziKatering"
             ],
         ];
 
-        $this->isSyncProgress = SyncSupplierRepository::findBy(whereClause: [
-            ['is_done', false]
-        ]);
+        $this->syncSupplier = SyncSupplierRepository::findBy(whereClause: [['is_done', false]]);
     }
 
-    public function formatImportMasterDataProductRumahTangga()
+    public function importRumahTangga()
     {
         return function ($row) {
-            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])] : strtoupper($row[2]);
-            $product_name = $row[1];
-            $product_type = Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[0];
+            $product_name = $row[1];
+            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])] : strtoupper($row[2]);
             $product_kode_sakti = $row[3];
-            $unit_detail = UnitDetailRepository::findBy(whereClause: [
-                ['name', $unit_name]
-            ]);
 
-            if (!$unit_detail) {
-                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$unit_name]) ? ImportDataHelper::TITLE_UNIT[$unit_name] : $unit_name;
-                $unit = UnitRepository::findBy(whereClause: [
-                    ['title', $title_unit]
-                ]);
-
-                if (!$unit) {
-                    $unit = UnitRepository::create([
-                        'title' => $title_unit,
-                    ]);
-                }
-
-                $unit_detail = UnitDetailRepository::create([
-                    'unit_id' => $unit->id,
-                    'is_main' => true,
-                    'name' => $unit_name,
-                    'value' => 1,
-                ]);
-            } else {
-                $unit = UnitRepository::findBy(whereClause: [
-                    ['id', $unit_detail->unit_id]
-                ]);
-            }
-
-            $product = ProductRepository::findBy(whereClause: [
-                ['kode_simrs', $product_kode_simrs]
-            ]);
-
-            if (!$product) {
+            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+            if (empty($product)) {
+                $unit = UnitRepository::createByUnitDetailName($unit_name);
                 ProductRepository::create([
                     'unit_id' => $unit->id,
                     'name' => $product_name,
-                    'type' => $product_type,
+                    'type' => Product::TYPE_PRODUCT_WITH_STOCK,
                     'kode_simrs' => $product_kode_simrs,
                     'kode_sakti' => $product_kode_sakti,
                 ]);
             }
-
-            ProductRepository::create([
-                'unit_id' => $unit->id,
-                'name' => $product_name,
-                'type' => $product_type,
-                'kode_simrs' => $product_kode_simrs,
-                'kode_sakti' => $product_kode_sakti,
-            ]);
         };
     }
 
-    public function formatImportMasterDataProductGiziKatering()
+    public function importGiziKatering()
     {
         return function ($row) {
-            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
-            $product_name = $row[3];
             $product_type = $row[0] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[1];
             $product_kode_sakti = $row[2];
-            $unit_detail = UnitDetailRepository::findBy(whereClause: [
-                ['name', $unit_name]
-            ]);
+            $product_name = $row[3];
+            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
 
-            if (!$unit_detail) {
-                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$unit_name]) ? ImportDataHelper::TITLE_UNIT[$unit_name] : $unit_name;
-                $unit = UnitRepository::findBy(whereClause: [
-                    ['title', $title_unit]
-                ]);
-
-                if (!$unit) {
-                    $unit = UnitRepository::create([
-                        'title' => $title_unit,
-                    ]);
-                }
-
-                $unit_detail = UnitDetailRepository::create([
-                    'unit_id' => $unit->id,
-                    'is_main' => true,
-                    'name' => $unit_name,
-                    'value' => 1,
-                ]);
-            } else {
-                $unit = UnitRepository::findBy(whereClause: [
-                    ['id', $unit_detail->unit_id]
-                ]);
-            }
-
-            $product = ProductRepository::findBy(whereClause: [
-                ['kode_simrs', $product_kode_simrs]
-            ]);
-
-            if (!$product) {
+            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+            if (empty($product)) {
+                $unit = UnitRepository::createByUnitDetailName($unit_name);
                 ProductRepository::create([
                     'unit_id' => $unit->id,
                     'name' => $product_name,
@@ -167,47 +102,18 @@ class Index extends Component
         };
     }
 
-    public function formatImportMasterDataProductGiziPasien()
+    public function importGiziPasien()
     {
         return function ($row) {
-            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
-            $product_name = $row[3];
-            $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
             $product_kode_simrs = $row[0];
             $product_kode_sakti = $row[1];
-            $unit_detail = UnitDetailRepository::findBy(whereClause: [
-                ['name', $unit_name]
-            ]);
+            $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
+            $product_name = $row[3];
+            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
 
-            if (!$unit_detail) {
-                $title_unit = isset(ImportDataHelper::TITLE_UNIT[$unit_name]) ? ImportDataHelper::TITLE_UNIT[$unit_name] : $unit_name;
-                $unit = UnitRepository::findBy(whereClause: [
-                    ['title', $title_unit]
-                ]);
-
-                if (!$unit) {
-                    $unit = UnitRepository::create([
-                        'title' => $title_unit,
-                    ]);
-                }
-
-                $unit_detail = UnitDetailRepository::create([
-                    'unit_id' => $unit->id,
-                    'is_main' => true,
-                    'name' => $unit_name,
-                    'value' => 1,
-                ]);
-            } else {
-                $unit = UnitRepository::findBy(whereClause: [
-                    ['id', $unit_detail->unit_id]
-                ]);
-            }
-
-            $product = ProductRepository::findBy(whereClause: [
-                ['kode_simrs', $product_kode_simrs]
-            ]);
-
-            if (!$product) {
+            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+            if (empty($product)) {
+                $unit = UnitRepository::createByUnitDetailName($unit_name);
                 ProductRepository::create([
                     'unit_id' => $unit->id,
                     'name' => $product_name,
@@ -219,21 +125,21 @@ class Index extends Component
         };
     }
 
-    public function syncSupplier()
+    public function syncDataSupplier()
     {
         try {
             DB::beginTransaction();
             $obj = SyncSupplierRepository::create([
                 'total' => SuplierRepository::count(),
             ]);
-            $this->isSyncProgress = $obj;
+            $this->syncSupplier = $obj;
             DB::commit();
 
             Alert::confirmation(
                 $this,
                 Alert::ICON_SUCCESS,
                 "Berhasil",
-                "Data Berhasil Diperbarui",
+                "Proses Sinkronisasi Berhasil Dijalankan, Silahkan Tunggu Hingga Selesai",
                 "on-dialog-confirm",
                 "on-dialog-cancel",
                 "Oke",
@@ -243,10 +149,5 @@ class Index extends Component
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
-    }
-
-    public function render()
-    {
-        return view('livewire.logistic.import.master-data.index');
     }
 }

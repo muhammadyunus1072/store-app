@@ -17,7 +17,7 @@ class SyncSupplierJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    
+
     /**
      * Create a new job instance.
      */
@@ -25,8 +25,7 @@ class SyncSupplierJob implements ShouldQueue
         public $syncSupplierId,
         public $limit,
         public $offset,
-    )
-    {}
+    ) {}
 
     /**
      * Execute the job.
@@ -35,24 +34,19 @@ class SyncSupplierJob implements ShouldQueue
     {
         try {
             DB::beginTransaction();
-            
-            $dataSupplier = SuplierRepository::getSync($this->limit, $this->offset);
-            foreach($dataSupplier as $key => $value)
-            {
-                $validatedData = [
-                    'name' => $value->name,
-                    'kode_simrs' => $value->kode_simrs,
-                ];
-                Log::info($validatedData);
-                $obj = SupplierRepository::createOrUpdate($validatedData);
+
+            $data = SuplierRepository::getSync($this->limit, $this->offset);
+            foreach ($data as $item) {
+                SupplierRepository::createOrUpdate([
+                    'name' => $item->name,
+                    'kode_simrs' => $item->kode_simrs,
+                ]);
                 SyncSupplier::onJobSuccess($this->syncSupplierId);
             }
-
 
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
-
             $message = "ERROR SYNC SUPPLIER ID: {$this->syncSupplierId}) : " . $exception->getMessage();
             SyncSupplier::onJobFail($this->syncSupplierId, $message);
         }

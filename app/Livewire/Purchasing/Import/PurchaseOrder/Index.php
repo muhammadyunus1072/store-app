@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Purchasing\Transaction\PurchaseOrder;
+namespace App\Livewire\Purchasing\Import\PurchaseOrder;
 
 use Carbon\Carbon;
 use Livewire\Component;
@@ -17,13 +17,13 @@ use App\Repositories\Finance\Master\Tax\TaxRepository;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
-use App\Repositories\Rsmh\GudangLog\PembelianRT\PembelianRTRepository;
-use App\Repositories\Rsmh\Sync\SyncPembelianRT\SyncPembelianRTRepository;
+use App\Repositories\Rsmh\GudangLog\PembelianRt\PembelianRtRepository;
+use App\Repositories\Rsmh\Sync\SyncPembelianRt\SyncPembelianRtRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductTaxRepository;
 
-class ImportDataPurchaseOrder extends Component
+class Index extends Component
 {
     use WithImportExcel;
 
@@ -211,7 +211,7 @@ class ImportDataPurchaseOrder extends Component
                 'total' => $countPembelian,
                 'warehouse_id' => Crypt::decrypt($this->pembelianRTWarehouseId),
             ];
-            $obj = SyncPembelianRTRepository::create($validatedData);
+            $obj = SyncPembelianRtRepository::create($validatedData);
             $this->syncPembelianRT = $obj;
             DB::commit();
 
@@ -233,6 +233,6 @@ class ImportDataPurchaseOrder extends Component
 
     public function render()
     {
-        return view('livewire.purchasing.transaction.purchase-order.import-data-purchase-order');
+        return view('livewire.purchasing.import.purchase-order.index');
     }
 }

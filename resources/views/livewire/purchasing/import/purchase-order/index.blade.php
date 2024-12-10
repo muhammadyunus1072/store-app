@@ -76,7 +76,7 @@
             @enderror
         </div>
     </div>
-    @include('app.components.import-excel-file', ['import_excel' => $import_excel])
+    @include('livewire.components.import-excel-file', ['import_excel' => $import_excel])
 </div>
 
 @push('css')

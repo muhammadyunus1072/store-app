@@ -13,6 +13,29 @@ class UnitRepository extends MasterDataRepository
         return Unit::class;
     }
 
+    public static function createByUnitDetailName($unitDetailName)
+    {
+        $unitDetailName = empty($unitDetailName) ? "SATUAN" : "";
+        $unitDetail = UnitDetailRepository::findBy(whereClause: [['name', $unitDetailName]]);
+
+        if (empty($unitDetail)) {
+            $unit = UnitRepository::create([
+                'title' => $unitDetailName,
+            ]);
+
+            $unitDetail = UnitDetailRepository::create([
+                'unit_id' => $unit->id,
+                'is_main' => true,
+                'name' => $unitDetailName,
+                'value' => 1,
+            ]);
+        } else {
+            $unit = $unitDetail->unit;
+        }
+
+        return $unit;
+    }
+
     public static function findWithDetails($id)
     {
         return Unit::with('unitDetails')->where('id', $id)->first();

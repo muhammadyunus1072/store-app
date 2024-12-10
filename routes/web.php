@@ -24,6 +24,7 @@ Route::group([], __DIR__ . '/web/Purchasing/Filter.php');
 Route::group([], __DIR__ . '/web/Purchasing/Master.php');
 Route::group([], __DIR__ . '/web/Purchasing/Report.php');
 Route::group([], __DIR__ . '/web/Purchasing/Transaction.php');
+Route::group([], __DIR__ . '/web/Purchasing/Import.php');
 
 Route::group([], __DIR__ . '/web/Logistic/Filter.php');
 Route::group([], __DIR__ . '/web/Logistic/Master.php');

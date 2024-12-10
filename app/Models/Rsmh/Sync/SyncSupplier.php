@@ -53,23 +53,11 @@ class SyncSupplier extends Model
 
     public function dispatchJob()
     {
-        $limit = 100; 
+        $limit = 100;
 
         for ($offset = 0; $offset < $this->total; $offset += $limit) {
-            
             $jobLimit = min($limit, $this->total - $offset);
-
             SyncSupplierJob::dispatch($this->id, $jobLimit, $offset);
         }
-    }
-
-    public function isDeletable()
-    {
-        return true;
-    }
-
-    public function isEditable()
-    {
-        return true;
     }
 }

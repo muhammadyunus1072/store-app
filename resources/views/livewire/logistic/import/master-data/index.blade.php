@@ -1,17 +1,21 @@
 <div>
     <h4>Import Master Data</h4>
     <hr>
-
-    @include('app.components.import-excel-file', ['import_excel' => $import_excel])
+    @include('livewire.components.import-excel-file', ['import_excel' => $import_excel])
 
     <div class="row">
         <div class="col-md-4 border rounded p-4">
             <label>Import Master Data Supplier</label>
             <hr>
-            <button type="button" wire:click="syncSupplier" class="btn btn-primary mt-3"
-                {{ $isSyncProgress ? 'disabled' : null }}>
-                <i class="fa fa-sync"></i>
-                Sync Supplier
+            <button type="button" class="btn btn-primary" wire:click="syncDataSupplier" wire:loading.attr="disabled"
+                {{ $syncSupplier ? 'disabled' : null }}>
+                @if ($syncSupplier)
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Loading ({{ $syncSupplier->progress ? $syncSupplier->progress : 0 }} / {{ $syncSupplier->total }})
+                @else
+                    <i class="fa fa-sync"></i>
+                    Sync Data Supplier
+                @endif
             </button>
         </div>
     </div>

@@ -18,7 +18,7 @@ use App\Repositories\Rsmh\GudangLog\PembelianRT\PembelianRTRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductRepository;
 
-class SyncPembelianRTJob implements ShouldQueue
+class SyncPembelianRtJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

@@ -16,13 +16,6 @@ trait WithImportExcel
 
     public $import_excel = [];
 
-    public function onMount() {}
-
-    public function mount()
-    {
-        $this->onMount();
-    }
-
     public function storeImport($index)
     {
         try {
@@ -42,7 +35,6 @@ trait WithImportExcel
                 $path = $import_excel['data']->store('temp');
 
                 $formatFunction = $this->{$import_excel['format']}();
-
                 $importInstance = new ImportExcel(
                     $formatFunction,
                     isset($import_excel['skip_rows']) ? $import_excel['skip_rows'] : null
@@ -63,10 +55,5 @@ trait WithImportExcel
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
-    }
-
-    public function render()
-    {
-        return view($this->getView());
     }
 }

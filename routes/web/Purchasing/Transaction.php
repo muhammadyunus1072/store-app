@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Logistic\Master\ProductController;
 use App\Http\Controllers\Purchasing\Master\SupplierController;
-use App\Http\Controllers\Purchasing\Transaction\ImportDataPurchaseOrderController;
 use App\Http\Controllers\Purchasing\Transaction\PurchaseOrderController;
 
 Route::middleware(['auth', 'access_permission'])->group(function () {
@@ -16,9 +15,5 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
         Route::get('/product/get', [ProductController::class, 'search'])->name('get.product');
         Route::get('/supplier/get', [SupplierController::class, 'search'])->name('get.supplier');
     });
-    Route::group(["controller" => ImportDataPurchaseOrderController::class, "prefix" => "i_purchase_order", "as" => "i_purchase_order."], function () {
-        Route::get('/', 'index')->name('index');
 
-        Route::get('/supplier/get', [SupplierController::class, 'search'])->name('get.supplier');
-    });
 });

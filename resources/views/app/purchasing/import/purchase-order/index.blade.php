@@ -21,7 +21,7 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <livewire:purchasing.transaction.purchase-order.import-data-purchase-order>
+            <livewire:purchasing.import.purchase-order.index>
         </div>
     </div>
 @stop
