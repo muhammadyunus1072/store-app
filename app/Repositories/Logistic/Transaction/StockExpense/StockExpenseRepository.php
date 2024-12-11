@@ -23,4 +23,12 @@ class StockExpenseRepository extends MasterDataRepository
             })
             ->whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"]);
     }
+
+    public static function deleteWithEmptyProducts()
+    {
+        $data = StockExpense::whereDoesntHave('stockExpenseProducts')->get();
+        foreach ($data as $item) {
+            $item->delete();
+        }
+    }
 }

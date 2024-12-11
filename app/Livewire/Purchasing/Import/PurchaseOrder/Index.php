@@ -27,7 +27,7 @@ class Index extends Component
     // Gizi
     #[Validate('required', message: 'Gudang Harus Diisi', onUpdate: false)]
     public $warehouseId;
-    #[Validate('required', message: 'Tanggal Harus Diisi', onUpdate: false)]
+    #[Validate('required', message: 'Periode Harus Diisi', onUpdate: false)]
     public $periode;
     public $supplierId;
     public $noteGizi = 'Import Data Gizi';
@@ -43,9 +43,9 @@ class Index extends Component
     public $isMultipleCompany = false;
     public $companies = [];
     public $warehouses = [];
-
     public $createdPurchaseOrderIds = [];
     public $taxPpnId;
+    public $taxPpnValue;
 
     public function render()
     {
@@ -61,9 +61,9 @@ class Index extends Component
                 "class" => 'col-4',
                 'storeHandler' => 'store',
                 "name" => "Import Data Pembelian Gizi",
-                'onImportStart' => 'onImportPembelianGiziStart',
-                "onImport" => "onImportPembelianGizi",
-                'onImportDone' => 'onImportPembelianGiziDone',
+                'onImportStart' => 'onImportGiziStart',
+                "onImport" => "onImportGizi",
+                'onImportDone' => 'onImportGiziDone',
             ],
         ];
 
@@ -72,6 +72,7 @@ class Index extends Component
 
         $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
         $this->taxPpnId = $taxPpn->id;
+        $this->taxPpnValue  = $taxPpn->value;
 
         $this->loadUserState();
     }
@@ -110,14 +111,22 @@ class Index extends Component
     /*
     | IMPORT GIZI
     */
-    public function onImportPembelianGiziStart()
+    public function onImportGiziStart()
     {
         $this->createdPurchaseOrderIds = [];
         $supplierId = Crypt::decrypt($this->supplierId);
         $warehouseId = Crypt::decrypt($this->warehouseId);
-
         $dateStart = Carbon::parse("{$this->periode}-01")->startOfMonth();
         $dateEnd = Carbon::parse("{$this->periode}-01")->endOfMonth();
+
+        // Delete Old
+        PurchaseOrderRepository::deleteBy(whereClause: [
+            ['transaction_date', '>=', $dateStart],
+            ['transaction_date', '<=', $dateEnd],
+            ['note', $this->noteGizi]
+        ]);
+
+        // Create New
         while ($dateStart->lte($dateEnd)) {
             $transactionDate = $dateStart->format('Y-m-d');
             $purchaseOrder = PurchaseOrderRepository::findBy(whereClause: [['transaction_date', $transactionDate], ['note', $this->noteGizi]]);
@@ -136,7 +145,7 @@ class Index extends Component
         }
     }
 
-    public function onImportPembelianGiziDone()
+    public function onImportGiziDone()
     {
         PurchaseOrderRepository::deleteWithEmptyProducts();
 
@@ -146,19 +155,33 @@ class Index extends Component
         }
     }
 
-    public function onImportPembelianGizi($row)
+    public function onImportGizi($row)
     {
         if (!$row[2]) {
             return null;
         }
 
         $product_kode_simrs = $row[2];
+        $product_name = $row[4];
+        $product_unit = $row[5];
+        $product_price_hpt = $row[6];
         $product_price = $row[7];
         $product_price_ppn = $row[8];
 
+        if ($product_price != null) {
+            $price = $product_price;
+            $is_tax = $product_price_ppn != null && $product_price_ppn != $product_price;
+        } else if ($product_price_ppn != null) {
+            $price = $product_price_ppn * 100 / (100 + $this->taxPpnValue);
+            $is_tax = true;
+        } else {
+            $price = $product_price_hpt;
+            $is_tax = false;
+        }
+
         $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
         if (empty($product)) {
-            Log::debug("GIZI - PEMBELIAN - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+            Log::debug("GIZI - PEMBELIAN {$this->periode} / - KODE TIDAK DITEMUKAN: {$product_kode_simrs};{$product_name};{$product_unit}");
             return null;
         }
 
@@ -173,13 +196,13 @@ class Index extends Component
                     'product_id' => $product->id,
                     'unit_detail_id' => $product->unit->unitDetailMain->id,
                     'quantity' => $qty,
-                    'price' => $product_price ? $product_price : $product_price_ppn,
+                    'price' => $price,
                     'code' => null,
                     'batch' => null,
                     'expired_date' => null
                 ]);
 
-                if ($product_price_ppn != $product_price) {
+                if ($is_tax) {
                     PurchaseOrderProductTaxRepository::create([
                         'purchase_order_product_id' => $purchaseOrderProduct->id,
                         'tax_id' => $this->taxPpnId,

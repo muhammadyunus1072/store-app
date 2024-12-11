@@ -40,7 +40,7 @@ class Index extends Component
             ],
             [
                 "data" => null,
-                "skip_rows" => 3,
+                "skip_rows" => 1,
                 "class" => 'col-4',
                 "name" => "Import Master Data Produk (Gizi Pasien)",
                 "onImport" => "onImportGiziPasien"
