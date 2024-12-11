@@ -30,6 +30,7 @@ class Index extends Component
     #[Validate('required', message: 'Tanggal Harus Diisi', onUpdate: false)]
     public $periode;
     public $supplierId;
+    public $noteGizi = 'Import Data Gizi';
 
     // Rumah Tangga
     #[Validate('required', message: 'Gudang Harus Diisi', onUpdate: false)]
@@ -42,6 +43,9 @@ class Index extends Component
     public $isMultipleCompany = false;
     public $companies = [];
     public $warehouses = [];
+
+    public $createdPurchaseOrderIds = [];
+    public $taxPpnId;
 
     public function render()
     {
@@ -57,13 +61,17 @@ class Index extends Component
                 "class" => 'col-4',
                 'storeHandler' => 'store',
                 "name" => "Import Data Pembelian Gizi",
-                "format" => "importPembelianGizi",
+                'onImportStart' => 'onImportPembelianGiziStart',
+                "onImport" => "onImportPembelianGizi",
                 'onImportDone' => 'onImportPembelianGiziDone',
             ],
         ];
 
         $this->syncPembelianRT = SyncPembelianRTRepository::findBy(whereClause: [['is_done', false]]);
         $this->periode = Carbon::now()->format("Y-m");
+
+        $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
+        $this->taxPpnId = $taxPpn->id;
 
         $this->loadUserState();
     }
@@ -102,84 +110,83 @@ class Index extends Component
     /*
     | IMPORT GIZI
     */
-    public function onImportPembelianGiziDone()
+    public function onImportPembelianGiziStart()
     {
-        PurchaseOrderRepository::deleteWithEmptyProducts();
-    }
-
-    public function importPembelianGizi()
-    {
-        $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
-        $taxPpnId = $taxPpn->id;
-
-        $companyId = 1;
+        $this->createdPurchaseOrderIds = [];
         $supplierId = Crypt::decrypt($this->supplierId);
         $warehouseId = Crypt::decrypt($this->warehouseId);
-        $periode = $this->periode;
-        $note = 'Import Data Gizi';
 
-        // Create Purchase Order
-        $purchaseOrders = [];
-        $dateStart = Carbon::parse("$periode-01")->startOfMonth();
-        $dateEnd = Carbon::parse("$periode-01")->endOfMonth();
+        $dateStart = Carbon::parse("{$this->periode}-01")->startOfMonth();
+        $dateEnd = Carbon::parse("{$this->periode}-01")->endOfMonth();
         while ($dateStart->lte($dateEnd)) {
             $transactionDate = $dateStart->format('Y-m-d');
-            $purchaseOrder = PurchaseOrderRepository::findBy(whereClause: [['transaction_date', $transactionDate], ['note', $note]]);
+            $purchaseOrder = PurchaseOrderRepository::findBy(whereClause: [['transaction_date', $transactionDate], ['note', $this->noteGizi]]);
             if (empty($purchaseOrder)) {
                 $purchaseOrder = PurchaseOrderRepository::create([
-                    'company_id' => $companyId,
+                    'company_id' => 1,
                     'supplier_id' => $supplierId,
                     'warehouse_id' => $warehouseId,
                     'transaction_date' => $transactionDate,
-                    'note' => $note,
+                    'note' => $this->noteGizi,
                 ]);
             }
-            $purchaseOrders[$transactionDate] = $purchaseOrder;
+
+            $this->createdPurchaseOrderIds[$transactionDate] = $purchaseOrder->id;
             $dateStart->addDay();
         }
+    }
 
-        return function ($row) use ($purchaseOrders, $taxPpnId, $periode) {
-            if (!$row[2]) {
-                return null;
-            }
+    public function onImportPembelianGiziDone()
+    {
+        PurchaseOrderRepository::deleteWithEmptyProducts();
 
-            $product_kode_simrs = $row[2];
-            $product_price = $row[7];
-            $product_price_ppn = $row[8];
+        $purchaseOrders = PurchaseOrderRepository::getBy(whereClause: [['id', 'IN', $this->createdPurchaseOrderIds]]);
+        foreach ($purchaseOrders as $purchaseOrder) {
+            $purchaseOrder->onUpdated();
+        }
+    }
 
-            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
-            if (empty($product)) {
-                Log::debug("GIZI - PEMBELIAN - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
-                return null;
-            }
+    public function onImportPembelianGizi($row)
+    {
+        if (!$row[2]) {
+            return null;
+        }
 
-            for ($i = 1; $i <= 31; $i++) {
-                $transactionDate = "$periode-" . str_pad($i, 2, '0', STR_PAD_LEFT);
-                $purchaseOrder = $purchaseOrders[$transactionDate];
+        $product_kode_simrs = $row[2];
+        $product_price = $row[7];
+        $product_price_ppn = $row[8];
 
-                // Create Purchase Order Product
-                $qty = $row[8 + (($i - 1) * 14) + 13];
-                if ($qty) {
-                    $purchaseOrderProduct = PurchaseOrderProductRepository::create([
-                        'purchase_order_id' => $purchaseOrder->id,
-                        'product_id' => $product->id,
-                        'unit_detail_id' => $product->unit->unitDetailMain->id,
-                        'quantity' => $qty,
-                        'price' => $product_price ? $product_price : $product_price_ppn,
-                        'code' => null,
-                        'batch' => null,
-                        'expired_date' => null
+        $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+        if (empty($product)) {
+            Log::debug("GIZI - PEMBELIAN - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+            return null;
+        }
+
+        for ($i = 1; $i <= 31; $i++) {
+            $transactionDate = "{$this->periode}-" . str_pad($i, 2, '0', STR_PAD_LEFT);
+
+            // Create Purchase Order Product
+            $qty = $row[8 + (($i - 1) * 14) + 13];
+            if ($qty) {
+                $purchaseOrderProduct = PurchaseOrderProductRepository::create([
+                    'purchase_order_id' => $this->createdPurchaseOrderIds[$transactionDate],
+                    'product_id' => $product->id,
+                    'unit_detail_id' => $product->unit->unitDetailMain->id,
+                    'quantity' => $qty,
+                    'price' => $product_price ? $product_price : $product_price_ppn,
+                    'code' => null,
+                    'batch' => null,
+                    'expired_date' => null
+                ]);
+
+                if ($product_price_ppn != $product_price) {
+                    PurchaseOrderProductTaxRepository::create([
+                        'purchase_order_product_id' => $purchaseOrderProduct->id,
+                        'tax_id' => $this->taxPpnId,
                     ]);
-
-                    if ($product_price_ppn != $product_price) {
-                        PurchaseOrderProductTaxRepository::create([
-                            'purchase_order_product_id' => $purchaseOrderProduct->id,
-                            'tax_id' => $taxPpnId,
-                        ]);
-                    }
                 }
             }
-        };
+        }
     }
 
     /*

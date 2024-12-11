@@ -42,19 +42,17 @@ class Index extends Component
                 "data" => null,
                 "skip_rows" => 1,
                 "class" => 'col-4',
-                "className" => Product::class,
+                'storeHandler' => 'store',
                 "name" => "Import Stok Awal Produk (Rumah Tangga)",
-                "format" => "importRumahTangga",
-                'storeHandler' => 'store'
+                "onImport" => "onImportRumahTangga",
             ],
             [
                 "data" => null,
                 "skip_rows" => 1,
                 "class" => 'col-4',
-                "className" => Product::class,
+                'storeHandler' => 'store',
                 "name" => "Import Stok Awal Produk (Gizi)",
-                "format" => "importGizi",
-                'storeHandler' => 'store'
+                "onImport" => "onImportGizi",
             ],
         ];
 
@@ -88,66 +86,64 @@ class Index extends Component
         $this->storeImport($index);
     }
 
-    public function importGizi()
+    /*
+    | IMPORT: GIZI
+    */
+    public function onImportGizi($row)
     {
-        $warehouseId = Crypt::decrypt($this->warehouseId);
+        $product_kode_simrs = $row[0];
+        $product_name = $row[1];
+        $product_quantity = $row[2];
+        $product_total_price = $row[3];
+        $product_price = $product_total_price / $product_quantity;
 
-        return function ($row) use ($warehouseId) {
-            $product_kode_simrs = $row[0];
-            $product_name = $row[1];
-            $product_quantity = $row[2];
-            $product_total_price = $row[3];
-            $product_price = $product_total_price / $product_quantity;
+        $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+        if (empty($product)) {
+            Log::debug("GIZI - STOK AWAL - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+            return null;
+        }
 
-            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
-            if (empty($product)) {
-                Log::debug("GIZI - STOK AWAL - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
-                return null;
-            }
-
-            StockHandler::createStock(
-                $product->id,
-                1,
-                $warehouseId,
-                $this->transactionDate,
-                $product_quantity,
-                $product_price,
-                null,
-                null,
-                null
-            );
-        };
+        StockHandler::createStock(
+            $product->id,
+            1,
+            Crypt::decrypt($this->warehouseId),
+            $this->transactionDate,
+            $product_quantity,
+            $product_price,
+            null,
+            null,
+            null
+        );
     }
 
-    public function importRumahTangga()
+    /*
+    | IMPORT: RUMAH TANGGA
+    */
+    public function onImportRumahTangga($row)
     {
-        $warehouseId = Crypt::decrypt($this->warehouseId);
+        $product_kode_simrs = $row[0];
+        $product_name = $row[1];
+        $product_quantity = $row[2];
+        $product_unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[3])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[3])] : strtoupper($row[3]);
+        $product_price = $row[4];
+        $product_total_price = $row[5];
 
-        return function ($row) use ($warehouseId) {
-            $product_kode_simrs = $row[0];
-            $product_name = $row[1];
-            $product_quantity = $row[2];
-            $product_unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[3])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[3])] : strtoupper($row[3]);
-            $product_price = $row[4];
-            $product_total_price = $row[5];
+        $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+        if (empty($product)) {
+            Log::debug("RT - STOK AWAL - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
+            return null;
+        }
 
-            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
-            if (empty($product)) {
-                Log::debug("RT - STOK AWAL - KODE TIDAK DITEMUKAN: " . $product_kode_simrs);
-                return null;
-            }
-
-            StockHandler::createStock(
-                $product->id,
-                1,
-                $warehouseId,
-                $this->transactionDate,
-                $product_quantity,
-                $product_price,
-                null,
-                null,
-                null
-            );
-        };
+        StockHandler::createStock(
+            $product->id,
+            1,
+            Crypt::decrypt($this->warehouseId),
+            $this->transactionDate,
+            $product_quantity,
+            $product_price,
+            null,
+            null,
+            null
+        );
     }
 }

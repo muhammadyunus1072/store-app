@@ -35,99 +35,102 @@ class Index extends Component
                 "data" => null,
                 "skip_rows" => 1,
                 "class" => 'col-4',
-                "className" => Product::class,
                 "name" => "Import Master Data Produk (Rumah Tangga)",
-                "format" => "importRumahTangga"
+                "onImport" => "onImportRumahTangga"
             ],
             [
                 "data" => null,
                 "skip_rows" => 3,
                 "class" => 'col-4',
-                "className" => Product::class,
                 "name" => "Import Master Data Produk (Gizi Pasien)",
-                "format" => "importGiziPasien"
+                "onImport" => "onImportGiziPasien"
             ],
             [
                 "data" => null,
                 "skip_rows" => 1,
                 "class" => 'col-4',
-                "className" => Product::class,
                 "name" => "Import Master Data Produk (Gizi - Katering)",
-                "format" => "importGiziKatering"
+                "onImport" => "onImportGiziKatering"
             ],
         ];
 
         $this->syncSupplier = SyncSupplierRepository::findBy(whereClause: [['is_done', false]]);
     }
 
-    public function importRumahTangga()
+    /*
+    | IMPORT: RUMAH TANGGA
+    */
+    public function onImportRumahTangga($row)
     {
-        return function ($row) {
-            $product_kode_simrs = $row[0];
-            $product_name = $row[1];
-            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])] : strtoupper($row[2]);
-            $product_kode_sakti = $row[3];
+        $product_kode_simrs = $row[0];
+        $product_name = $row[1];
+        $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[2])] : strtoupper($row[2]);
+        $product_kode_sakti = $row[3];
 
-            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
-            if (empty($product)) {
-                $unit = UnitRepository::createByUnitDetailName($unit_name);
-                ProductRepository::create([
-                    'unit_id' => $unit->id,
-                    'name' => $product_name,
-                    'type' => Product::TYPE_PRODUCT_WITH_STOCK,
-                    'kode_simrs' => $product_kode_simrs,
-                    'kode_sakti' => $product_kode_sakti,
-                ]);
-            }
-        };
+        $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+        if (empty($product)) {
+            $unit = UnitRepository::createByUnitDetailName($unit_name);
+            ProductRepository::create([
+                'unit_id' => $unit->id,
+                'name' => $product_name,
+                'type' => Product::TYPE_PRODUCT_WITH_STOCK,
+                'kode_simrs' => $product_kode_simrs,
+                'kode_sakti' => $product_kode_sakti,
+            ]);
+        }
     }
 
-    public function importGiziKatering()
+    /*
+    | IMPORT: GIZI - KATERING
+    */
+    public function onImportGiziKatering($row)
     {
-        return function ($row) {
-            $product_type = $row[0] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
-            $product_kode_simrs = $row[1];
-            $product_kode_sakti = $row[2];
-            $product_name = $row[3];
-            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
+        $product_type = $row[0] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
+        $product_kode_simrs = $row[1];
+        $product_kode_sakti = $row[2];
+        $product_name = $row[3];
+        $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
 
-            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
-            if (empty($product)) {
-                $unit = UnitRepository::createByUnitDetailName($unit_name);
-                ProductRepository::create([
-                    'unit_id' => $unit->id,
-                    'name' => $product_name,
-                    'type' => $product_type,
-                    'kode_simrs' => $product_kode_simrs,
-                    'kode_sakti' => $product_kode_sakti,
-                ]);
-            }
-        };
+        $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+        if (empty($product)) {
+            $unit = UnitRepository::createByUnitDetailName($unit_name);
+            ProductRepository::create([
+                'unit_id' => $unit->id,
+                'name' => $product_name,
+                'type' => $product_type,
+                'kode_simrs' => $product_kode_simrs,
+                'kode_sakti' => $product_kode_sakti,
+            ]);
+        }
     }
 
-    public function importGiziPasien()
+    /*
+    | IMPORT: GIZI - PASIEN
+    */
+    public function onImportGiziPasien($row)
     {
-        return function ($row) {
-            $product_kode_simrs = $row[0];
-            $product_kode_sakti = $row[1];
-            $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
-            $product_name = $row[3];
-            $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
+        $product_kode_simrs = $row[0];
+        $product_kode_sakti = $row[1];
+        $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
+        $product_name = $row[3];
+        $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
 
-            $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
-            if (empty($product)) {
-                $unit = UnitRepository::createByUnitDetailName($unit_name);
-                ProductRepository::create([
-                    'unit_id' => $unit->id,
-                    'name' => $product_name,
-                    'type' => $product_type,
-                    'kode_simrs' => $product_kode_simrs,
-                    'kode_sakti' => $product_kode_sakti,
-                ]);
-            }
-        };
+        $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);
+        if (empty($product)) {
+            $unit = UnitRepository::createByUnitDetailName($unit_name);
+            ProductRepository::create([
+                'unit_id' => $unit->id,
+                'name' => $product_name,
+                'type' => $product_type,
+                'kode_simrs' => $product_kode_simrs,
+                'kode_sakti' => $product_kode_sakti,
+            ]);
+        }
     }
 
+    /*
+    | SYNCHRONIZE: SUPPLIER
+    */
     public function syncDataSupplier()
     {
         try {
@@ -153,6 +156,9 @@ class Index extends Component
         }
     }
 
+    /*
+    | SYNCHRONIZE: WAREHOUSE
+    */
     public function syncWarehouse()
     {
         try {

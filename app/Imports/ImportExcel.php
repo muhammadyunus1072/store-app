@@ -3,26 +3,23 @@
 namespace App\Imports;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 
 class ImportExcel implements ToCollection, WithCalculatedFormulas
 {
-    private $formatCallback;
-    private $skip_rows;
-
-    public function __construct(callable $formatCallback = null, $skip_rows = null)
-    {
-        $this->formatCallback = $formatCallback;
-        $this->skip_rows = $skip_rows;
-    }
+    public function __construct(
+        public $obj,
+        public $onImportCallback,
+        public $skip = null
+    ) {}
 
     public function collection(Collection $rows)
     {
-        $rows = $this->skip_rows ? $rows->skip($this->skip_rows) : $rows;
+        $rows = $this->skip ? $rows->skip($this->skip) : $rows;
+
         foreach ($rows as $row) {
-            $data = call_user_func($this->formatCallback, $row);
+            call_user_func([$this->obj, $this->onImportCallback], $row);
         }
     }
 }

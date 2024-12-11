@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 abstract class MasterDataRepository
 {
-    const OPERATOR = ['=', '!=', '<>', '<', '<=', '>', '>='];
+    const OPERATOR = ['=', '!=', '<>', '<', '<=', '>', '>=', 'IN', 'NOT IN'];
 
     abstract protected static function className(): string;
 
@@ -22,12 +22,8 @@ abstract class MasterDataRepository
                 $operator = isset($clause['operator']) ? $clause['operator'] : $clause[1];
                 $value = isset($clause['value']) ? $clause['value'] : $clause[2];
                 $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[3]) ? $clause[3] : null);
-            } else if (is_array($clause[1])) {
-                $operator = "IN";
-                $value = $clause[1];
-                $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[2]) ? $clause[2] : null);
             } else {
-                $operator = "=";
+                $operator = is_array($clause[1]) ? "IN" : "=";
                 $value = isset($clause['value']) ? $clause['value'] : $clause[1];
                 $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[2]) ? $clause[2] : null);
             }
@@ -35,12 +31,16 @@ abstract class MasterDataRepository
             if ($conjunction == 'OR') {
                 if ($operator == "IN") {
                     $query->orWhereIn($column, $value);
+                } else if ($operator == "NOT IN") {
+                    $query->orWhereNotIn($column, $value);
                 } else {
                     $query->orWhere($column, $operator, $value);
                 }
             } else {
                 if ($operator == "IN") {
                     $query->whereIn($column, $value);
+                } else if ($operator == "NOT IN") {
+                    $query->whereNotIn($column, $value);
                 } else {
                     $query->where($column, $operator, $value);
                 }

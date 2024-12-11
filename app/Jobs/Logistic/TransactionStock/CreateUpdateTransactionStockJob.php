@@ -90,6 +90,7 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
                 ]);
                 $transaction->save();
 
+                $affectedProductIds = [];
                 foreach ($this->products as $item) {
                     $product = TransactionStockProductRepository::findBy(
                         whereClause: [
@@ -100,7 +101,7 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
                     );
 
                     if (empty($product)) {
-                        TransactionStockProductRepository::create([
+                        $product = TransactionStockProductRepository::create([
                             'transaction_stock_id' => $transaction->id,
                             'product_id' => $item['product_id'],
                             'unit_detail_id' => $item['unit_detail_id'],
@@ -124,7 +125,15 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
                         ]);
                         $product->save();
                     }
+
+                    $affectedProductIds[] = $product->id;
                 }
+
+                // Delete Not Affected Products
+                TransactionStockProductRepository::deleteBy(whereClause: [
+                    ['transaction_stock_id', $transaction->id],
+                    ['id', 'NOT IN', $affectedProductIds]
+                ]);
             }
 
             DB::commit();

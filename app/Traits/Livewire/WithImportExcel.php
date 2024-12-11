@@ -3,11 +3,11 @@
 namespace App\Traits\Livewire;
 
 use Exception;
-use App\Imports\ImportExcel;
 use Livewire\WithFileUploads;
+use App\Imports\ImportExcel;
 use App\Helpers\General\Alert;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 trait WithImportExcel
@@ -32,25 +32,36 @@ trait WithImportExcel
 
             $importItem = $this->import_excel[$index];
 
-            if (isset($importItem['onImportStart']) && is_callable($importItem['onImportStart'])) {
-                call_user_func($importItem['onImportStart']);
+            // CALLBACK: onImportStart
+            if (isset($importItem['onImportStart'])) {
+                if (is_callable([$this, $importItem['onImportStart']])) {
+                    call_user_func([$this, $importItem['onImportStart']]);
+                } else if (is_callable([$this, $importItem['onImportStart']])) {
+                    call_user_func($importItem['onImportStart']);
+                }
             }
 
+            // CALLBACK: onImport
             if ($importItem['data']) {
                 $path = $importItem['data']->store('temp');
-
-                $formatFunction = $this->{$importItem['format']}();
-                $importInstance = new ImportExcel(
-                    $formatFunction,
-                    isset($importItem['skip_rows']) ? $importItem['skip_rows'] : null
+                Excel::import(
+                    new ImportExcel(
+                        $this,
+                        $importItem['onImport'],
+                        isset($importItem['skip_rows']) ? $importItem['skip_rows'] : null
+                    ),
+                    Storage::path($path)
                 );
-
-                Excel::import($importInstance, Storage::path($path));
                 Storage::delete($path);
             }
 
-            if (isset($importItem['onImportDone']) && is_callable($importItem['onImportDone'])) {
-                call_user_func($importItem['onImportDone']);
+            // CALLBACK: onImportDone
+            if (isset($importItem['onImportDone'])) {
+                if (is_callable([$this, $importItem['onImportDone']])) {
+                    call_user_func([$this, $importItem['onImportDone']]);
+                } else if (is_callable([$this, $importItem['onImportDone']])) {
+                    call_user_func($importItem['onImportDone']);
+                }
             }
 
             DB::commit();
