@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Logistic\Master\Unit\UnitDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Logistic\Master\Product\ProductCategory;
+use App\Models\Rsmh\Sakti\InterkoneksiSaktiCoa;
+use App\Models\Rsmh\Sakti\InterkoneksiSaktiKbki;
 
 class Product extends Model
 {
@@ -20,6 +22,10 @@ class Product extends Model
         'type',
         'kode_simrs',
         'kode_sakti',
+        'interkoneksi_sakti_persentase_tkdn',
+        'interkoneksi_sakti_kategori_pdn',
+        'interkoneksi_sakti_kbki_id',
+        'interkoneksi_sakti_coa_id',
     ];
 
     protected $guarded = ['id'];
@@ -80,6 +86,15 @@ class Product extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class, 'unit_id', 'id');
+    }
+
+    public function kbki()
+    {
+        return $this->belongsTo(InterkoneksiSaktiKbki::class, 'interkoneksi_sakti_kbki_id', 'id');
+    }
+    public function coa()
+    {
+        return $this->belongsTo(InterkoneksiSaktiCoa::class, 'interkoneksi_sakti_coa_id', 'id');
     }
 
     public function productCategories()

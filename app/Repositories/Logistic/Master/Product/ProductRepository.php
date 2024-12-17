@@ -47,6 +47,6 @@ class ProductRepository extends MasterDataRepository
 
     public static function datatable()
     {
-        return Product::with('unit', 'productCategories', 'productCategories.categoryProduct');
+        return Product::with('unit', 'kbki', 'coa', 'productCategories', 'productCategories.categoryProduct');
     }
 }

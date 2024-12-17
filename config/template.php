@@ -304,6 +304,36 @@ return [
 
         /*
         | ======================================
+        | ======== INTERKONEKSI SAKTI ==========
+        | ======================================
+        */
+        [
+            // 'id' => 'menu_admin'
+            'header' => 'Interkoneksi Sakti',
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Master Data',
+            'icon' => 'ki-duotone ki-category',
+            'submenu' => [
+                [
+                    'text' => 'KBKI',
+                    'route' => 'interkoneksi_sakti_kbki.index',
+                ],
+                [
+                    'text' => 'COA',
+                    'route' => 'interkoneksi_sakti_coa.index',
+                ],
+            ],
+        ],
+        [
+            'text' => 'Setting',
+            'route' => 'interkoneksi_sakti_setting.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+
+        /*
+        | ======================================
         | ========== GENERAL SETTING ===========
         | ======================================
         */

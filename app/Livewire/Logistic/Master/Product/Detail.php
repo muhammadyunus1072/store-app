@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\Logistic\Master\Product\Product;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Product\ProductCategoryRepository;
-
+use App\Repositories\Rsmh\Sakti\InterkoneksiSaktiCoa\InterkoneksiSaktiCoaRepository;
+use App\Repositories\Rsmh\Sakti\InterkoneksiSaktiKbki\InterkoneksiSaktiKbkiRepository;
+use App\Settings\InterkoneksiSaktiSetting;
 
 class Detail extends Component
 {
@@ -32,10 +34,19 @@ class Detail extends Component
     public $kode_simrs;
     public $kode_sakti;
 
+    public $interkoneksi_sakti_persentase_tkdn;
+    public $interkoneksi_sakti_kategori_pdn;
+    public $interkoneksi_sakti_kbki_id_choice = [];
+    public $interkoneksi_sakti_kbki_id;
+    public $interkoneksi_sakti_coa_id_choice = [];
+    public $interkoneksi_sakti_coa_id;
+
     public $category_products = [];
 
     public function mount()
     {
+        $this->loadInterkoneksiSaktiSetting();
+
         $this->type_choice = Product::TYPE_CHOICE;
         if ($this->objId) {
             $id = Crypt::decrypt($this->objId);
@@ -48,6 +59,11 @@ class Detail extends Component
             $this->unit_id = Crypt::encrypt($product->unit_id);
             $this->unit_title = $product->unit->title;
 
+            $this->interkoneksi_sakti_persentase_tkdn = $product->interkoneksi_sakti_persentase_tkdn;
+            $this->interkoneksi_sakti_kategori_pdn = $product->interkoneksi_sakti_kategori_pdn;
+            $this->interkoneksi_sakti_kbki_id = $product->interkoneksi_sakti_kbki_id;
+            $this->interkoneksi_sakti_coa_id = $product->interkoneksi_sakti_coa_id;
+
             foreach ($product->productCategories as $product_category) {
                 $this->category_products[] = [
                     'id' => Crypt::encrypt($product_category->categoryProduct->id),
@@ -57,6 +73,17 @@ class Detail extends Component
         } else {
             $this->type = Product::TYPE_PRODUCT_WITH_STOCK;
         }
+    }
+
+    public function loadInterkoneksiSaktiSetting()
+    {
+        $this->interkoneksi_sakti_persentase_tkdn = InterkoneksiSaktiSetting::get(InterkoneksiSaktiSetting::BARANG_PERSENTASE_TKDN);
+        $this->interkoneksi_sakti_kategori_pdn = InterkoneksiSaktiSetting::get(InterkoneksiSaktiSetting::BARANG_KATEGORI_PDN);
+        $this->interkoneksi_sakti_kbki_id = InterkoneksiSaktiSetting::get(InterkoneksiSaktiSetting::BARANG_INTERKONEKSI_SAKTI_KBKI_ID);
+        $this->interkoneksi_sakti_coa_id = InterkoneksiSaktiSetting::get(InterkoneksiSaktiSetting::HEADER_INTERKONEKSI_SAKTI_COA_12_ID);
+
+        $this->interkoneksi_sakti_kbki_id_choice = InterkoneksiSaktiKbkiRepository::all()->pluck('nama', 'id');
+        $this->interkoneksi_sakti_coa_id_choice = InterkoneksiSaktiCoaRepository::all()->pluck('kode', 'id');
     }
 
     #[On('on-dialog-confirm')]
@@ -101,6 +128,10 @@ class Detail extends Component
             'kode_sakti' => $this->kode_sakti,
             'unit_id' => Crypt::decrypt($this->unit_id),
             'type' => $this->type,
+            'interkoneksi_sakti_persentase_tkdn' => $this->interkoneksi_sakti_persentase_tkdn,
+            'interkoneksi_sakti_kategori_pdn' => $this->interkoneksi_sakti_kategori_pdn,
+            'interkoneksi_sakti_kbki_id' => $this->interkoneksi_sakti_kbki_id,
+            'interkoneksi_sakti_coa_id' => $this->interkoneksi_sakti_coa_id,
         ];
 
         try {

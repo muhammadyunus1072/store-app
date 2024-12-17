@@ -65,6 +65,33 @@
             @enderror
         </div>
 
+        <div class="col-md-4 mb-4">
+            <label class='fw-bold'>Persentasi TKDN</label>
+            <input type="text" class="form-control currency @error('interkoneksi_sakti_persentase_tkdn') is-invalid @enderror" wire:model.blur="interkoneksi_sakti_persentase_tkdn" />
+        </div>
+        <div class="col-md-4 mb-4">
+            <label class='fw-bold'>Kategori TKDN</label>
+            <input type="text" class="form-control @error('interkoneksi_sakti_kategori_pdn') is-invalid @enderror" wire:model.blur="interkoneksi_sakti_kategori_pdn" />
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <label class='fw-bold'>KBKI</label>
+            <select class="form-select" wire:model="interkoneksi_sakti_kbki_id">
+                @foreach ($interkoneksi_sakti_kbki_id_choice as $value => $text)
+                    <option value="{{ $value }}">{{ $text }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <label class='fw-bold'>COA</label>
+            <select class="form-select" wire:model="interkoneksi_sakti_coa_id">
+                @foreach ($interkoneksi_sakti_coa_id_choice as $value => $text)
+                    <option value="{{ $value }}">{{ $text }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="col-md-12 mb-4">
             <div class="w-100" wire:ignore>
                 <label>Kategori Produk</label>
@@ -83,6 +110,8 @@
         Simpan
     </button>
 </form>
+
+@include('js.imask')
 
 @push('js')
     <script>

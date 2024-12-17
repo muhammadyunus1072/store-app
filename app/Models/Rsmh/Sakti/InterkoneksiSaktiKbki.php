@@ -2,10 +2,28 @@
 
 namespace App\Models\Rsmh\Sakti;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Sis\TrackHistory\HasTrackHistory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class InterkoneksiSaktiKbki extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes, HasTrackHistory;
+
+    protected $fillable = [
+        'nama',
+    ];
+
+    protected $guarded = ['id'];
+
+    public function isDeletable()
+    {
+        return true;
+    }
+
+    public function isEditable()
+    {
+        return true;
+    }
 }

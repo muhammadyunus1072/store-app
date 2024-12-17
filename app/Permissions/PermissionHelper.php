@@ -32,6 +32,7 @@ class PermissionHelper
         'AccessFinance' => AccessFinance::class,
         'AccessLogistic' => AccessLogistic::class,
         'AccessPurchasing' => AccessPurchasing::class,
+        'AccessInterkoneksiSakti' => AccessInterkoneksiSakti::class,
     ];
 
     const ACCESS_GROUPS = [
@@ -40,6 +41,7 @@ class PermissionHelper
         'Keuangan' => AccessFinance::ALL,
         'Logistik' => AccessLogistic::ALL,
         'Pembelian' => AccessPurchasing::ALL,
+        'InterKoneksi Sakti' => AccessInterkoneksiSakti::ALL,
     ];
 
     const ACCESS_ALL = [
@@ -48,6 +50,7 @@ class PermissionHelper
         ...AccessFinance::ALL,
         ...AccessLogistic::ALL,
         ...AccessPurchasing::ALL,
+        ...AccessInterkoneksiSakti::ALL,
     ];
 
     const ACCESS_TYPE_ALL = [
@@ -56,6 +59,7 @@ class PermissionHelper
         ...AccessFinance::TYPE_ALL,
         ...AccessLogistic::TYPE_ALL,
         ...AccessPurchasing::TYPE_ALL,
+        ...AccessInterkoneksiSakti::TYPE_ALL,
     ];
 
     const ACCESS_TRANSLATE = [
@@ -64,6 +68,7 @@ class PermissionHelper
         ...AccessFinance::TRANSLATE,
         ...AccessLogistic::TRANSLATE,
         ...AccessPurchasing::TRANSLATE,
+        ...AccessInterkoneksiSakti::TRANSLATE,
     ];
 
     /*

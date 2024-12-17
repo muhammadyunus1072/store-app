@@ -37,3 +37,5 @@ Route::group([], __DIR__ . '/web/Finance/Master.php');
 
 Route::group([], __DIR__ . '/web/Document/Master.php');
 Route::group([], __DIR__ . '/web/Document/Transaction.php');
+
+Route::group([], __DIR__ . '/web/Rsmh/InterkoneksiSakti.php');

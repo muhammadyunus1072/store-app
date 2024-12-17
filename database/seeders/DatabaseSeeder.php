@@ -18,6 +18,7 @@ use Database\Seeders\Core\RolesAndPermissionsSeeder;
 use Database\Seeders\Core\RoleSeeder;
 use Database\Seeders\Core\UserSeeder;
 use Database\Seeders\Core\UserWarehouseSeeder;
+use Database\Seeders\InterkoneksiSakti\InterkoneksiSaktiSettingSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -63,6 +64,11 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,
             CategorySupplierSeeder::class,
             Purchasing\SettingSeeder::class,
+        ]);
+
+        // Interkoneksi Sakti Seeder
+        $this->call([
+            InterkoneksiSaktiSettingSeeder::class,
         ]);
     }
 }

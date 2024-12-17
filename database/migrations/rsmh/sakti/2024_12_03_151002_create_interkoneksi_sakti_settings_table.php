@@ -36,7 +36,7 @@ return new class extends Migration
         }
 
         $table->unsignedBigInteger('barang_interkoneksi_sakti_kbki_id')->nullable();
-        $table->double("barang_presentase_tkdn")->nullable();
+        $table->double("barang_persentase_tkdn")->nullable();
         $table->string("barang_kategori_pdn")->nullable();
         $table->string("barang_kode_uakpb")->nullable();
 

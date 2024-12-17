@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Livewire\Logistic\Master\Product;
+namespace App\Livewire\Rsmh\Sakti\InterkoneksiSaktiKbki;
 
 use App\Helpers\General\Alert;
-use App\Permissions\AccessLogistic;
+use App\Models\Rsmh\Sakti\InterkoneksiSaktiKbki;
+use App\Permissions\AccessInterkoneksiSakti;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Traits\Livewire\WithDatatable;
@@ -11,7 +12,7 @@ use App\Permissions\PermissionHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
-use App\Repositories\Logistic\Master\Product\ProductRepository;
+use App\Repositories\Rsmh\Sakti\InterkoneksiSaktiKbki\InterkoneksiSaktiKbkiRepository;
 
 class Datatable extends Component
 {
@@ -26,8 +27,8 @@ class Datatable extends Component
     public function onMount()
     {
         $authUser = UserRepository::authenticatedUser();
-        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::PRODUCT, PermissionHelper::TYPE_UPDATE));
-        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessLogistic::PRODUCT, PermissionHelper::TYPE_DELETE));
+        $this->isCanUpdate = $authUser->hasPermissionTo(PermissionHelper::transform(AccessInterkoneksiSakti::INTERKONEKSI_SAKTI_KBKI, PermissionHelper::TYPE_UPDATE));
+        $this->isCanDelete = $authUser->hasPermissionTo(PermissionHelper::transform(AccessInterkoneksiSakti::INTERKONEKSI_SAKTI_KBKI, PermissionHelper::TYPE_DELETE));
     }
 
     #[On('on-delete-dialog-confirm')]
@@ -37,7 +38,7 @@ class Datatable extends Component
             return;
         }
         
-        ProductRepository::delete(Crypt::decrypt($this->targetDeleteId));
+        InterkoneksiSaktiKbkiRepository::delete(Crypt::decrypt($this->targetDeleteId));
         Alert::success($this, 'Berhasil', 'Data berhasil dihapus');
     }
 
@@ -75,7 +76,7 @@ class Datatable extends Component
                     $editHtml = "";
                     $id = Crypt::encrypt($item->id);
                     if ($this->isCanUpdate) {
-                        $editUrl = route('product.edit', $id);
+                        $editUrl = route('interkoneksi_sakti_kbki.edit', $id);
                         $editHtml = "<div class='col-auto mb-2'>
                             <a class='btn btn-primary btn-sm' href='$editUrl'>
                                 <i class='ki-duotone ki-notepad-edit fs-1'>
@@ -112,99 +113,19 @@ class Datatable extends Component
                 },
             ],
             [
-                'key' => 'name',
-                'name' => 'Nama Produk',
-            ],
-            [
-                'key' => 'kode_simrs',
-                'name' => 'Kode SIMRS',
-            ],
-            [
-                'key' => 'kode_sakti',
-                'name' => 'Kode SAKTI',
-            ],
-            [
-                'key' => 'type',
-                'name' => 'Tipe Produk',
-                'render' => function($item)
-                {
-                    return $item->getTranslatedType();
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Satuan',
-                'render' => function($item)
-                {
-                    return $item->unit->title;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Kategori Produk',
-                'render' => function($item)
-                {
-                    $html = "<ul style='list-style-type: disc; padding-left: 20px;'>";
-
-                    foreach ($item->productCategories as $index => $product_category) {
-                        $html .= "<li class='m-0 p-0'>
-                            <span class='mr-2'>".$product_category->categoryProduct->name."</span>
-                        </li>";
-                    }
-                    
-                    $html .= "</ul>";
-
-                    return $html;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Persentase TKDN',
-                'render' => function($item)
-                {
-                    return $item->interkoneksi_sakti_persentase_tkdn;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Kategori PDN',
-                'render' => function($item)
-                {
-                    return $item->interkoneksi_sakti_kategori_pdn;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'KBKI',
-                'render' => function($item)
-                {
-                    return $item->kbki->nama;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'COA',
-                'render' => function($item)
-                {
-                    return $item->coa->kode;
-                }
+                'key' => 'nama',
+                'name' => 'Nama',
             ],
         ];
     }
 
     public function getQuery(): Builder
     {
-        return ProductRepository::datatable();
+        return InterkoneksiSaktiKbkiRepository::datatable();
     }
 
     public function getView(): string
     {
-        return 'livewire.logistic.master.product.datatable';
+        return 'livewire.rsmh.sakti.interkoneksi-sakti-kbki.datatable';
     }
 }
