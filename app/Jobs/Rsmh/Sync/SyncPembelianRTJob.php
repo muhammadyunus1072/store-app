@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Rsmh\Sync;
 
+use App\Helpers\General\ImportDataHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -10,8 +11,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use App\Models\Rsmh\Sync\syncPembelianRT;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Models\Logistic\Master\Unit\UnitDetail;
-use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Purchasing\Master\Supplier\SupplierRepository;
@@ -19,11 +18,11 @@ use App\Repositories\Rsmh\GudangLog\PembelianRT\PembelianRTRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderRepository;
 use App\Repositories\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProductRepository;
 
-class SyncPembelianRTJob implements ShouldQueue
+class SyncPembelianRtJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    
+
     /**
      * Create a new job instance.
      */
@@ -32,8 +31,7 @@ class SyncPembelianRTJob implements ShouldQueue
         public $warehouseId,
         public $limit,
         public $offset,
-    )
-    {}
+    ) {}
 
     /**
      * Execute the job.
@@ -42,25 +40,21 @@ class SyncPembelianRTJob implements ShouldQueue
     {
         try {
             DB::beginTransaction();
-            
+
             $dataSupplier = PembelianRTRepository::getSync($this->limit, $this->offset);
-            foreach($dataSupplier as $key => $value)
-            {
-                $supplier = SupplierRepository::findBy(whereClause:[
+            foreach ($dataSupplier as $key => $value) {
+                $supplier = SupplierRepository::findBy(whereClause: [
                     ['kode_simrs', $value['kode_simrs']]
                 ]);
-                if(!$supplier)
-                {
-                    Log::info("No Supplier ".$value['kode_simrs']);
-                    syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
+                if (!$supplier) {
+                    Log::info("No Supplier " . $value['kode_simrs']);
                     continue;
                 }
-                
-                $obj = PurchaseOrderRepository::findBy(whereClause:[
+
+                $obj = PurchaseOrderRepository::findBy(whereClause: [
                     ['no_spk', $value['no_spk']]
                 ]);
-                if(!$obj)
-                {
+                if (!$obj) {
                     $validatedData = [
                         'company_id' => 1,
                         'supplier_id' => $supplier->id,
@@ -72,22 +66,19 @@ class SyncPembelianRTJob implements ShouldQueue
                     ];
                     $obj = PurchaseOrderRepository::create($validatedData);
                 }
-                $product = ProductRepository::findBy(whereClause:[
+                
+                $product = ProductRepository::findBy(whereClause: [
                     ['kode_simrs', $value['id_barang']]
                 ]);
-                $unit_detail = UnitDetailRepository::findBy(whereClause:[
-                    ['name', isset(UnitDetail::TRANSLATE_UNIT[strtoupper(strtoupper($value['unit_name']))]) ? UnitDetail::TRANSLATE_UNIT[strtoupper(strtoupper($value['unit_name']))] : strtoupper(strtoupper($value['unit_name']))]
+                $unit_detail = UnitDetailRepository::findBy(whereClause: [
+                    ['name', isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper(strtoupper($value['unit_name']))]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper(strtoupper($value['unit_name']))] : strtoupper(strtoupper($value['unit_name']))]
                 ]);
-                if(!$product)
-                {
-                    Log::info("No Product ".$value['product_name']." kode ".$value['id_barang']);
-                    syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
+                if (!$product) {
+                    Log::info("No Product " . $value['id_barang']);
                     continue;
-                } 
-                if(!$unit_detail)
-                {                        
-                    Log::info("No UNIT ".$value['unit_name']);
-                    syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
+                }
+                if (!$unit_detail) {
+                    Log::info("No UNIT " . $value['unit_name']);
                     continue;
                 }
 
@@ -102,7 +93,7 @@ class SyncPembelianRTJob implements ShouldQueue
                     'expired_date' => null
                 ];
                 $object = PurchaseOrderProductRepository::create($validatedData);
-                 
+
                 syncPembelianRT::onJobSuccess($this->syncPembelianRTId);
             }
 

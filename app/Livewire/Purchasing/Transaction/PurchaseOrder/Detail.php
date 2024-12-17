@@ -121,7 +121,7 @@ class Detail extends Component
 
                     // Core Information
                     'product_id' => Crypt::encrypt($purchaseOrderProduct->product_id),
-                    'product_text' => $purchaseOrderProduct->product_name,
+                    'product_text' => $purchaseOrderProduct->getText(),
                     "unit_detail_id" => $unitDetailId,
                     "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($purchaseOrderProduct->quantity),
@@ -129,6 +129,7 @@ class Detail extends Component
 
                     // Tax Information
                     'tax_id' => $purchaseOrderProduct->ppn ? Crypt::encrypt($purchaseOrderProduct->ppn->tax_id) : null,
+                    'tax_value' => $purchaseOrderProduct->ppn ? $purchaseOrderProduct->ppn->tax_value : null,
                     "is_ppn" => $purchaseOrderProduct->ppn ? true : false,
 
                     // Additional Information
@@ -236,7 +237,7 @@ class Detail extends Component
             $objId = $purchaseOrder->id;
 
             // ===============================
-            // ===== GOOD RECEIVE PRODUCT ====
+            // ===== PURCHASE ORDER PRODUCT ====
             // ===============================
             foreach ($this->purchaseOrderProductRemoves as $removedId) {
                 PurchaseOrderProductRepository::delete(Crypt::decrypt($removedId));
@@ -262,9 +263,9 @@ class Detail extends Component
                     $purchaseOrderProductId = $object->id;
                 }
 
-                // ====================================
-                // == GOOD RECEIVE ORDER PRODUCT TAX ==
-                // ====================================
+                // ======================================
+                // == PURCHASE ORDER ORDER PRODUCT TAX ==
+                // ======================================
                 $tax = PurchaseOrderProductTaxRepository::findBy(whereClause: [['purchase_order_product_id', $purchaseOrderProductId], ['tax_type', Tax::TYPE_PPN]]);
                 if ($tax) {
                     if (!$item['is_ppn']) {
@@ -279,9 +280,9 @@ class Detail extends Component
                     }
                 }
 
-                // =====================================
-                // == GOOD RECEIVE PRODUCT ATTACHMENT ==
-                // =====================================
+                // =======================================
+                // == PURCHASE ORDER PRODUCT ATTACHMENT ==
+                // =======================================
                 foreach ($item['uploadedFileRemoves'] as $item) {
                     $object = PurchaseOrderProductAttachmentRepository::delete(Crypt::decrypt($item));
                 }
@@ -394,7 +395,7 @@ class Detail extends Component
 
             // Core Information
             'product_id' => Crypt::encrypt($product->id),
-            'product_text' => $product->name,
+            'product_text' => $product->getText(),
             "unit_detail_id" => $unit_detail_choice[0]['id'],
             "unit_detail_choice" => $unit_detail_choice,
             "quantity" => 0,
@@ -402,6 +403,7 @@ class Detail extends Component
 
             // Tax Information
             'tax_id' => null,
+            'tax_value' => null,
             "is_ppn" => false,
 
             // Additional Information
@@ -445,6 +447,7 @@ class Detail extends Component
 
             // Tax Information
             'tax_id' => $copy['tax_id'],
+            'tax_value' => $copy['tax_value'],
             "is_ppn" => $copy['is_ppn'],
 
             // Additional Information
@@ -459,5 +462,14 @@ class Detail extends Component
         ];
 
         array_splice($this->purchaseOrderProducts, $index + 1, 0, [$item]);
+    }
+
+    public function priceIncludeTax($index)
+    {
+        $item = $this->purchaseOrderProducts[$index];
+        $taxValue = $item['tax_value'] !== null ? $item['tax_value']  : $this->taxPpnValue;
+
+        $this->purchaseOrderProducts[$index]['is_ppn'] = true;
+        $this->purchaseOrderProducts[$index]['price'] = NumberFormatter::round(NumberFormatter::imaskToValue($item['price']) * 100 / (100 + $taxValue));
     }
 }

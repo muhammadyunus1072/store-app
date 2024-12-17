@@ -11,6 +11,12 @@ trait WithDatatableExport
     public $showExport = true;
 
     abstract public function datatableExportFileName(): string;
+    abstract public function datatableExportTitle(): string;
+
+    public function datatableExportView()
+    {
+        return "app.export.livewire-datatable";
+    }
 
     public function datatableExportPaperOption()
     {
@@ -20,59 +26,44 @@ trait WithDatatableExport
         ];
     }
 
-    public function datatableExportFilter(): array
+    public function datatableExportSubtitle(): array
     {
         return [];
     }
 
-    function calculateColspans($columns)
-    {
-        $footerIndexes = $columns->keys()->filter(function ($key) use ($columns) {
-            return isset($columns[$key]['export_footer_total']) && $columns[$key]['export_footer_total'] !== false;
-        })->values()->toArray();
-
-        $colspans = [];
-        $totalColumns = count($columns);
-
-        foreach ($footerIndexes as $key => $footerIndex) {
-            $nextIndex = isset($footerIndexes[$key + 1]) ? $footerIndexes[$key + 1] : $totalColumns;
-            $colspan = $nextIndex - $footerIndex + ((!$key) ? $footerIndex : 0);
-            $colspans[$footerIndex] = [
-                'colspan' => $colspan,
-                'value' => 0
-            ];
-        }
-
-        return $colspans;
-    }
-
     public function datatableExport($type)
     {
-        
-        $columns = collect($this->getColumns())->filter(function ($item) {
+        $columns = array_filter($this->getColumns(), function ($item) {
             return !isset($item['export']) || $item['export'] !== false;
-        })->values();
-        
+        });
+
         $data = $this->datatableGetProcessedQuery()->get();
-        $filters = $this->datatableExportFilter();
+        $title = $this->datatableExportTitle();
+        $subtitles = $this->datatableExportSubtitle();
         $fileName = $this->datatableExportFileName();
         $paperOption = $this->datatableExportPaperOption();
-        $footerTotal = $this->calculateColspans($columns);
-        
-        $view = "app.export.livewire-datatable";
-        if ('excel' == $type) {
-            return Excel::download(new LivewireDatatableExport($view, $columns, $data, $filters, $type, $footerTotal, $fileName), "$fileName.xlsx");
-        } elseif ('pdf' == $type) {
+        $view = $this->datatableExportView();
+
+        if ($type == LivewireDatatableExport::EXPORT_EXCEL) {
+            return Excel::download(
+                new LivewireDatatableExport(
+                    $view,
+                    $title,
+                    $subtitles,
+                    $columns,
+                    $data
+                ),
+                "$fileName.xlsx"
+            );
+        } elseif ($type == LivewireDatatableExport::EXPORT_PDF) {
             $pdf = Pdf::loadview(
                 $view,
                 [
+                    'title' => $title,
+                    'subtitles' => $subtitles,
                     'columns' => $columns,
                     'data' => $data,
-                    'filters' => $filters,
                     'type' => $type,
-                    'footerTotal' => $footerTotal,
-                    'fileName' => $fileName,
-                    'numberFormat' => true,
                 ],
             );
 

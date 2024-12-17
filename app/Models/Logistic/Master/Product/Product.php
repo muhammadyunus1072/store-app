@@ -49,8 +49,6 @@ class Product extends Model
     {
         $object[$prefix . "_name"] = $this->name;
         $object[$prefix . "_type"] = $this->type;
-        $object[$prefix . "_kode_simrs"] = $this->kode_simrs;
-        $object[$prefix . "_kode_sakti"] = $this->kode_sakti;
 
         return $object;
     }
@@ -63,6 +61,11 @@ class Product extends Model
     public function isEditable()
     {
         return true;
+    }
+
+    public function getText()
+    {
+        return "{$this->name} / {$this->kode_simrs} / {$this->kode_sakti}";
     }
 
     public function getTranslatedType()
@@ -82,10 +85,5 @@ class Product extends Model
     public function productCategories()
     {
         return $this->hasMany(ProductCategory::class, 'product_id', 'id');
-    }
-
-    public function unitDetailChoices()
-    {
-        return $this->hasMany(UnitDetail::class, 'unit_id', 'unit_id');
     }
 }

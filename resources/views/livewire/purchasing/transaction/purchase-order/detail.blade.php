@@ -134,6 +134,14 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
+                                    <button type='button'
+                                        class="dropdown-item text-primary {{ $item['is_ppn'] ? 'd-none' : '' }}"
+                                        wire:click="priceIncludeTax({{ $index }})">
+                                        <i class="ki-solid ki-price-tag text-primary"></i>
+                                        Harga Termasuk PPN
+                                    </button>
+                                </li>
+                                <li>
                                     <button type="button" class="dropdown-item text-info"
                                         wire:click.prevent="duplicateDetail({{ $index }})">
                                         <i class="ki-solid ki-copy text-info"></i>

@@ -76,6 +76,11 @@ class PurchaseOrderProduct extends Model
         });
     }
 
+    public function getText()
+    {
+        return "{$this->product_name} / {$this->product->kode_simrs} / {$this->product->kode_sakti}";
+    }
+
     public function isDeletable()
     {
         return true;
@@ -118,7 +123,7 @@ class PurchaseOrderProduct extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id', 'id');
+        return $this->belongsTo(Product::class, 'product_id', 'id')->withTrashed();
     }
 
     public function unitDetail()

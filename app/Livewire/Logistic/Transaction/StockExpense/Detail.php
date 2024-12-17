@@ -87,7 +87,7 @@ class Detail extends Component
                 $this->stockExpenseProducts[] = [
                     'id' => Crypt::encrypt($stockExpenseProduct->id),
                     'product_id' => Crypt::encrypt($stockExpenseProduct->product_id),
-                    'product_text' => $stockExpenseProduct->product_name,
+                    'product_text' => $stockExpenseProduct->getText(),
                     "unit_detail_id" => $unitDetailId,
                     "unit_detail_choice" => $unitDetailChoice,
                     "quantity" => NumberFormatter::valueToImask($stockExpenseProduct->quantity),
@@ -256,7 +256,7 @@ class Detail extends Component
         $this->stockExpenseProducts[] = [
             'id' => null,
             'product_id' => $productId,
-            'product_text' => $product->name,
+            'product_text' => $product->getText(),
             "unit_detail_id" => $unitDetailChoice[0]['id'],
             "unit_detail_choice" => $unitDetailChoice,
             "quantity" => 0,

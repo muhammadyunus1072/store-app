@@ -6,13 +6,15 @@
                 <label>Export Data:</label>
             </div>
             <div class="col-auto">
-                <button class="btn btn-light-success btn-sm" wire:click="datatableExport('excel')">
+                <button class="btn btn-light-success btn-sm"
+                    wire:click="datatableExport('{{ App\Exports\LivewireDatatableExport::EXPORT_EXCEL }}')">
                     <i class="fa fa-file-excel"></i>
                     Export Excel
                 </button>
             </div>
             <div class="col-auto">
-                <button class="btn btn-light-danger btn-sm" wire:click="datatableExport('pdf')">
+                <button class="btn btn-light-danger btn-sm"
+                    wire:click="datatableExport('{{ App\Exports\LivewireDatatableExport::EXPORT_PDF }}')">
                     <i class="fa fa-file-pdf"></i>
                     Export PDF
                 </button>

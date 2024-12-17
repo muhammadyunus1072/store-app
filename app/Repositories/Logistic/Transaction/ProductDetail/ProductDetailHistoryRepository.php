@@ -189,10 +189,10 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             }
 
             $query->addSelect(
-                DB::raw("SUM(quantity) $filter AS quantity_$key")
+                DB::raw("COALESCE(SUM(quantity) $filter, 0) AS quantity_$key")
             );
             $query->addSelect(
-                DB::raw("SUM(quantity * price) $filter AS value_$key")
+                DB::raw("COALESCE(SUM(quantity * price) $filter, 0) AS value_$key")
             );
         }
 

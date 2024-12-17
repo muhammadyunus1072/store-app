@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Logistic\Report\All\CurrentStock;
 
+use App\Exports\LivewireDatatableExport;
 use App\Helpers\General\ExportHelper;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -44,15 +45,12 @@ class Datatable extends Component
                 'render' => function ($item, $index) {
                     return $index + 1;
                 },
-                'export' => false,
-                'export_footer_total' => false,
             ],
             [
                 'sortable' => false,
                 'searchable' => false,
                 'key' => 'name',
                 'name' => 'Nama Produk',
-                'export_footer_total' => 'Total'
             ],
             [
                 'sortable' => false,
@@ -61,8 +59,6 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return $item->unit_detail_name;
                 },
-                'export' => true,
-                'export_footer_total' => false,
             ],
             [
                 'sortable' => false,
@@ -71,9 +67,19 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock_quantity - $item->quantity_stock_expense - $item->quantity_purchase_order);
                 },
-                'export_footer_total' => function($value, $index, $exportType) {
-                    return $exportType == ExportHelper::TYPE_PDF ? NumberFormatter::format($value) : $value;
-                }
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    $val = $item->stock_quantity - $item->quantity_stock_expense - $item->quantity_purchase_order;
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($val) : $val;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->stock_quantity - $item->quantity_stock_expense - $item->quantity_purchase_order;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -82,7 +88,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->quantity_purchase_order);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->quantity_purchase_order) : $item->quantity_purchase_order;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->quantity_purchase_order;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -91,7 +108,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->quantity_stock_expense * -1);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->quantity_stock_expense * -1) : $item->quantity_stock_expense * -1;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->quantity_stock_expense;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -100,7 +128,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock_quantity);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->stock_quantity) : $item->stock_quantity;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->stock_quantity;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -109,7 +148,19 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock_value - $item->value_stock_expense - $item->value_purchase_order);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    $val = $item->stock_value - $item->value_stock_expense - $item->value_purchase_order;
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($val) : $val;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->stock_value - $item->value_stock_expense - $item->value_purchase_order;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -118,7 +169,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value_purchase_order);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->value_purchase_order) : $item->value_purchase_order;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->value_purchase_order;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -127,7 +189,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->value_stock_expense * -1);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->value_stock_expense * -1) : $item->value_stock_expense * -1;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->value_stock_expense * -1;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -136,7 +209,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock_value);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->stock_value) : $item->stock_value;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->stock_value;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
         ];
     }
@@ -169,7 +253,12 @@ class Datatable extends Component
         return 'Laporan Stok Akhir ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
     }
 
-    function datatableExportFilter(): array
+    function datatableExportTitle(): string
+    {
+        return 'Laporan Stok Akhir';
+    }
+
+    function datatableExportSubtitle(): array
     {
         $productIds = collect($this->productIds)->map(function ($id) {
             return Crypt::decrypt($id);

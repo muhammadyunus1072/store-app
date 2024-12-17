@@ -73,12 +73,12 @@ class DatatableHeader extends Component
             ],
             [
                 "col" => 2,
-                "name" => "Total Jumlah Tranfer Masuk",
+                "name" => "Total Jumlah Transfer Masuk",
                 "value" => $incoming_tranfer_quantity
             ],
             [
                 "col" => 2,
-                "name" => "Total Jumlah Tranfer Keluar",
+                "name" => "Total Jumlah Transfer Keluar",
                 "value" => $outgoing_tranfer_quantity * -1
             ],
             [
@@ -105,12 +105,12 @@ class DatatableHeader extends Component
             ],
             [
                 "col" => 2,
-                "name" => "Total Nilai Tranfer Masuk",
+                "name" => "Total Nilai Transfer Masuk",
                 "value" => $incoming_tranfer_value
             ],
             [
                 "col" => 2,
-                "name" => "Total Nilai Tranfer Keluar",
+                "name" => "Total Nilai Transfer Keluar",
                 "value" => $outgoing_tranfer_value * -1
             ],
             [

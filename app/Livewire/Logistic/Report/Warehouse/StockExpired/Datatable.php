@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Logistic\Report\Warehouse\StockExpired;
 
+use App\Exports\LivewireDatatableExport;
 use App\Helpers\Core\UserStateHandler;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -140,7 +141,19 @@ class Datatable extends Component
                 'name' => 'Stok',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock_qty);
-                }
+                },
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->stock_qty) : $item->stock_qty;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->stock_qty;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -148,7 +161,19 @@ class Datatable extends Component
                 'name' => 'Nilai',
                 'render' => function ($item) {
                     return NumberFormatter::format($item->stock_value);
-                }
+                },
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->stock_value) : $item->stock_value;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->stock_value;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
         );
         return $columns;
@@ -183,7 +208,12 @@ class Datatable extends Component
         return 'Laporan Stok Expired ' . Carbon::parse($this->expiredDateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->expiredDateEnd)->format('Y-m-d');
     }
 
-    function datatableExportFilter(): array
+    function datatableExportTitle(): string
+    {
+        return 'Laporan Stok Expired';
+    }
+
+    function datatableExportSubtitle(): array
     {
         $productIds = collect($this->productIds)->map(function ($id) {
             return Crypt::decrypt($id);
@@ -202,20 +232,5 @@ class Datatable extends Component
             'Kategori Produk' => $categoryProductNames,
             'Kata Kunci' => $this->search,
         ];
-    }
-
-    function datatableExportEnableFooterTotal()
-    {
-        $colspan = 0;
-        if ($this->isInputProductCode) {
-            $colspan++;
-        }
-        if ($this->isInputProductExpiredDate) {
-            $colspan++;
-        }
-        if ($this->isInputProductBatch) {
-            $colspan++;
-        }
-        return [3 + $colspan, 4 + $colspan, 5 + $colspan, 6 + $colspan, 7 + $colspan, 8 + $colspan, 9 + $colspan, 10 + $colspan, 11 + $colspan];
     }
 }

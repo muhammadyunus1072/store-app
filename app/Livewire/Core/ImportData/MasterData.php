@@ -301,3 +301,4 @@ class MasterData extends Component
         return view('livewire.core.import-data.master-data');
     }
 }
+

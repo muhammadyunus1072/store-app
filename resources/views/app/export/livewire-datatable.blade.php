@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Data</title>
+    <title>Export</title>
     <style>
         .table-border {
             border-collapse: collapse;
@@ -27,12 +27,12 @@
         <thead>
             <tr>
                 <td colspan="{{ count($columns) }}" style="text-align: center; font-weight: bold;">
-                    {{ $fileName }}
+                    {{ $title }}
                 </td>
             </tr>
 
             {{-- FILTER --}}
-            @foreach ($filters as $key => $value)
+            @foreach ($subtitles as $key => $value)
                 @if ($value)
                     <tr>
                         <td colspan="{{ count($columns) }}" style="font-weight: bold;">
@@ -58,39 +58,28 @@
         </thead>
 
         <tbody>
-            @php
-                $isNumberFormat = $type == App\Helpers\General\ExportHelper::TYPE_PDF;
-            @endphp
-
+            {{-- CONTENT --}}
             @foreach ($data as $index => $item)
                 <tr>
                     @foreach ($columns as $i => $col)
                         @php
-                            if (!empty($footerTotal) && isset($footerTotal[$i])) 
-                            {    
-                                (isset($col['export_footer_total']) && $col['export_footer_total'] == true)
-                                    ? ($footerTotal[$i]['value'] += (float) str_replace(
-                                        ['.', ','],
-                                        ['', '.'],
-                                        isset($col['render']) ? $col['render']($item) : $col['key'],
-                                    ))
-                                    : null;
-                            }
+                            if (
+                                isset($columns[$i]['export_footer_type']) &&
+                                isset($columns[$i]['export_footer_data'])
+                            ) {
+                                if (
+                                    $columns[$i]['export_footer_type'] ==
+                                    App\Exports\LivewireDatatableExport::FOOTER_TYPE_SUM
+                                ) {
+                                    if (!isset($columns[$i]['export_footer_value'])) {
+                                        $columns[$i]['export_footer_value'] = 0;
+                                    }
 
-                            $cell_colspan = '';
-                            if (isset($col['colspan'])) {
-                                $cell_colspan = is_callable($col['colspan'])
-                                    ? call_user_func($col['colspan'], $item, $index)
-                                    : $col['colspan'];
-                                $cell_colspan = "colspan='{$cell_colspan}'";
-                            }
-
-                            $cell_rowspan = '';
-                            if (isset($col['rowspan'])) {
-                                $cell_rowspan = is_callable($col['rowspan'])
-                                    ? call_user_func($col['rowspan'], $item, $index)
-                                    : $col['rowspan'];
-                                $cell_rowspan = "rowspan='{$cell_rowspan}'";
+                                    $columns[$i]['export_footer_value'] += call_user_func(
+                                        $col['export_footer_data'],
+                                        $item,
+                                    );
+                                }
                             }
 
                             $cell_style = '';
@@ -110,48 +99,43 @@
                             }
                         @endphp
 
-                        @if(isset($col['export']) && is_callable($col['export']))
-                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
-                                {!! $cell_style !!}>
+                        @if (isset($col['export']) && is_callable($col['export']))
+                            <td {!! $cell_class !!} {!! $cell_style !!}>
                                 {!! call_user_func($col['export'], $item, $index, $type) !!}
                             </td>
                         @elseif (isset($col['render']) && is_callable($col['render']))
-                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
-                                {!! $cell_style !!}>
+                            <td {!! $cell_class !!} {!! $cell_style !!}>
                                 {!! call_user_func($col['render'], $item, $index, $type) !!}
                             </td>
                         @elseif (isset($col['key']))
-                            <td {!! $cell_colspan !!} {!! $cell_rowspan !!} {!! $cell_class !!}
-                                {!! $cell_style !!}>
+                            <td {!! $cell_class !!} {!! $cell_style !!}>
                                 {{ $item->{$col['key']} }}
                             </td>
                         @endif
                     @endforeach
                 </tr>
             @endforeach
+
+            {{-- FOOTER --}}
             <tr>
-                <td colspan="{{ count($columns) }}" style="border: 0px; padding:8px">
+                @foreach ($columns as $i => $col)
+                    @if (isset($columns[$i]['export_footer_type']) && isset($columns[$i]['export_footer_data']))
+                        @if (isset($col['export_footer_format']) && is_callable($col['export_footer_format']))
+                            <td>
+                                {!! call_user_func($col['export_footer_format'], $col['export_footer_value'], $type) !!}
+                            </td>
+                        @else
+                            <td>
+                                {{ $col['export_footer_value'] }}
+                            </td>
+                        @endif
+                    @else
+                        <td></td>
+                    @endif
+                @endforeach
             </tr>
         </tbody>
-        @if (!empty($footerTotal))
-            <tbody>
-                <tr>
-                    @foreach ($footerTotal as $index => $col)
-                        <th colspan="{{ $col['colspan'] }}">
-                            
-                            {{ isset($columns[$index]['export_footer_total']) 
-                                ? (is_callable($columns[$index]['export_footer_total']) 
-                                        ? $columns[$index]['export_footer_total']($col['value'], $index, $type) 
-                                        : ($columns[$index]['export_footer_total'] === true 
-                                            ? ($isNumberFormat ? number_format($col['value'], 0, '.', '.') : $col['value']) 
-                                            : $columns[$index]['export_footer_total'])
-                                    )
-                                : ($isNumberFormat ? number_format($col['value'], 0, '.', '.') : $col['value']) }}
-                        </th>
-                    @endforeach
-                </tr>
-            </tbody>
-        @endif
+
     </table>
 </body>
 

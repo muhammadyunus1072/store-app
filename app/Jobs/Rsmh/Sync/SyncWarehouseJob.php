@@ -17,7 +17,6 @@ class SyncWarehouseJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    
     /**
      * Create a new job instance.
      */
@@ -25,8 +24,7 @@ class SyncWarehouseJob implements ShouldQueue
         public $syncWarehouseId,
         public $limit,
         public $offset,
-    )
-    {}
+    ) {}
 
     /**
      * Execute the job.
@@ -35,20 +33,17 @@ class SyncWarehouseJob implements ShouldQueue
     {
         try {
             DB::beginTransaction();
-            
-            $dataSubBagian = SubBagianRepository::getSync($this->limit, $this->offset);
-            foreach($dataSubBagian as $key => $value)
-            {
-                $validatedData = [
-                    'name' => $value->name,
-                    'id_sub' => $value->id_sub,
-                    'id_bagian' => $value->id_bagian,
-                    'id_direktorat' => $value->id_direktorat,
-                ];
-                $obj = WarehouseRepository::createOrUpdate($validatedData);
+
+            $data = SubBagianRepository::getSync($this->limit, $this->offset);
+            foreach ($data as $item) {
+                WarehouseRepository::createOrUpdate([
+                    'name' => $item->name,
+                    'id_sub' => $item->id_sub,
+                    'id_bagian' => $item->id_bagian,
+                    'id_direktorat' => $item->id_direktorat,
+                ]);
                 SyncWarehouse::onJobSuccess($this->syncWarehouseId);
             }
-
 
             DB::commit();
         } catch (\Exception $exception) {

@@ -29,6 +29,9 @@ class Detail extends Component
     public $unit_id;
     public $unit_title;
 
+    public $kode_simrs;
+    public $kode_sakti;
+
     public $category_products = [];
 
     public function mount()
@@ -40,12 +43,14 @@ class Detail extends Component
 
             $this->name = $product->name;
             $this->type = $product->type;
+            $this->kode_simrs = $product->kode_simrs;
+            $this->kode_sakti = $product->kode_sakti;
             $this->unit_id = Crypt::encrypt($product->unit_id);
             $this->unit_title = $product->unit->title;
 
             foreach ($product->productCategories as $product_category) {
                 $this->category_products[] = [
-                    'id' => Crypt::encrypt($product_category->categoryProduct_id),
+                    'id' => Crypt::encrypt($product_category->categoryProduct->id),
                     'text' => $product_category->categoryProduct->name,
                 ];
             }
@@ -88,14 +93,12 @@ class Detail extends Component
 
     public function store()
     {
-        if (count($this->category_products) == 0) {
-            Alert::fail($this, "Gagal", "Kategori Produk Belum Diinput");
-            return;
-        }
         $this->validate();
 
         $validatedData = [
             'name' => $this->name,
+            'kode_simrs' => $this->kode_simrs,
+            'kode_sakti' => $this->kode_sakti,
             'unit_id' => Crypt::decrypt($this->unit_id),
             'type' => $this->type,
         ];

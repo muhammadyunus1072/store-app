@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Logistic\Report\Warehouse\StockExpense;
 
+use App\Exports\LivewireDatatableExport;
 use Carbon\Carbon;
 use Livewire\Component;
 use Illuminate\Support\Facades\Crypt;
@@ -98,7 +99,6 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return $item->unit_detail_name;
                 },
-                'export_footer_total' => 'Total',
             ],
             [
                 'sortable' => false,
@@ -107,7 +107,18 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return NumberFormatter::format($item->converted_quantity);
                 },
-                'export_footer_total' => true,
+
+                // EXPORT ATTRIBUTE
+                'export' => function ($item, $index, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($item->converted_quantity) : $item->converted_quantity;
+                },
+                'export_footer_type' => LivewireDatatableExport::FOOTER_TYPE_SUM,
+                'export_footer_data' => function ($item) {
+                    return $item->converted_quantity;
+                },
+                'export_footer_format' => function ($footerValue, $exportType) {
+                    return $exportType == LivewireDatatableExport::EXPORT_PDF ? NumberFormatter::format($footerValue) : $footerValue;
+                },
             ],
             [
                 'sortable' => false,
@@ -117,7 +128,6 @@ class Datatable extends Component
                 'render' => function ($item) {
                     return $item->main_unit_detail_name;
                 },
-                'export_footer_total' => ' ',
             ],
         ];
     }
@@ -151,7 +161,12 @@ class Datatable extends Component
         return 'Laporan Pengeluaran Gudang ' . Carbon::parse($this->dateStart)->format('Y-m-d') . ' sd ' . Carbon::parse($this->dateEnd)->format('Y-m-d');
     }
 
-    function datatableExportFilter(): array
+    function datatableExportTitle(): string
+    {
+        return 'Laporan Pengeluaran Gudang';
+    }
+
+    function datatableExportSubtitle(): array
     {
         $productIds = collect($this->productIds)->map(function ($id) {
             return Crypt::decrypt($id);

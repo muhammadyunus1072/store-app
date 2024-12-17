@@ -37,4 +37,12 @@ class PurchaseOrderRepository extends MasterDataRepository
                 });
             });
     }
+
+    public static function deleteWithEmptyProducts()
+    {
+        $data = PurchaseOrder::whereDoesntHave('purchaseOrderProducts')->get();
+        foreach ($data as $item) {
+            $item->delete();
+        }
+    }
 }

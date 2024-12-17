@@ -62,6 +62,11 @@ return [
             'icon' => 'ki-duotone ki-arrow-right',
         ],
         [
+            'text' => 'Import Data - Master',
+            'route'  => 'i_master_data_logistic.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
             // 'id' => 'menu_admin'
             'text' => 'Master Data',
             'icon' => 'ki-duotone ki-category',
@@ -154,6 +159,16 @@ return [
                 [
                     'text' => 'Pengeluaran',
                     'route'  => 'r_stock_expense_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Permintaan Masuk',
+                    'route'  => 'r_stock_request_in_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                [
+                    'text' => 'Permintaan Keluar',
+                    'route'  => 'r_stock_request_out_warehouse.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 [
@@ -321,11 +336,6 @@ return [
                 [
                     'text' => 'Akses',
                     'route' => 'permission.index',
-                ],
-                [
-                    'text' => 'Import Data',
-                    'route'  => 'import_data_logistic.index',
-                    'icon' => 'ki-duotone ki-setting-2',
                 ],
             ],
         ],

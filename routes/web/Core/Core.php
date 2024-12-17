@@ -10,8 +10,6 @@ use App\Http\Controllers\Core\RoleController;
 use App\Http\Controllers\Core\DashboardController;
 use App\Http\Controllers\Core\SettingController;
 
-use App\Http\Controllers\Core\ImportDataController;
-
 use App\Http\Controllers\Logistic\Master\WarehouseController;
 use App\Http\Controllers\Finance\Master\TaxController;
 
@@ -81,9 +79,5 @@ Route::middleware(['auth', 'access_permission'])->group(function () {
         // Purchasing 
         Route::get('/setting_purchasing', 'purchasing')->name('setting_purchasing.index');
         Route::get('/setting_purchasing/tax/get', [TaxController::class, 'search'])->name('setting_purchasing.get.tax');
-    });
-
-    Route::group(["controller" => ImportDataController::class, "prefix" => "import_data_logistic", "as" => "import_data_logistic."], function () {
-        Route::get('/', 'index')->name('index');
     });
 });

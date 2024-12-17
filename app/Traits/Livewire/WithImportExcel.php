@@ -3,11 +3,11 @@
 namespace App\Traits\Livewire;
 
 use Exception;
-use App\Imports\ImportExcel;
 use Livewire\WithFileUploads;
+use App\Imports\ImportExcel;
 use App\Helpers\General\Alert;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 trait WithImportExcel
@@ -16,19 +16,11 @@ trait WithImportExcel
 
     public $import_excel = [];
 
-    public function onMount() {}
-
-    public function mount()
-    {
-        $this->onMount();
-    }
-
     public function storeImport($index)
     {
-
         try {
             DB::beginTransaction();
-            
+
             if (!isset($this->import_excel[$index])) {
                 Alert::fail($this, "Gagal", "Gagal Menyimpan Data");
                 return;
@@ -38,19 +30,38 @@ trait WithImportExcel
                 return;
             }
 
-            $import_excel = $this->import_excel[$index];
-            if ($import_excel['data']) {
-                $path = $import_excel['data']->store('temp');
+            $importItem = $this->import_excel[$index];
 
-                $formatFunction = $this->{$import_excel['format']}();
+            // CALLBACK: onImportStart
+            if (isset($importItem['onImportStart'])) {
+                if (is_callable([$this, $importItem['onImportStart']])) {
+                    call_user_func([$this, $importItem['onImportStart']]);
+                } else if (is_callable([$this, $importItem['onImportStart']])) {
+                    call_user_func($importItem['onImportStart']);
+                }
+            }
 
-                $importInstance = new ImportExcel(
-                    $formatFunction,
-                    isset($import_excel['skip_rows']) ? $import_excel['skip_rows'] : null
+            // CALLBACK: onImport
+            if ($importItem['data']) {
+                $path = $importItem['data']->store('temp');
+                Excel::import(
+                    new ImportExcel(
+                        $this,
+                        $importItem['onImport'],
+                        isset($importItem['skip_rows']) ? $importItem['skip_rows'] : null
+                    ),
+                    Storage::path($path)
                 );
-
-                Excel::import($importInstance, Storage::path($path));
                 Storage::delete($path);
+            }
+
+            // CALLBACK: onImportDone
+            if (isset($importItem['onImportDone'])) {
+                if (is_callable([$this, $importItem['onImportDone']])) {
+                    call_user_func([$this, $importItem['onImportDone']]);
+                } else if (is_callable([$this, $importItem['onImportDone']])) {
+                    call_user_func($importItem['onImportDone']);
+                }
             }
 
             DB::commit();
@@ -64,10 +75,5 @@ trait WithImportExcel
             DB::rollBack();
             Alert::fail($this, "Gagal", $e->getMessage());
         }
-    }
-
-    public function render()
-    {
-        return view($this->getView());
     }
 }

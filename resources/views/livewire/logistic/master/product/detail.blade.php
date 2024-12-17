@@ -12,6 +12,28 @@
         </div>
 
         <div class="col-md-4 mb-4">
+            <label>Kode SIMRS</label>
+            <input type="text" class="form-control @error('kode_simrs') is-invalid @enderror" wire:model.blur="kode_simrs" />
+
+            @error('kode_simrs')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <label>Kode SAKTI</label>
+            <input type="text" class="form-control @error('kode_sakti') is-invalid @enderror" wire:model.blur="kode_sakti" />
+
+            @error('kode_sakti')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <div class="col-md-4 mb-4">
             <label>Tipe Produk</label>
             <select class="form-select @error('type') is-invalid @enderror" wire:model.blur="type">
                 @foreach ($type_choice as $key => $val)

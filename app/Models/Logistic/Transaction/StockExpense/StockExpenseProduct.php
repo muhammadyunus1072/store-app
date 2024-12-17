@@ -67,6 +67,11 @@ class StockExpenseProduct extends Model
         return true;
     }
 
+    public function getText()
+    {
+        return "{$this->product_name} / {$this->product->kode_simrs} / {$this->product->kode_sakti}";
+    }
+
     public function saveConvertResult()
     {
         $convertResult = StockHandler::convertUnitPrice($this->quantity, 0, $this->unit_detail_id);
@@ -93,7 +98,7 @@ class StockExpenseProduct extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id', 'id');
+        return $this->belongsTo(Product::class, 'product_id', 'id')->withTrashed();
     }
 
     public function unitDetail()
