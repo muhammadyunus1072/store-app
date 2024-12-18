@@ -327,6 +327,16 @@ return [
             ],
         ],
         [
+            'text' => 'Detail Barang',
+            'route' => 'interkoneksi_sakti_detail_barang.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
+            'text' => 'Detail Coa',
+            'route' => 'interkoneksi_sakti_detail_coa.index',
+            'icon' => 'ki-duotone ki-arrow-right',
+        ],
+        [
             'text' => 'Setting',
             'route' => 'interkoneksi_sakti_setting.index',
             'icon' => 'ki-duotone ki-arrow-right',

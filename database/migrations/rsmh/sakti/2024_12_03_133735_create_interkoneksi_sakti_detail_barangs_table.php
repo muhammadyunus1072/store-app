@@ -47,7 +47,7 @@ return new class extends Migration
         $table->string("kode_uakpb")->nullable();
         $table->string("kode_kbki")->nullable();
         $table->string("kode_coa")->nullable();
-        $table->double("presentase_tkdn")->nullable();
+        $table->double("persentase_tkdn")->nullable();
         $table->string("kategori_pdn")->nullable();
 
         $table->bigInteger("created_by")->unsigned()->nullable();

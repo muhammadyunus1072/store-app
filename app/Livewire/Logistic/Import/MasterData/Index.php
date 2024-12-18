@@ -5,14 +5,15 @@ namespace App\Livewire\Logistic\Import\MasterData;
 use Exception;
 use Livewire\Component;
 use App\Helpers\General\Alert;
-use App\Helpers\General\ImportDataHelper;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Traits\Livewire\WithImportExcel;
+use App\Helpers\General\ImportDataHelper;
 use App\Models\Logistic\Master\Product\Product;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
+use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Rsmh\GudangLog\SubBagian\SubBagianRepository;
-use App\Repositories\Rsmh\GudangLog\Suplier\SuplierRepository;
 use App\Repositories\Rsmh\Sync\SyncSupplier\SyncSupplierRepository;
 use App\Repositories\Rsmh\Sync\SyncWarehouse\SyncWarehouseRepository;
 
@@ -113,6 +114,11 @@ class Index extends Component
         $product_kode_sakti = $row[1];
         $product_type = $row[2] == 'YA' ? Product::TYPE_PRODUCT_WITHOUT_STOCK : Product::TYPE_PRODUCT_WITH_STOCK;
         $product_name = $row[3];
+        if(!$product_name)
+        {
+            Log::debug("GIZI - Pasien No Product Name $product_name");
+            return null;
+        }
         $unit_name = isset(ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])]) ? ImportDataHelper::TRANSLATE_UNIT[strtoupper($row[4])] : strtoupper($row[4]);
 
         $product = ProductRepository::findBy(whereClause: [['kode_simrs', $product_kode_simrs]]);

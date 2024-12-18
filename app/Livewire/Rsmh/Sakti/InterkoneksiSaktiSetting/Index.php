@@ -17,7 +17,7 @@ class Index extends Component
 {
     public $barang_interkoneksi_sakti_kbki_id_choice = [];
     public $barang_interkoneksi_sakti_kbki_id;
-    public $barang_presentase_tkdn;
+    public $barang_persentase_tkdn;
     public $barang_kategori_pdn;
     public $barang_kode_uakpb;
 
@@ -43,7 +43,7 @@ class Index extends Component
         if($interkoneksi_sakti_setting)
         {
             $this->barang_interkoneksi_sakti_kbki_id = $interkoneksi_sakti_setting->barang_interkoneksi_sakti_kbki_id;
-            $this->barang_presentase_tkdn = $interkoneksi_sakti_setting->barang_presentase_tkdn;
+            $this->barang_persentase_tkdn = $interkoneksi_sakti_setting->barang_persentase_tkdn;
             $this->barang_kategori_pdn = $interkoneksi_sakti_setting->barang_kategori_pdn;
             $this->barang_kode_uakpb = $interkoneksi_sakti_setting->barang_kode_uakpb;
             $this->coa_vol_sub_output = $interkoneksi_sakti_setting->coa_vol_sub_output;
@@ -82,7 +82,7 @@ class Index extends Component
             {
                 InterkoneksiSaktiSettingRepository::update(1, [
                     'barang_interkoneksi_sakti_kbki_id' => $this->barang_interkoneksi_sakti_kbki_id,
-                    'barang_presentase_tkdn' => $this->barang_presentase_tkdn,
+                    'barang_persentase_tkdn' => $this->barang_persentase_tkdn,
                     'barang_kategori_pdn' => $this->barang_kategori_pdn,
                     'barang_kode_uakpb' => $this->barang_kode_uakpb,
                     'coa_vol_sub_output' => $this->coa_vol_sub_output,
@@ -99,7 +99,7 @@ class Index extends Component
             } else {
                 InterkoneksiSaktiSettingRepository::create([
                     'barang_interkoneksi_sakti_kbki_id' => $this->barang_interkoneksi_sakti_kbki_id,
-                    'barang_presentase_tkdn' => $this->barang_presentase_tkdn,
+                    'barang_persentase_tkdn' => $this->barang_persentase_tkdn,
                     'barang_kategori_pdn' => $this->barang_kategori_pdn,
                     'barang_kode_uakpb' => $this->barang_kode_uakpb,
                     'coa_vol_sub_output' => $this->coa_vol_sub_output,
