@@ -39,7 +39,7 @@ return new class extends Migration
 
         $table->string('name')->comment('Nama Pajak');
         $table->string('type')->comment('Jenis Pajak');
-        $table->double('value')->comment('Nilai Persen Pajak');
+        $table->decimal('value', 12,2)->comment('Nilai Persen Pajak');
         $table->boolean('is_active')->comment('Aktif / Tidak Aktif');
 
         $table->bigInteger("created_by")->unsigned()->nullable();

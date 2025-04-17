@@ -30,7 +30,8 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
         public $sourceWarehouseId,
         public $products,
         public $destinationCompanyId,
-        public $destinationWarehouseId,
+        public $destinationLocationId,
+        public $destinationLocationType,
     ) {}
 
     /**
@@ -38,6 +39,8 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
      */
     public function handle(): void
     {
+        logger('Job sedang berjalan secara sync');
+
         try {
             DB::beginTransaction();
 
@@ -51,6 +54,7 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
 
             if (empty($transaction)) {
                 // Create 
+
                 $transaction = TransactionStockRepository::create([
                     'status' => TransactionStock::STATUS_NOT_PROCESSED,
                     'transaction_type' => $this->transactionType,
@@ -58,11 +62,13 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
                     "source_company_id" => $this->sourceCompanyId,
                     "source_warehouse_id" => $this->sourceWarehouseId,
                     "destination_company_id" => $this->destinationCompanyId,
-                    "destination_warehouse_id" => $this->destinationWarehouseId,
+                    "destination_location_id" => $this->destinationLocationId,
+                    "destination_location_type" => $this->destinationLocationType,
                     'remarks_id' => $this->remarksId,
                     'remarks_type' => $this->remarksType,
                 ]);
-
+                logger("create TRANSACTION job");
+                logger($transaction);
                 foreach ($this->products as $item) {
                     TransactionStockProductRepository::create([
                         'transaction_stock_id' => $transaction->id,
@@ -86,7 +92,8 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
                     "source_company_id" => $this->sourceCompanyId,
                     "source_warehouse_id" => $this->sourceWarehouseId,
                     "destination_company_id" => $this->destinationCompanyId,
-                    "destination_warehouse_id" => $this->destinationWarehouseId,
+                    "destination_location_id" => $this->destinationLocationId,
+                    "destination_location_type" => $this->destinationLocationType,
                 ]);
                 $transaction->save();
 
@@ -139,7 +146,7 @@ class CreateUpdateTransactionStockJob implements ShouldQueue
             DB::commit();
 
             // Process Transaction
-            ProcessTransactionStockJob::dispatch();
+            ProcessTransactionStockJob::dispatchSync();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("ERROR CREATE OR UPDATE TRANSACTION STOCK JOB ({$this->remarksType} | ID: {$this->remarksId}) : " . $e->getMessage());

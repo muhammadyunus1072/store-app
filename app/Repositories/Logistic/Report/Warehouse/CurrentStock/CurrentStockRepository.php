@@ -3,6 +3,7 @@
 namespace App\Repositories\Logistic\Report\Warehouse\CurrentStock;
 
 use App\Models\Logistic\Master\Product\Product;
+use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Models\Logistic\Transaction\StockExpense\StockExpenseProduct;
 use App\Models\Logistic\Transaction\StockRequest\StockRequestProduct;
 use App\Models\Purchasing\Transaction\PurchaseOrder\PurchaseOrderProduct;
@@ -16,13 +17,17 @@ class CurrentStockRepository
         $dateEnd,
         $productIds,
         $categoryProductIds,
-        $warehouseId
+        $locationId,
+        $locationType = Warehouse::class,
     ) {
         // QUERY : LAST STOCK
         $queryLastStock = ProductDetailHistoryRepository::queryLastStock(
             thresholdDate: $dateEnd,
             groupBy: ['product_id'],
-            whereClause: [['warehouse_id', '=', $warehouseId]]
+            whereClause: [
+                ['location_id', '=', $locationId],
+                ['location_type', '=', $locationType],
+                ]
         );
 
         // QUERY : TRANSACTIONS
@@ -36,7 +41,10 @@ class CurrentStockRepository
                 'stock_request_in' => [['product_detail_histories.remarks_type', '=', StockRequestProduct::class], ['quantity', '>', 0]],
             ],
             groupBy: ['product_id'],
-            whereClause: [['warehouse_id', '=', $warehouseId]]
+            whereClause: [
+                ['location_id', '=', $locationId],
+                ['location_type', '=', $locationType],
+                ]
         );
 
         return Product::select(

@@ -49,6 +49,8 @@ trait IntegerRuleHandler
                     'product_name' => $item['product_name'],
                     'source_company_id' => $item['source_company_id'],
                     'source_warehouse_id' => $item['source_warehouse_id'],
+                    'destination_location_id' => $item['destination_location_id'],
+                    'destination_location_type' => $item['destination_location_type'],
                     'quantity' => $resultConvert['quantity'],
                     'unit_detail_id' => $resultConvert['unit_detail_id'],
                     'transaction_date' => $item['transaction_date'],
@@ -82,6 +84,8 @@ trait IntegerRuleHandler
                     'product_name' => $item['product_name'],
                     'source_company_id' => $item['source_company_id'],
                     'source_warehouse_id' => $item['source_warehouse_id'],
+                    'destination_location_id' => $item['destination_location_id'],
+                    'destination_location_type' => $item['destination_location_type'],
                     'quantity' => $resultConvert['quantity'],
                     'unit_detail_id' => $resultConvert['unit_detail_id'],
                     'transaction_date' => $item['transaction_date'],
@@ -115,6 +119,8 @@ trait IntegerRuleHandler
                         'product_name' => $item['product_name'],
                         'source_company_id' => $item['source_company_id'],
                         'source_warehouse_id' => $item['source_warehouse_id'],
+                        'destination_location_id' => $item['destination_location_id'],
+                        'destination_location_type' => $item['destination_location_type'],
                         'quantity' => $resultConvert['quantity'],
                         'unit_detail_id' => $resultConvert['unit_detail_id'],
                         'transaction_date' => $item['transaction_date'],
@@ -133,6 +139,8 @@ trait IntegerRuleHandler
                             'product_name' => $item['product_name'],
                             'source_company_id' => $item['source_company_id'],
                             'source_warehouse_id' => $item['source_warehouse_id'],
+                            'destination_location_id' => $item['destination_location_id'],
+                            'destination_location_type' => $item['destination_location_type'],
                             'quantity' => $resultConvert['quantity'] - 1,
                             'unit_detail_id' => $resultConvert['unit_detail_id'],
                             'transaction_date' => $item['transaction_date'],
@@ -149,6 +157,8 @@ trait IntegerRuleHandler
                             'product_name' => $item['product_name'],
                             'source_company_id' => $item['source_company_id'],
                             'source_warehouse_id' => $item['source_warehouse_id'],
+                            'destination_location_id' => $item['destination_location_id'],
+                            'destination_location_type' => $item['destination_location_type'],
                             'quantity' => 1,
                             'unit_detail_id' => $resultConvert['unit_detail_id'],
                             'transaction_date' => $item['transaction_date'],
@@ -171,13 +181,15 @@ trait IntegerRuleHandler
     public static function integerRuleAdd($data)
     {
         $convertedData = self::convertProductsToIntegerRule($data);
-
+        logger('INTEGER CONVERT');
+        logger($convertedData);
         foreach ($convertedData as $groupProduct) {
             foreach ($groupProduct as $item) {
                 StockHandler::createStock(
                     productId: $item['product_id'],
                     companyId: $item['source_company_id'],
-                    warehouseId: $item['source_warehouse_id'],
+                    locationId : $item['destination_location_id'],
+                    locationType : $item['destination_location_type'],
                     transactionDate: $item['transaction_date'],
                     quantity: $item['quantity'],
                     price: $item['price'],

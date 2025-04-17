@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'username',
         'email',
+        'phone',
         'password',
     ];
 
@@ -64,6 +65,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     public function userWarehouses()
+    {
+        return $this->hasMany(UserWarehouse::class, 'user_id', 'id');
+    }
+    public function displayRacks()
+    {
+        return $this->belongsToMany(Warehouse::class, 'user_display_racks', 'user_id', 'warehouse_id')->whereNull('user_display_racks.deleted_at');
+    }
+
+    public function userdisplayRacks()
     {
         return $this->hasMany(UserWarehouse::class, 'user_id', 'id');
     }

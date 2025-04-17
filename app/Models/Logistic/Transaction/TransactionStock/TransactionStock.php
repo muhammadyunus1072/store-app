@@ -34,7 +34,8 @@ class TransactionStock extends Model
         "source_company_id",
         "source_warehouse_id",
         "destination_company_id",
-        "destination_warehouse_id",
+        "destination_location_id",
+        "destination_location_type",
         'remarks_id',
         'remarks_type',
     ];
@@ -52,7 +53,10 @@ class TransactionStock extends Model
     {
         try {
             $data = $this->prepareData();
-
+            logger('HERE');
+            logger($this);
+            logger($data);
+            logger('end here');
             if ($this->transaction_type == self::TYPE_ADD) {
                 StockHandler::add($data);
             } else if ($this->transaction_type == self::TYPE_TRANSFER) {
@@ -93,7 +97,8 @@ class TransactionStock extends Model
                 'source_company_id' => $this->source_company_id,
                 'source_warehouse_id' => $this->source_warehouse_id,
                 'destination_company_id' => $this->destination_company_id,
-                'destination_warehouse_id' => $this->destination_warehouse_id,
+                'destination_location_id' => $this->destination_location_id,
+                'destination_location_type' => $this->destination_location_type,
 
                 // Product Information
                 'product_id' => $item->product_id,

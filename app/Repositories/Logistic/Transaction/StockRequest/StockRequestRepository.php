@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Logistic\Transaction\StockRequest;
 
+use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Repositories\MasterDataRepository;
 use App\Models\Logistic\Transaction\StockRequest\StockRequest;
 
@@ -12,11 +13,12 @@ class StockRequestRepository extends MasterDataRepository
         return StockRequest::class;
     }
 
-    public static function datatable($dateStart, $dateEnd, $warehouseId, $companyId)
+    public static function datatable($dateStart, $dateEnd, $locationId, $locationType = Warehouse::class, $companyId)
     {
         return StockRequest::with('transactionStock')
-            ->when($warehouseId, function ($query) use ($warehouseId) {
-                $query->where('destination_warehouse_id', $warehouseId);
+            ->when($locationId, function ($query) use ($locationId, $locationType) {
+                $query->where('destination_location_id', $locationId)
+                ->where('destination_location_type', $locationType);
             })
             ->when($companyId, function ($query) use ($companyId) {
                 $query->where('destination_company_id', $companyId);

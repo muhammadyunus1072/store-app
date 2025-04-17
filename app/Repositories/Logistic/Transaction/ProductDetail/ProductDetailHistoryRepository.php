@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Logistic\Transaction\ProductDetail;
 
+use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Models\Logistic\Transaction\ProductDetail\ProductDetailHistory;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\MasterDataRepository;
@@ -33,6 +34,7 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             'product_details.code',
             'companies.name as company_name',
             'warehouses.name as warehouse_name',
+            'display_racks.name as display_rack_name',
             'products.name as product_name',
             'unit_details.name as unit_detail_name',
         )
@@ -42,8 +44,11 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             ->join('companies', function ($join) {
                 $join->on('companies.id', '=', 'product_details.company_id');
             })
-            ->join('warehouses', function ($join) {
-                $join->on('warehouses.id', '=', 'product_details.warehouse_id');
+            ->leftJoin('warehouses', function ($join) {
+                $join->on('warehouses.id', '=', 'product_details.location_id');
+            })
+            ->leftJoin('display_racks', function ($join) {
+                $join->on('display_racks.id', '=', 'product_details.location_id');
             })
             ->join('products', function ($join) {
                 $join->on('products.id', '=', 'product_details.product_id');
@@ -95,7 +100,8 @@ class ProductDetailHistoryRepository extends MasterDataRepository
                         $query->where('company_id', $companyId);
                     })
                     ->when($warehouseId != null, function ($query) use ($warehouseId) {
-                        $query->where('warehouse_id', $warehouseId);
+                        $query->where('location_id', $warehouseId)
+                        ->where('location_type', Warehouse::class);
                     });
             });
 
@@ -107,10 +113,8 @@ class ProductDetailHistoryRepository extends MasterDataRepository
             ->where('rn', '=', 1)
             ->get();
     }
-
     public static function queryLastStock($thresholdDate, $groupBy, $whereClause = [])
     {
-        // Query Row Number
         $query = ProductDetailHistory::select(
             'product_detail_histories.last_stock',
             'product_details.price',
@@ -121,42 +125,40 @@ class ProductDetailHistoryRepository extends MasterDataRepository
                     ->whereNull('product_details.deleted_at');
             })
             ->where('transaction_date', '<=', "$thresholdDate 23:59:59");
-
+    
         foreach ($whereClause as $col) {
             $query->where($col[0], $col[1], $col[2]);
         }
-
+    
         foreach ($groupBy as $column) {
-            if ($column == 'price' || $column == 'last_stock') {
-                continue;
+            if (!in_array($column, ['price', 'last_stock'])) {
+                $query->addSelect($column);
             }
-
-            $query->addSelect($column);
         }
-        // Query Last Row Number
-        $query = DB::table($query, "stocks")
+    
+        $query = DB::query()->fromSub($query, 'stocks')
             ->select(
                 DB::raw('SUM(last_stock) as quantity'),
                 DB::raw('SUM(last_stock * price) as value')
-            )
-            ->where('rn', '=', 1);
-
+            );
+    
         foreach ($groupBy as $column) {
-            if ($column == 'code') {
-                $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
-            } elseif ($column == 'batch') {
+            if ($column == 'code' || $column == 'batch') {
                 $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
             } elseif ($column == 'expired_date') {
-                $query->addSelect(DB::raw("COALESCE($column, '0001-01-01') as $column"));
+                $query->addSelect(DB::raw("COALESCE($column, '1970-01-01') as $column"));
             } else {
                 $query->addSelect($column);
             }
-
+    
             $query->groupBy($column);
         }
+    
+        $query->where('rn', '=', 1);
+    
         return $query;
     }
-
+    
     public static function querySumTransactions($dateStart, $dateEnd, $remarksTypes, $groupBy, $whereClause = [])
     {
         $query = ProductDetailHistory::whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"])
@@ -164,52 +166,46 @@ class ProductDetailHistoryRepository extends MasterDataRepository
                 $join->on('product_details.id', '=', 'product_detail_histories.product_detail_id')
                     ->whereNull('product_details.deleted_at');
             });
-
+    
         // Handle Where Clause
         foreach ($whereClause as $col) {
             $query->where($col[0], $col[1], $col[2]);
         }
-
+    
         // Handle Remarks Type
         foreach ($remarksTypes as $key => $columns) {
-            $whereFilter = "";
-            $filter = "";
-
+            $conditions = [];
+    
             foreach ($columns as $col) {
-                if ($whereFilter != "") {
-                    $whereFilter .= " AND ";
-                }
-
-
-                $whereFilter .= "{$col[0]} {$col[1]} '{$col[2]}'";
+                $value = is_numeric($col[2]) ? $col[2] : DB::getPdo()->quote($col[2]);
+                $conditions[] = "{$col[0]} {$col[1]} {$value}";
             }
-
-            if ($whereFilter) {
-                $filter = "FILTER (WHERE $whereFilter)";
-            }
-
+    
+            $whereCase = implode(' AND ', $conditions);
+    
             $query->addSelect(
-                DB::raw("COALESCE(SUM(quantity) $filter, 0) AS quantity_$key")
+                DB::raw("COALESCE(SUM(CASE WHEN $whereCase THEN quantity ELSE 0 END), 0) AS quantity_$key")
             );
+    
             $query->addSelect(
-                DB::raw("COALESCE(SUM(quantity * price) $filter, 0) AS value_$key")
+                DB::raw("COALESCE(SUM(CASE WHEN $whereCase THEN quantity * price ELSE 0 END), 0) AS value_$key")
             );
         }
-
+    
         // Handle Group By
         foreach ($groupBy as $column) {
-            if ($column == 'code') {
+            if ($column === 'code' || $column === 'batch') {
                 $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
-            } elseif ($column == 'batch') {
-                $query->addSelect(DB::raw("COALESCE($column, '') as $column"));
-            } elseif ($column == 'expired_date') {
-                $query->addSelect(DB::raw("COALESCE($column, '0001-01-01') as $column"));
+            } elseif ($column === 'expired_date') {
+                $query->addSelect(DB::raw("COALESCE($column, '1970-01-01') as $column")); // Adjust from '0001-01-01'
             } else {
                 $query->addSelect($column);
             }
+    
             $query->groupBy($column);
         }
-
+    
         return $query;
     }
+    
 }

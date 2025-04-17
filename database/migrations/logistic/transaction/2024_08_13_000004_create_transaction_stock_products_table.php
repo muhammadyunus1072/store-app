@@ -50,11 +50,11 @@ return new class extends Migration
         $table->bigInteger("unit_detail_unit_id")->unsigned()->comment('UnitDetail Unit ID');
         $table->boolean('unit_detail_is_main')->default(false)->comment('UnitDetail Satuan Utama');
         $table->string('unit_detail_name')->comment('UnitDetail Satuan');
-        $table->double('unit_detail_value')->comment('UnitDetail Nilai Konversi');
+        $table->decimal('unit_detail_value', 12,2)->comment('UnitDetail Nilai Konversi');
 
-        $table->double('quantity')->comment('Jumlah Barang');
+        $table->decimal('quantity', 12,2)->comment('Jumlah Barang');
         $table->string('batch')->nullable()->comment('Kode Produksi Barang');
-        $table->double('price')->nullable()->comment('Harga Beli Satuan Barang');
+        $table->decimal('price', 12,2)->nullable()->comment('Harga Beli Satuan Barang');
         $table->string('code')->nullable()->comment('Kode Barang');
         $table->date('expired_date')->nullable()->comment('Tanggal Expired');
 

@@ -85,6 +85,10 @@
             <label>Kunci Persetujuan Pengeluaran </label>
             <input type="text" class="form-control" wire:model="setting.{{ SettingLogistic::APPROVAL_KEY_STOCK_EXPENSE }}" />
         </div>
+        <div class="col-md-4 mb-4">
+            <label>Kunci Persetujuan Stok Opname </label>
+            <input type="text" class="form-control" wire:model="setting.{{ SettingLogistic::APPROVAL_KEY_STOCK_OPNAME }}" />
+        </div>
     </div>
 
     <button type="submit" class="btn btn-success mt-3">

@@ -17,13 +17,8 @@ class Login extends Component
     #[Validate('required', message: 'Password Harus Diisi', onUpdate: false)]
     public $password;
 
-    #[Validate('required', message: 'Captcha Harus Diisi', onUpdate: false)]
-    #[Validate('captcha', message: 'Captcha Tidak Sesuai', onUpdate: false)]
-    public $captcha;
-
     public function store()
     {
-        $this->dispatch('reload-captcha');
         $this->validate();
 
         $user = UserRepository::findByUsernameOrEmail($this->usernameOrEmail);

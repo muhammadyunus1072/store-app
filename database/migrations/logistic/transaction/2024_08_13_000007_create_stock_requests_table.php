@@ -35,7 +35,8 @@ return new class extends Migration
         } else {
             $table->index('destination_company_id', 'stock_requests_destination_company_id_idx');
             $table->index('source_company_id', 'stock_requests_source_company_id_idx');
-            $table->index('destination_warehouse_id', 'stock_requests_destination_warehouse_id_idx');
+            $table->index('destination_location_id', 'stock_requests_destination_location_id_idx');
+            $table->index('destination_location_type', 'stock_requests_destination_location_type_idx');
             $table->index('source_warehouse_id', 'stock_requests_source_warehouse_id_idx');
             $table->index('number', 'stock_requests_number_idx');
             $table->index('transaction_date', 'stock_requests_transaction_date_idx');
@@ -45,8 +46,9 @@ return new class extends Migration
         $table->string('destination_company_name')->comment('Nama Perusahaan Destination');
 
         // Warehouse Destination Info
-        $table->bigInteger("destination_warehouse_id")->unsigned()->comment('Warehouse ID Destination');
-        $table->string('destination_warehouse_name')->comment('Nama Warehouse Destination');
+        $table->bigInteger("destination_location_id")->unsigned()->comment('Lokasi ID Destination');
+        $table->string('destination_location_type')->comment('Jenis Lokasi Destination');
+        $table->string('destination_location_name')->comment('Nama Lokasi Destination');
 
         // Company Info
         $table->bigInteger("source_company_id")->unsigned()->comment('Perusahaan Source ID');

@@ -33,6 +33,7 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
+            $table->index('name', 'users_name_idx');
             $table->index('email', 'users_email_idx');
             $table->index('username', 'users_username_idx');
         }
@@ -41,6 +42,7 @@ return new class extends Migration
         $table->string('email');
         $table->string('username');
         $table->string('password');
+        $table->string('phone')->nullable()->default(null);
         $table->datetime('email_verified_at')->nullable()->default(null);
 
         $table->bigInteger("created_by")->unsigned()->nullable();

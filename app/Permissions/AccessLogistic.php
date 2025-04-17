@@ -11,6 +11,7 @@ class AccessLogistic
     const WAREHOUSE = "warehouse";
     const STOCK_REQUEST = "stock_request";
     const STOCK_EXPENSE = "stock_expense";
+    const STOCK_OPNAME = "stock_opname";
 
     const I_STOCK_EXPENSE = "i_stock_expense";
     const I_STOCK_REQUEST = "i_stock_request";
@@ -40,6 +41,7 @@ class AccessLogistic
         self::WAREHOUSE,
         self::STOCK_REQUEST,
         self::STOCK_EXPENSE,
+        self::STOCK_OPNAME,
 
         self::I_STOCK_EXPENSE,
         self::I_STOCK_REQUEST,
@@ -70,6 +72,7 @@ class AccessLogistic
         self::WAREHOUSE => PermissionHelper::TYPE_ALL,
         self::STOCK_REQUEST => PermissionHelper::TYPE_ALL,
         self::STOCK_EXPENSE => PermissionHelper::TYPE_ALL,
+        self::STOCK_OPNAME => PermissionHelper::TYPE_ALL,
 
         self::I_MASTER_DATA => [PermissionHelper::TYPE_READ],
         self::I_STOCK_EXPENSE => [PermissionHelper::TYPE_READ],
@@ -100,6 +103,7 @@ class AccessLogistic
         self::WAREHOUSE => "Gudang",
         self::STOCK_REQUEST => "Permintaan Barang",
         self::STOCK_EXPENSE => "Pengeluaran Barang",
+        self::STOCK_OPNAME => "Stok Opname",
 
         self::I_MASTER_DATA => "Import Data - Master Data",
         self::I_STOCK_EXPENSE => "Import Data - Pengeluaran Barang",

@@ -19,6 +19,7 @@ class SettingLogistic
 
     const APPROVAL_KEY_STOCK_REQUEST = "approval_key_stock_request";
     const APPROVAL_KEY_STOCK_EXPENSE = "approval_key_stock_expense";
+    const APPROVAL_KEY_STOCK_OPNAME = "approval_key_stock_opname";
 
     const ALL = [
         self::INFO_PRODUCT_CODE => true,
@@ -31,6 +32,7 @@ class SettingLogistic
 
         self::APPROVAL_KEY_STOCK_REQUEST => "permintaan",
         self::APPROVAL_KEY_STOCK_EXPENSE => "pengeluaran",
+        self::APPROVAL_KEY_STOCK_OPNAME => "stok_opname",
     ];
 
     public $parsedSetting;

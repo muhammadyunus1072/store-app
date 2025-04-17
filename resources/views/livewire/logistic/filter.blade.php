@@ -80,8 +80,32 @@
             </div>
         @endif
 
+        {{-- SELECT LOCATION TYPE --}}
+        @if ($filterLocationType)
+            <div class="col-md-4 mb-3">
+                <label>Jenis Lokasi</label>
+                <select class="form-select w-100" wire:model.live='locationType'>
+                    @foreach ($locationTypeChoice as $value => $name)
+                        <option value="{{ $value }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
+        {{-- SELECT DISPLAY RACK --}}
+        @if ($filterDisplayRack && ($locationType == 'App\Models\Logistic\Master\DisplayRack\DisplayRack' && $filterLocationType))
+            <div class="col-md-4 mb-3">
+                <label>{{ $filterDisplayRackLabel }}</label>
+                <select class="form-select w-100" wire:model.live='displayRackId'>
+                    @foreach ($displayRacks as $displayRack)
+                        <option value="{{ $displayRack['id'] }}">{{ $displayRack['name'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
         {{-- SELECT WAREHOUSE --}}
-        @if ($filterWarehouse)
+        @if ($filterWarehouse && ($locationType == 'App\Models\Logistic\Master\Warehouse\Warehouse' && $filterLocationType))
             <div class="col-md-4 mb-3">
                 <label>{{ $filterWarehouseLabel }}</label>
                 <select class="form-select w-100" wire:model.live='warehouseId'>

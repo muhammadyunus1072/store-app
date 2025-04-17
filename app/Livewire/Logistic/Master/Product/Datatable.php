@@ -177,24 +177,24 @@ class Datatable extends Component
                     return $item->interkoneksi_sakti_kategori_pdn;
                 }
             ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'KBKI',
-                'render' => function($item)
-                {
-                    return $item->kbki->nama;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'COA',
-                'render' => function($item)
-                {
-                    return $item->coa->kode;
-                }
-            ],
+            // [
+            //     'sortable' => false,
+            //     'searchable' => false,
+            //     'name' => 'KBKI',
+            //     'render' => function($item)
+            //     {
+            //         return $item->kbki->nama;
+            //     }
+            // ],
+            // [
+            //     'sortable' => false,
+            //     'searchable' => false,
+            //     'name' => 'COA',
+            //     'render' => function($item)
+            //     {
+            //         return $item->coa->kode;
+            //     }
+            // ],
         ];
     }
 

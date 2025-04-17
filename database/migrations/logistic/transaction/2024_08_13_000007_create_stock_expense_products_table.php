@@ -45,20 +45,20 @@ return new class extends Migration
         $table->string('product_type')->comment('Product Tipe Produk');
         
         // Unit Detail Information
-        $table->double('quantity')->comment('Jumlah Barang');
+        $table->decimal('quantity', 12,2)->comment('Jumlah Barang');
         $table->bigInteger("unit_detail_id")->unsigned()->comment('Unit Detail ID');
         $table->bigInteger("unit_detail_unit_id")->unsigned()->comment('Unit Detail Unit ID');
         $table->boolean('unit_detail_is_main')->default(false)->comment('Penanda Unit Detail Satuan Utama');
         $table->string('unit_detail_name')->comment('Unit Detail Satuan');
-        $table->double('unit_detail_value')->comment('Unit Detail Nilai Konversi');
+        $table->decimal('unit_detail_value', 12,2)->comment('Unit Detail Nilai Konversi');
 
         // Main Unit Detail Information
-        $table->double('converted_quantity')->comment('Konversi Jumlah Barang');
+        $table->decimal('converted_quantity', 12,2)->comment('Konversi Jumlah Barang');
         $table->bigInteger("main_unit_detail_id")->unsigned()->comment('Unit Detail ID Utama');
         $table->bigInteger("main_unit_detail_unit_id")->unsigned()->comment('Unit Detail Unit ID Utama');
         $table->boolean('main_unit_detail_is_main')->default(false)->comment('Penanda Unit Detail Satuan Utama');
         $table->string('main_unit_detail_name')->comment('Unit Detail Satuan Utama');
-        $table->double('main_unit_detail_value')->comment('Unit Detail Nilai Konversi Utama');
+        $table->decimal('main_unit_detail_value', 12,2)->comment('Unit Detail Nilai Konversi Utama');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

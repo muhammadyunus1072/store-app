@@ -43,7 +43,7 @@ return new class extends Migration
         $table->bigInteger("tax_id")->unsigned()->comment('Tax ID');
         $table->string('tax_name')->comment('Nama Pajak');
         $table->string('tax_type')->comment('Jenis Pajak');
-        $table->double('tax_value')->comment('Nilai Persen Pajak');
+        $table->decimal('tax_value', 12,2)->comment('Nilai Persen Pajak');
         $table->boolean('tax_is_active')->comment('Aktif / Tidak Aktif');
 
         $table->bigInteger("created_by")->unsigned()->nullable();

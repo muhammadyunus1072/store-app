@@ -33,6 +33,7 @@ return new class extends Migration
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
         } else {
+            $table->index('title', 'units_title_idx');
         }
 
         $table->string('title')->comment('Nama');

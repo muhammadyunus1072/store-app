@@ -52,20 +52,25 @@ return [
             'icon' => 'ki-duotone ki-arrow-right',
         ],
         [
-            'text' => 'Import Data - Permintaan',
-            'route' => 'i_stock_request.index',
+            'text' => 'Stok Opname',
+            'route' => 'stock_opname.index',
             'icon' => 'ki-duotone ki-arrow-right',
         ],
-        [
-            'text' => 'Import Data - Pengeluaran',
-            'route' => 'i_stock_expense.index',
-            'icon' => 'ki-duotone ki-arrow-right',
-        ],
-        [
-            'text' => 'Import Data - Master',
-            'route'  => 'i_master_data_logistic.index',
-            'icon' => 'ki-duotone ki-arrow-right',
-        ],
+        // [
+        //     'text' => 'Import Data - Permintaan',
+        //     'route' => 'i_stock_request.index',
+        //     'icon' => 'ki-duotone ki-arrow-right',
+        // ],
+        // [
+        //     'text' => 'Import Data - Pengeluaran',
+        //     'route' => 'i_stock_expense.index',
+        //     'icon' => 'ki-duotone ki-arrow-right',
+        // ],
+        // [
+        //     'text' => 'Import Data - Master',
+        //     'route'  => 'i_master_data_logistic.index',
+        //     'icon' => 'ki-duotone ki-arrow-right',
+        // ],
         [
             // 'id' => 'menu_admin'
             'text' => 'Master Data',
@@ -103,32 +108,32 @@ return [
                     'route'  => 'r_current_stock.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
-                [
-                    'text' => 'Stok Akhir Detail',
-                    'route'  => 'r_current_stock_detail.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Kartu Stok',
-                    'route'  => 'r_history_stock.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Kartu Stok Detail',
-                    'route'  => 'r_history_stock_detail.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Pengeluaran',
-                    'route'  => 'r_stock_expense.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'id' => 'submenu_r_stock_expired',
-                    'text' => 'Stok Expired',
-                    'route'  => 'r_stock_expired.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
+                // [
+                //     'text' => 'Stok Akhir Detail',
+                //     'route'  => 'r_current_stock_detail.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Kartu Stok',
+                //     'route'  => 'r_history_stock.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Kartu Stok Detail',
+                //     'route'  => 'r_history_stock_detail.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Pengeluaran',
+                //     'route'  => 'r_stock_expense.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'id' => 'submenu_r_stock_expired',
+                //     'text' => 'Stok Expired',
+                //     'route'  => 'r_stock_expired.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
             ],
         ],
         [
@@ -141,49 +146,49 @@ return [
                     'route'  => 'r_current_stock_warehouse.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
-                [
-                    'text' => 'Stok Akhir Detail',
-                    'route'  => 'r_current_stock_detail_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Kartu Stok',
-                    'route'  => 'r_history_stock_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Kartu Stok Detail',
-                    'route'  => 'r_history_stock_detail_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Pengeluaran',
-                    'route'  => 'r_stock_expense_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Permintaan Masuk',
-                    'route'  => 'r_stock_request_in_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'text' => 'Permintaan Keluar',
-                    'route'  => 'r_stock_request_out_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
-                [
-                    'id' => 'submenu_r_stock_expired_warehouse',
-                    'text' => 'Stok Expired',
-                    'route'  => 'r_stock_expired_warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
+                // [
+                //     'text' => 'Stok Akhir Detail',
+                //     'route'  => 'r_current_stock_detail_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Kartu Stok',
+                //     'route'  => 'r_history_stock_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Kartu Stok Detail',
+                //     'route'  => 'r_history_stock_detail_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Pengeluaran',
+                //     'route'  => 'r_stock_expense_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Permintaan Masuk',
+                //     'route'  => 'r_stock_request_in_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Permintaan Keluar',
+                //     'route'  => 'r_stock_request_out_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'id' => 'submenu_r_stock_expired_warehouse',
+                //     'text' => 'Stok Expired',
+                //     'route'  => 'r_stock_expired_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
             ],
         ],
-        // [
-        //     'text' => 'Pengaturan',
-        //     'route'  => 'setting_logistic.index',
-        //     'icon' => 'ki-duotone ki-setting-2',
-        // ],
+        [
+            'text' => 'Pengaturan',
+            'route'  => 'setting_logistic.index',
+            'icon' => 'ki-duotone ki-setting-2',
+        ],
 
         /*
         | ======================================
@@ -199,11 +204,11 @@ return [
             'route' => 'purchase_order.index',
             'icon' => 'ki-duotone ki-arrow-right',
         ],
-        [
-            'text' => 'Import Data - Pembelian',
-            'route' => 'i_purchase_order.index',
-            'icon' => 'ki-duotone ki-arrow-right',
-        ],
+        // [
+        //     'text' => 'Import Data - Pembelian',
+        //     'route' => 'i_purchase_order.index',
+        //     'icon' => 'ki-duotone ki-arrow-right',
+        // ],
         [
             // 'id' => 'menu_admin'
             'text' => 'Master Data',
@@ -234,18 +239,18 @@ return [
                     'route'  => 'r_purchase_order_product.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
-                [
-                    'text' => 'Pembelian Produk Detail',
-                    'route'  => 'r_purchase_order_product_detail.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
+                // [
+                //     'text' => 'Pembelian Produk Detail',
+                //     'route'  => 'r_purchase_order_product_detail.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
             ],
         ],
-        // [
-        //     'text' => 'Pengaturan',
-        //     'route'  => 'setting_purchasing.index',
-        //     'icon' => 'ki-duotone ki-setting-2',
-        // ],
+        [
+            'text' => 'Pengaturan',
+            'route'  => 'setting_purchasing.index',
+            'icon' => 'ki-duotone ki-setting-2',
+        ],
 
         /*
         | ======================================
@@ -295,51 +300,11 @@ return [
                     'text' => 'Pajak',
                     'route' => 'tax.index',
                 ],
-                [
-                    'text' => 'Table Editor - Pajak',
-                    'route' => 'tax_editor.index',
-                ],
+                // [
+                //     'text' => 'Table Editor - Pajak',
+                //     'route' => 'tax_editor.index',
+                // ],
             ],
-        ],
-
-        /*
-        | ======================================
-        | ======== INTERKONEKSI SAKTI ==========
-        | ======================================
-        */
-        [
-            // 'id' => 'menu_admin'
-            'header' => 'Interkoneksi Sakti',
-        ],
-        [
-            // 'id' => 'menu_admin'
-            'text' => 'Master Data',
-            'icon' => 'ki-duotone ki-category',
-            'submenu' => [
-                [
-                    'text' => 'KBKI',
-                    'route' => 'interkoneksi_sakti_kbki.index',
-                ],
-                [
-                    'text' => 'COA',
-                    'route' => 'interkoneksi_sakti_coa.index',
-                ],
-            ],
-        ],
-        [
-            'text' => 'Detail Barang',
-            'route' => 'interkoneksi_sakti_detail_barang.index',
-            'icon' => 'ki-duotone ki-arrow-right',
-        ],
-        [
-            'text' => 'Detail Coa',
-            'route' => 'interkoneksi_sakti_detail_coa.index',
-            'icon' => 'ki-duotone ki-arrow-right',
-        ],
-        [
-            'text' => 'Setting',
-            'route' => 'interkoneksi_sakti_setting.index',
-            'icon' => 'ki-duotone ki-arrow-right',
         ],
 
         /*
@@ -357,14 +322,14 @@ return [
             'text' => 'Pengaturan',
             'icon' => 'ki-duotone ki-setting-2',
             'submenu' => [
-                // [
-                //     'text' => 'Pengaturan Global',
-                //     'route' => 'setting_core.index',
-                // ],
-                // [
-                //     'text' => 'Perusahaan',
-                //     'route' => 'company.index',
-                // ],
+                [
+                    'text' => 'Pengaturan Global',
+                    'route' => 'setting_core.index',
+                ],
+                [
+                    'text' => 'Perusahaan',
+                    'route' => 'company.index',
+                ],
                 [
                     'text' => 'Pengguna',
                     'route' => 'user.index',

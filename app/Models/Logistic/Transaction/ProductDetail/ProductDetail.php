@@ -17,7 +17,9 @@ class ProductDetail extends Model
     protected $fillable = [
         'product_id',
         'company_id',
-        'warehouse_id',
+        'location_id',
+        'location_type',
+        'location_note',
         'entry_date',
         'expired_date',
         'batch',
@@ -52,9 +54,9 @@ class ProductDetail extends Model
         return $this->belongsTo(Company::class, 'company_id', 'id');
     }
 
-    public function warehouse()
+    public function location()
     {
-        return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
+        return $this->belongsTo($this->location_type, 'location_id', 'id');
     }
 
     public function histories()

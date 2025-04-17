@@ -138,4 +138,9 @@ abstract class MasterDataRepository
     {
         return app(static::className())::all();
     }
+
+    public static function first()
+    {
+        return app(static::className())::first();
+    }
 }

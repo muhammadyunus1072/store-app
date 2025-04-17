@@ -14,9 +14,6 @@ class Warehouse extends Model
 
     protected $fillable = [
         'name',
-        'id_sub',
-        'id_bagian',
-        'id_direktorat',
     ];
 
     protected $guarded = ['id'];

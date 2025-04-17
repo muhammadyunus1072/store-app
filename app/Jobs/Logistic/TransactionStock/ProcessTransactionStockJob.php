@@ -34,7 +34,9 @@ class ProcessTransactionStockJob implements ShouldQueue, ShouldBeUnique
             DB::beginTransaction();
 
             $oldestTransaction = TransactionStockRepository::findOldestNeedToBeProcessed();
-
+            logger("1");
+            logger($oldestTransaction);
+            logger("end oldest");
             if ($oldestTransaction) {
                 // Cancel Oldest Transaction
                 if ($oldestTransaction->status == TransactionStock::STATUS_REPROCESSED) {
@@ -46,12 +48,18 @@ class ProcessTransactionStockJob implements ShouldQueue, ShouldBeUnique
 
                 // Cancel Newer Transactions
                 $transactions = TransactionStockRepository::getNewerTransactions($oldestTransaction);
+                logger('2');
+                logger($transactions);
+                logger("end cancel");
                 foreach ($transactions as $newerTransaction) {
                     $newerTransaction->cancel();
                 }
 
                 // Process All Not Processed Transaction
                 $transactions = TransactionStockRepository::getNotProcessedTransactions();
+                logger('3');
+                logger($transactions);
+                logger("end process");
                 foreach ($transactions as $transaction) {
                     $transaction->process();
                 }

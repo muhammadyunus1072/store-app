@@ -30,7 +30,8 @@ class StockRequest extends Model
         'source_company_id',
         'source_warehouse_id',
         'destination_company_id',
-        'destination_warehouse_id',
+        'destination_location_id',
+        'destination_location_type',
         'transaction_date',
         'note',
     ];
@@ -43,8 +44,8 @@ class StockRequest extends Model
             $model->number = NumberGenerator::simpleYearCode(self::class, "SP", $model->transaction_date);
             $model = $model->companyDestination->saveInfo($model, 'destination_company');
             $model = $model->companySource->saveInfo($model, 'source_company');
-            $model = $model->warehouseDestination->saveInfo($model, 'destination_warehouse');
             $model = $model->warehouseSource->saveInfo($model, 'source_warehouse');
+            $model = $model->locationDestination->saveInfo($model, 'destination_location');
         });
 
         self::updating(function ($model) {
@@ -54,11 +55,8 @@ class StockRequest extends Model
             if ($model->getOriginal('source_company_id') != $model->source_company_id) {
                 $model = $model->companySource->saveInfo($model, 'source_company');
             }
-            if ($model->getOriginal('destination_warehouse_id') != $model->destination_warehouse_id) {
-                $model = $model->warehouseDestination->saveInfo($model, 'destination_warehouse');
-            }
-            if ($model->getOriginal('destination_warehouse_id') != $model->destination_warehouse_id) {
-                $model = $model->warehouseDestination->saveInfo($model, 'destination_warehouse');
+            if ($model->getOriginal('destination_location_id') != $model->destination_location_id) {
+                $model = $model->locationDestination->saveInfo($model, 'destination_location');
             }
         });
 
@@ -113,7 +111,8 @@ class StockRequest extends Model
             'source_company_id' => $this->source_company_id,
             'source_warehouse_id' => $this->source_warehouse_id,
             'destination_company_id' => $this->destination_company_id,
-            'destination_warehouse_id' => $this->destination_warehouse_id,
+            'destination_location_id' => $this->destination_location_id,
+            'destination_location_type' => $this->destination_location_type,
             'products' => [],
             'remarks_id' => $this->id,
             'remarks_type' => get_class($this)
@@ -185,9 +184,9 @@ class StockRequest extends Model
         return $this->belongsTo(Company::class, 'source_company_id', 'id');
     }
 
-    public function warehouseDestination()
+    public function locationDestination()
     {
-        return $this->belongsTo(Warehouse::class, 'destination_warehouse_id', 'id');
+        return $this->belongsTo($this->destination_location_type, 'destination_location_id', 'id');
     }
 
     public function warehouseSource()

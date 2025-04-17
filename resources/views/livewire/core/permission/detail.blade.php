@@ -13,6 +13,7 @@
         <div class="col-md-6 mb-4">
             <label>Tipe</label>
             <select class="form-select @error('type') is-invalid @enderror" wire:model.blur="type">
+                <option value="all">Semua Akses</option>
                 @foreach (PermissionHelper::TRANSLATE_TYPE as $key => $val)
                     <option value="{{ $key }}">{{ $val }}</option>
                 @endforeach

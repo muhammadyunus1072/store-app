@@ -38,23 +38,6 @@
         <!--end::Password-->
     </div>
     <div class="fv-row mb-8">
-        <div class="captcha" wire:ignore>
-            <span>{!! captcha_img() !!}</span>
-            <button type="button" class="btn btn-danger" class="reload" id="reload">
-                &#x21bb;
-            </button>
-        </div>
-    </div>
-    <div class="fv-row mb-8">
-        <input id="captcha" type="text" class="form-control @error('captcha') is-invalid @enderror"
-            placeholder="Enter Captcha" wire:model="captcha">
-        @error('captcha')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-        @enderror
-    </div>
-    <div class="fv-row mb-8">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value="1" id="remember_me" wire:model='rememberMe'>
             <label class="form-check-label" for="remember_me">
@@ -79,25 +62,3 @@
     </div>
     <!--end::Submit button-->
 </form>
-
-@push('js')
-    <script type="text/javascript">
-        function getCaptcha() {
-            $.ajax({
-                type: 'GET',
-                url: '{{ route('reload_captcha') }}',
-                success: function(data) {
-                    $(".captcha span").html(data.captcha);
-                }
-            });
-        };
-
-        $('#reload').click(function() {
-            getCaptcha();
-        });
-
-        Livewire.on('reload-captcha', () => {
-            getCaptcha();
-        });
-    </script>
-@endpush

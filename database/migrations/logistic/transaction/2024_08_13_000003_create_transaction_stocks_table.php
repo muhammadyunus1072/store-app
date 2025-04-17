@@ -37,7 +37,8 @@ return new class extends Migration
             $table->index('source_company_id', 'transaction_stocks_source_company_id_idx');
             $table->index('source_warehouse_id', 'transaction_stocks_source_warehouse_id_idx');
             $table->index('destination_company_id', 'transaction_stocks_destination_company_id_idx');
-            $table->index('destination_warehouse_id', 'transaction_stocks_destination_warehouse_id_idx');
+            $table->index('destination_location_id', 'transaction_stocks_destination_location_id_idx');
+            $table->index('destination_location_type', 'transaction_stocks_destination_location_type_idx');
 
             $table->index('remarks_id', 'transaction_stocks_remarks_id_idx');
             $table->index('remarks_type', 'transaction_stocks_remarks_type_idx');
@@ -52,7 +53,8 @@ return new class extends Migration
         $table->unsignedBigInteger("source_company_id");
         $table->unsignedBigInteger("source_warehouse_id");
         $table->unsignedBigInteger("destination_company_id")->nullable();
-        $table->unsignedBigInteger("destination_warehouse_id")->nullable();
+        $table->unsignedBigInteger("destination_location_id")->nullable();
+        $table->string("destination_location_type")->nullable();
 
         $table->unsignedBigInteger("remarks_id")->nullable();
         $table->string('remarks_type')->nullable();

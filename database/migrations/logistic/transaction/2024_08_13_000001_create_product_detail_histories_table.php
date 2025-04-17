@@ -44,9 +44,9 @@ return new class extends Migration
         $table->bigInteger("product_detail_id")->unsigned()->comment('ProductDetail ID');
         $table->dateTime('transaction_date')->comment('Tanggal dan Waktu Transaksi');
         $table->text('note')->nullable()->comment('Catatan');
-        $table->double('start_stock')->comment('Stok Awal');
-        $table->double('quantity')->comment('Jumlah Keluar Masuk');
-        $table->double('last_stock')->comment('Stok Akhir');
+        $table->decimal('start_stock', 12,2)->comment('Stok Awal');
+        $table->decimal('quantity', 12,2)->comment('Jumlah Keluar Masuk');
+        $table->decimal('last_stock', 12,2)->comment('Stok Akhir');
         
         $table->bigInteger('remarks_id')->nullable()->unsigned()->comment('FK Polimorfik Penyebab Keluar / Masuk');
         $table->string('remarks_type')->nullable()->comment('Jenis Polimorfik Penyebab Keluar / Masuk');

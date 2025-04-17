@@ -3,9 +3,13 @@
 namespace App\Livewire\Logistic;
 
 use Livewire\Component;
-use App\Helpers\Core\UserStateHandler;
 use App\Settings\SettingCore;
 use App\Settings\SettingLogistic;
+use Illuminate\Support\Facades\Crypt;
+use App\Helpers\Core\UserStateHandler;
+use App\Models\Logistic\Master\Warehouse\Warehouse;
+use App\Models\Logistic\Master\DisplayRack\DisplayRack;
+use App\Repositories\Logistic\Master\DisplayRack\DisplayRackRepository;
 
 class Filter extends Component
 {
@@ -14,6 +18,8 @@ class Filter extends Component
 
     // Filter
     public $companyId;
+    public $locationType;
+    public $displayRackId;
     public $warehouseId;
     public $warehouseIds = [];
     public $dateStart;
@@ -27,6 +33,8 @@ class Filter extends Component
     public $categoryProductIds = [];
 
     // Setting Filter
+    public $filterLocationType;
+    public $filterDisplayRack;
     public $filterWarehouse;
     public $filterWarehouseMultiple;
     public $filterCompany;
@@ -48,10 +56,13 @@ class Filter extends Component
     public $isMultipleCompany = false;
 
     // Helpers
+    public $filterDisplayRackLabel = "Rak Display";
     public $filterWarehouseLabel = "Gudang";
     public $filterWarehouseMultipleLabel = "Gudang";
     public $companies = [];
     public $warehouses = [];
+    public $displayRacks = [];
+    public $locationTypeChoice = [];
 
     public function mount()
     {
@@ -61,6 +72,15 @@ class Filter extends Component
         $this->filterCompany = $this->isMultipleCompany ? $this->filterCompany : false;
         $this->filterExpiredDateStart = $this->infoProductExpiredDate ? $this->filterExpiredDateStart : false;
         $this->filterExpiredDateEnd = $this->infoProductExpiredDate ? $this->filterExpiredDateEnd : false;
+
+        if($this->filterLocationType)
+        {
+            $this->locationTypeChoice = [
+                Warehouse::class => 'Gudang',
+                DisplayRack::class => 'Rak Display',
+            ];
+            $this->locationType = Warehouse::class;
+        }
     }
 
     public function loadUserState()
@@ -76,6 +96,14 @@ class Filter extends Component
             $this->warehouses = $userState['warehouses'];
             $this->warehouseId = $userState['warehouse_id'];
         }
+
+        $this->displayRacks = DisplayRackRepository::all()->map(function ($item) {
+            return [
+                'id' => Crypt::encrypt($item->id),
+                'name' => $item->name,
+            ];
+        })->toArray();
+        $this->displayRackId = $this->displayRacks[0]['id'];
     }
 
     public function loadSetting()
@@ -86,6 +114,7 @@ class Filter extends Component
         $this->infoProductExpiredDate = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_EXPIRED_DATE);
         $this->infoProductBatch = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_BATCH);
         $this->infoProductAttachment = SettingLogistic::get(SettingLogistic::INFO_PRODUCT_ATTACHMENT);
+        
     }
 
     public function updated()
@@ -97,7 +126,9 @@ class Filter extends Component
     {
         $this->dispatch($this->dispatchEvent, [
             'companyId' => $this->companyId,
-            'warehouseId' => $this->warehouseId,
+            'locationType' => $this->locationType,
+            'displayRackId' => $this->displayRackId,
+            // 'warehouseId' => $this->warehouseId,
             'warehouseIds' => $this->warehouseIds,
             'dateStart' => $this->dateStart,
             'dateEnd' => $this->dateEnd,

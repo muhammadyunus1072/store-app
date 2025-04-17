@@ -40,7 +40,9 @@
             :filterDateStart="true" 
             :filterDateEnd="true"
             :filterCompany="true"
-            :filterWarehouse="true"
+            :filterDisplayRack="true"
+            :filterLocationType="App\Models\Logistic\Master\DisplayRack\DisplayRack::class"
+            :filterWarehouse="false"
             :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
             :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')">
         </div>

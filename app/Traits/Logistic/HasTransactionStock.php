@@ -15,7 +15,7 @@ trait HasTransactionStock
     {
         $data = $this->transactionStockData();
 
-        CreateUpdateTransactionStockJob::dispatch(
+        CreateUpdateTransactionStockJob::dispatchSync(
             remarksId: $this->id,
             remarksType: self::class,
             transactionDate: $data['transaction_date'],
@@ -24,7 +24,8 @@ trait HasTransactionStock
             sourceWarehouseId: $data['source_warehouse_id'],
             products: $data['products'],
             destinationCompanyId: $data['destination_company_id'],
-            destinationWarehouseId: $data['destination_warehouse_id'],
+            destinationLocationId: $data['destination_location_id'],
+            destinationLocationType: $data['destination_location_type'],
         );
     }
 

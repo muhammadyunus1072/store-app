@@ -113,10 +113,10 @@ class ApprovalConfig extends Model
                 $operator = $item['operator'];
                 $value = $item['value'];
 
-                if (!isset($object->$column)) {
+                if (!data_get($object, $column)) {
                     $currentResult = false;
                 } else {
-                    $objectValue = $object->$column;
+                    $objectValue = data_get($object, $column);
 
                     switch ($operator) {
                         case self::OPERATOR_ASSIGNMENT:

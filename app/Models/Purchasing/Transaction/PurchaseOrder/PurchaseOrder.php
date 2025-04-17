@@ -115,8 +115,9 @@ class PurchaseOrder extends Model
             'transaction_type' => TransactionStock::TYPE_ADD,
             'source_company_id' => $this->company_id,
             'source_warehouse_id' => $this->warehouse_id,
-            'destination_company_id' => null,
-            'destination_warehouse_id' => null,
+            'destination_company_id' => $this->warehouse_id,
+            'destination_location_id' => $this->warehouse_id,
+            'destination_location_type' => Warehouse::class,
             'products' => [],
             'remarks_id' => $this->id,
             'remarks_type' => get_class($this)

@@ -40,7 +40,6 @@ class Detail extends Component
             return;
         }
 
-        $this->name = "";
         $this->type = PermissionHelper::TYPE_ALL[0];
     }
 
@@ -49,30 +48,39 @@ class Detail extends Component
     {
         $this->redirectRoute('permission.index');
     }
-
-    public function store()
+    
+    private function savePermission($key, $value)
     {
-        $this->validate();
-
-        $permissionName = PermissionHelper::transform($this->name, $this->type);
-
+        $permissionName = PermissionHelper::transform($key, $value);
         $permission = PermissionRepository::findByName($permissionName);
         if (!empty($permission) && $permission->id != $this->objId) {
             $translatedPermissionName = PermissionHelper::translate($permissionName);
-            Alert::fail($this, 'Gagal', "Akses dengan nama {$translatedPermissionName} sudah pernah dibuat");
-            return;
+            throw new \Exception("Akses dengan nama {$translatedPermissionName} sudah pernah dibuat");
         }
 
         $validatedData = [
             'name' => $permissionName
         ];
+        if ($this->objId) {
+            PermissionRepository::update($this->objId, $validatedData);
+        } else {
+            PermissionRepository::create($validatedData);
+        }
+    }
 
+    public function store()
+    {
+        $this->validate();
+        
         try {
             DB::beginTransaction();
-            if ($this->objId) {
-                PermissionRepository::update($this->objId, $validatedData);
-            } else {
-                PermissionRepository::create($validatedData);
+            if($this->type === 'all' && !$this->objId)
+            {
+                foreach (PermissionHelper::TRANSLATE_TYPE as $key => $value) {
+                    $this->savePermission($this->name, $key);
+                }
+            }else{
+                $this->savePermission($this->name, $this->type);
             }
             DB::commit();
 

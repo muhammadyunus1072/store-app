@@ -41,8 +41,25 @@
                 </select>
             </div>
 
-            {{-- SELECT WAREHOUSE REQUESTER --}}
+            {{-- SELECT DISPLAY RACK REQUESTER --}}
             <div class="col-md-6 mb-3">
+                <label>Display Rak Peminta</label>
+                <select class="form-select w-100" wire:model='destinationDisplayRackId' {{ $isShow ? 'disabled' : '' }}>
+                    @php $isFound = false; @endphp
+
+                    @foreach ($destinationDisplayRacks as $diplayRack)
+                        @php $isFound = $isFound || $diplayRack['id'] == $destinationDisplayRackId; @endphp
+                        <option value="{{ $diplayRack['id'] }}">{{ $diplayRack['name'] }}</option>
+                    @endforeach
+
+                    @if (!$isFound && !empty($destinationDisplayRackId))
+                        <option value="{{ $destinationDisplayRackId }}" selected>{{ $destinationdiplayRackText }}
+                        </option>
+                    @endif
+                </select>
+            </div>
+            {{-- SELECT WAREHOUSE REQUESTER --}}
+            {{-- <div class="col-md-6 mb-3">
                 <label>Gudang Peminta</label>
                 <select class="form-select w-100" wire:model='destinationWarehouseId' {{ $isShow ? 'disabled' : '' }}>
                     @php $isFound = false; @endphp
@@ -57,7 +74,7 @@
                         </option>
                     @endif
                 </select>
-            </div>
+            </div> --}}
 
             {{-- SELECT COMPANY REQUESTED --}}
             <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}" wire:ignore>

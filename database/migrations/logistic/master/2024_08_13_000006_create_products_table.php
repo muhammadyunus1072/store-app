@@ -35,6 +35,7 @@ return new class extends Migration
         }else{
             $table->index('unit_id', 'products_unit_id_idx');
             $table->index('name', 'products_name_idx');
+            $table->index('type', 'products_type_idx');
         }
 
         $table->bigInteger("unit_id")->unsigned()->comment('Unit ID');

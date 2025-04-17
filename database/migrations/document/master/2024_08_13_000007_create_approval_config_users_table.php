@@ -39,7 +39,7 @@ return new class extends Migration
 
         $table->unsignedBigInteger("approval_config_id")->comment('Approval Config ID');
         $table->unsignedBigInteger("user_id")->comment('User ID');
-        $table->double('position')->comment('Urutan Persetujuan');
+        $table->integer('position')->comment('Urutan Persetujuan');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();

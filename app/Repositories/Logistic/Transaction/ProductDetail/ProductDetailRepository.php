@@ -16,7 +16,9 @@ class ProductDetailRepository extends MasterDataRepository
     public static function createIfNotExist(
         $productId,
         $companyId,
-        $warehouseId,
+        $destinationLocationId,
+        $destinationLocationType,
+        $destinationLocationNote,
         $entryDate,
         $price,
         $code,
@@ -28,7 +30,9 @@ class ProductDetailRepository extends MasterDataRepository
     ) {
         $productDetail = ProductDetail::where('product_id', $productId)
             ->where('company_id', $companyId)
-            ->where('warehouse_id', $warehouseId)
+            ->where('location_id', $destinationLocationId)
+            ->where('location_type', $destinationLocationType)
+            ->where('location_note', $destinationLocationType)
             ->where('entry_date', $entryDate)
             ->where('price', $price)
             ->where('code', $code)
@@ -36,11 +40,29 @@ class ProductDetailRepository extends MasterDataRepository
             ->where('expired_date', $expiredDate)
             ->first();
 
+            logger('IN PRODUCT DETAIL');
+            logger([
+                'product_id' => $productId,
+                'company_id' => $companyId,
+                'location_id' => $destinationLocationId,
+                'location_type' => $destinationLocationType,
+                'location_note' => $destinationLocationNote,
+                'entry_date' => $entryDate,
+                'price' => $price,
+                'code' => $code,
+                'batch' => $batch,
+                'expired_date' => $expiredDate,
+                'remarks_id' => $remarksId,
+                'remarks_type' => $remarksType,
+                'remarks_note' => $remarksNote,
+            ]);
         if (empty($productDetail)) {
             $productDetail = ProductDetailRepository::create([
                 'product_id' => $productId,
                 'company_id' => $companyId,
-                'warehouse_id' => $warehouseId,
+                'location_id' => $destinationLocationId,
+                'location_type' => $destinationLocationType,
+                'location_note' => $destinationLocationNote,
                 'entry_date' => $entryDate,
                 'price' => $price,
                 'code' => $code,
@@ -58,7 +80,8 @@ class ProductDetailRepository extends MasterDataRepository
     public static function getBySubstractMethod(
         $productId,
         $companyId,
-        $warehouseId,
+        $locationId,
+        $locationType,
         $substractStockMethod
     ) {
         return ProductDetail::select(
@@ -68,7 +91,8 @@ class ProductDetailRepository extends MasterDataRepository
             ->lockForUpdate()
             ->where('product_id', $productId)
             ->where('company_id', $companyId)
-            ->where('warehouse_id', $warehouseId)
+            ->where('location_id', $locationId)
+            ->where('location_type', $locationType)
             ->where('last_stock', '>', 0)
             ->when($substractStockMethod == StockHandler::SUBSTRACT_STOCK_METHOD_FIFO, function ($query) {
                 $query->orderBy('entry_date', 'ASC')->orderBy('id', 'ASC');

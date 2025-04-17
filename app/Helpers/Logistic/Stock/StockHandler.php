@@ -3,6 +3,7 @@
 namespace App\Helpers\Logistic\Stock;
 
 use App\Helpers\General\NumberFormatter;
+use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
@@ -29,7 +30,8 @@ class StockHandler
     public static function createStock(
         $productId,
         $companyId,
-        $warehouseId,
+        $locationId,
+        $locationType,
         $transactionDate,
         $quantity,
         $price,
@@ -43,7 +45,9 @@ class StockHandler
         $productDetail = ProductDetailRepository::createIfNotExist(
             productId: $productId,
             companyId: $companyId,
-            warehouseId: $warehouseId,
+            destinationLocationId: $locationId,
+            destinationLocationType: $locationType,
+            destinationLocationNote: $locationType,
             entryDate: $transactionDate,
             price: $price,
             code: $code,
@@ -54,7 +58,10 @@ class StockHandler
             remarksNote: $remarksNote,
         );
 
-        ProductDetailHistoryRepository::create([
+        logger('ifnotexit');
+        logger($productDetail);
+
+        $a = ProductDetailHistoryRepository::create([
             'product_detail_id' => $productDetail->id,
             'transaction_date' => $transactionDate,
             'quantity' => $quantity,
@@ -62,6 +69,9 @@ class StockHandler
             'remarks_type' => $remarksType,
             'remarks_note' => $remarksNote,
         ]);
+
+        logger('a');
+        logger($a);
     }
 
 
@@ -94,9 +104,13 @@ class StockHandler
             $productDetails = ProductDetailRepository::getBySubstractMethod(
                 productId: $item['product_id'],
                 companyId: $item['source_company_id'],
-                warehouseId: $item['source_warehouse_id'],
+                locationId: $item['source_warehouse_id'],
+                locationType: Warehouse::class,
                 substractStockMethod: SettingLogistic::get(SettingLogistic::SUBSTRACT_STOCK_METHOD)
             );
+
+            logger('sub p');
+            logger($productDetails);
 
             foreach ($productDetails as $productDetail) {
                 $usedQty = min($productDetail->last_stock, $substractQty) * -1;
@@ -143,7 +157,8 @@ class StockHandler
                 self::createStock(
                     productId: $item['product_id'],
                     companyId: $item['destination_company_id'],
-                    warehouseId: $item['destination_warehouse_id'],
+                    locationId: $item['destination_location_id'],
+                    locationType: $item['destination_location_type'],
                     transactionDate: $item['transaction_date'],
                     quantity: abs($history->quantity),
                     price: $history->productDetail->price,
@@ -208,7 +223,8 @@ class StockHandler
             $productDetails = ProductDetailRepository::getBy([
                 ['product_id', $productId],
                 ['company_id', $companyId],
-                ['warehouse_id', $warehouseId]
+                ['location_id', $warehouseId],
+                ['location_type', Warehouse::class]
             ]);
             return $productDetails->sum('last_stock');
         } else {
@@ -221,11 +237,12 @@ class StockHandler
     public static function convertUnitPrice(
         $quantity,
         $price,
-        $fromUnitDetailId
+        $fromUnitDetailId,
+        $targetUnitDetailId = null,
     ) {
         $fromUnitDetail = UnitDetailRepository::find($fromUnitDetailId);
 
-        if (empty($targetUnitDetailId)) {
+        if (!$targetUnitDetailId) {
             $targetUnitDetail = UnitDetailRepository::findMainUnit($fromUnitDetail->unit_id);
         } else {
             $targetUnitDetail = UnitDetailRepository::find($targetUnitDetailId);

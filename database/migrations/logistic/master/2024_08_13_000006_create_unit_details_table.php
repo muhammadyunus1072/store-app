@@ -34,12 +34,13 @@ return new class extends Migration
             $table->bigInteger('obj_id')->unsigned();
         } else {
             $table->index('unit_id', 'unit_details_unit_id_idx');
+            $table->index('is_main', 'unit_details_is_main_idx');
         }
 
         $table->bigInteger("unit_id")->unsigned()->comment('Unit ID');
         $table->boolean('is_main')->default(false)->comment('Satuan Utama');
         $table->string('name')->comment('Satuan');
-        $table->double('value')->comment('Nilai Konversi');
+        $table->decimal('value', 12,2)->comment('Nilai Konversi');
 
         $table->bigInteger("created_by")->unsigned()->nullable();
         $table->bigInteger("updated_by")->unsigned()->nullable();
