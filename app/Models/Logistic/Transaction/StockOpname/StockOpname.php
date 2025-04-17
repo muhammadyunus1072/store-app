@@ -119,7 +119,7 @@ class StockOpname extends Model
 
             $data['products'][] = [
                 'product_id' => $stockOpnameDetail->product_id,
-                'quantity' => abs($stockOpnameDetail->difference),
+                'quantity' => $stockOpnameDetail->difference * -1,
                 'unit_detail_id' => $stockOpnameDetail->main_unit_detail_id,
                 'remarks_id' => $stockOpnameDetail->id,
                 'remarks_type' => get_class($stockOpnameDetail)
