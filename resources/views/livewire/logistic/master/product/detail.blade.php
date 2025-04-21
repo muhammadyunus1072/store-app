@@ -12,28 +12,6 @@
         </div>
 
         <div class="col-md-4 mb-4">
-            <label>Kode SIMRS</label>
-            <input type="text" class="form-control @error('kode_simrs') is-invalid @enderror" wire:model.blur="kode_simrs" />
-
-            @error('kode_simrs')
-                <div class="invalid-feedback">
-                    {{ $message }}
-                </div>
-            @enderror
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <label>Kode SAKTI</label>
-            <input type="text" class="form-control @error('kode_sakti') is-invalid @enderror" wire:model.blur="kode_sakti" />
-
-            @error('kode_sakti')
-                <div class="invalid-feedback">
-                    {{ $message }}
-                </div>
-            @enderror
-        </div>
-
-        <div class="col-md-4 mb-4">
             <label>Tipe Produk</label>
             <select class="form-select @error('type') is-invalid @enderror" wire:model.blur="type">
                 @foreach ($type_choice as $key => $val)
@@ -63,33 +41,6 @@
                     {{ $message }}
                 </div>
             @enderror
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <label class='fw-bold'>Persentasi TKDN</label>
-            <input type="text" class="form-control currency @error('interkoneksi_sakti_persentase_tkdn') is-invalid @enderror" wire:model.blur="interkoneksi_sakti_persentase_tkdn" />
-        </div>
-        <div class="col-md-4 mb-4">
-            <label class='fw-bold'>Kategori TKDN</label>
-            <input type="text" class="form-control @error('interkoneksi_sakti_kategori_pdn') is-invalid @enderror" wire:model.blur="interkoneksi_sakti_kategori_pdn" />
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <label class='fw-bold'>KBKI</label>
-            <select class="form-select" wire:model="interkoneksi_sakti_kbki_id">
-                @foreach ($interkoneksi_sakti_kbki_id_choice as $value => $text)
-                    <option value="{{ $value }}">{{ $text }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <label class='fw-bold'>COA</label>
-            <select class="form-select" wire:model="interkoneksi_sakti_coa_id">
-                @foreach ($interkoneksi_sakti_coa_id_choice as $value => $text)
-                    <option value="{{ $value }}">{{ $text }}</option>
-                @endforeach
-            </select>
         </div>
 
         <div class="col-md-12 mb-4">

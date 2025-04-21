@@ -115,14 +115,7 @@ class Datatable extends Component
                 'key' => 'name',
                 'name' => 'Nama Produk',
             ],
-            [
-                'key' => 'kode_simrs',
-                'name' => 'Kode SIMRS',
-            ],
-            [
-                'key' => 'kode_sakti',
-                'name' => 'Kode SAKTI',
-            ],
+        
             [
                 'key' => 'type',
                 'name' => 'Tipe Produk',
@@ -157,24 +150,6 @@ class Datatable extends Component
                     $html .= "</ul>";
 
                     return $html;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Persentase TKDN',
-                'render' => function($item)
-                {
-                    return $item->interkoneksi_sakti_persentase_tkdn;
-                }
-            ],
-            [
-                'sortable' => false,
-                'searchable' => false,
-                'name' => 'Kategori PDN',
-                'render' => function($item)
-                {
-                    return $item->interkoneksi_sakti_kategori_pdn;
                 }
             ],
             // [
