@@ -2,12 +2,12 @@
 
 return [
     'title' => env('APP_NAME', 'Template Project'),
-    'subtitle' => 'Sistem Logistik RSMH',
+    'subtitle' => 'Sistem Logistik Minimarket',
 
-    'logo_auth' => 'files/images/logo_rsmh.png',
+    'logo_auth' => 'files/images/logo.png',
     'logo_auth_background' => 'white',
 
-    'logo_panel' => 'files/images/logo_rsmh.png',
+    'logo_panel' => 'files/images/logo.png',
     'logo_panel_background' => 'white',
 
     'registration_route' => 'register',
