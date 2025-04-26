@@ -4,6 +4,7 @@ namespace App\Livewire\Logistic\Master\Product;
 
 use Exception;
 use Livewire\Component;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use App\Helpers\General\Alert;
 use Livewire\Attributes\Validate;
@@ -14,8 +15,8 @@ use App\Models\Logistic\Master\Product\Product;
 use App\Repositories\Logistic\Master\Unit\UnitRepository;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
-use App\Repositories\Logistic\Master\Product\ProductCategoryRepository;
 use App\Repositories\Logistic\Master\Product\ProductUnitRepository;
+use App\Repositories\Logistic\Master\Product\ProductCategoryRepository;
 use App\Repositories\Rsmh\Sakti\InterkoneksiSaktiCoa\InterkoneksiSaktiCoaRepository;
 use App\Repositories\Rsmh\Sakti\InterkoneksiSaktiKbki\InterkoneksiSaktiKbkiRepository;
 
@@ -150,6 +151,7 @@ class Detail extends Component
             'name' => $this->name,
             'unit_id' => Crypt::decrypt($this->unit_id),
             'type' => $this->type,
+            'plu' => Str::random(10),
             'min_stock' => imaskToValue($this->min_stock),
             'max_stock' => imaskToValue($this->max_stock),
         ];
