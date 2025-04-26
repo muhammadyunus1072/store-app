@@ -9,40 +9,6 @@
                 </div>
             @endif
 
-            {{-- SELECT COMPANY --}}
-            <div class="col-md-4 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}">
-                <label>Perusahaan</label>
-                <select class="form-select w-100" wire:model='companyId' {{ $isShow ? 'disabled' : '' }}>
-                    @php $isFound = false; @endphp
-
-                    @foreach ($companies as $company)
-                        @php $isFound = $isFound || $company['id'] == $companyId; @endphp
-                        <option value="{{ $company['id'] }}">{{ $company['name'] }}</option>
-                    @endforeach
-
-                    @if (!$isFound && !empty($companyId))
-                        <option value="{{ $companyId }}" selected>{{ $companyText }}</option>
-                    @endif
-                </select>
-            </div>
-
-            {{-- SELECT WAREHOUSE --}}
-            <div class="col-md-4 mb-3">
-                <label>Gudang</label>
-                <select class="form-select w-100" wire:model='warehouseId' {{ $isShow ? 'disabled' : '' }}>
-                    @php $isFound = false; @endphp
-
-                    @foreach ($warehouses as $warehouse)
-                        @php $isFound = $isFound || $warehouse['id'] == $warehouseId; @endphp
-                        <option value="{{ $warehouse['id'] }}">{{ $warehouse['name'] }}</option>
-                    @endforeach
-
-                    @if (!$isFound && !empty($warehouseId))
-                        <option value="{{ $warehouseId }}" selected>{{ $warehouseText }}</option>
-                    @endif
-                </select>
-            </div>
-
             {{-- SELECT SUPPLIER --}}
             <div class="col-md-4 mb-3" wire:ignore>
                 <label>Supplier</label>
@@ -60,32 +26,6 @@
                     wire:model="transactionDate" {{ $isShow ? 'disabled' : '' }} />
 
                 @error('transactionDate')
-                    <div class="invalid-feedback">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
-
-            {{-- SUPPLIER INVOICE NUMBER --}}
-            <div class="col-md-4 mb-3">
-                <label>Nomor Nota Supplier</label>
-                <input type="text" class="form-control @error('supplierInvoiceNumber') is-invalid @enderror"
-                    wire:model="supplierInvoiceNumber" {{ $isShow ? 'disabled' : '' }} />
-
-                @error('supplierInvoiceNumber')
-                    <div class="invalid-feedback">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
-
-            {{-- NO SPK --}}
-            <div class="col-md-4 mb-3">
-                <label>No SPK</label>
-                <input type="text" class="form-control @error('no_spk') is-invalid @enderror"
-                    wire:model="no_spk" {{ $isShow ? 'disabled' : '' }} />
-
-                @error('no_spk')
                     <div class="invalid-feedback">
                         {{ $message }}
                     </div>
@@ -215,49 +155,6 @@
                         <input class='form-control text-end' value="@currency($subtotal)" disabled>
                     </td>
                 </tr>
-
-                {{-- OPTIONAL ATTIRBUTE --}}
-                @if ($isInputProductCode || $isInputProductBatch || $isInputProductExpiredDate)
-                    <tr>
-                        <td></td>
-
-                        {{-- CODE --}}
-                        @if ($isInputProductCode)
-                            <td>
-                                <label class='fw-bold'>Kode Barang</label>
-                                <input type="text" class="form-control"
-                                    wire:model="purchaseOrderProducts.{{ $index }}.code"
-                                    {{ $isShow ? 'disabled' : '' }} />
-                            </td>
-                        @endif
-
-                        {{-- BATCH --}}
-                        @if ($isInputProductBatch)
-                            <td>
-                                <label class='fw-bold'>Kode Produksi</label>
-                                <input type="text" class="form-control"
-                                    wire:model="purchaseOrderProducts.{{ $index }}.batch"
-                                    {{ $isShow ? 'disabled' : '' }} />
-                            </td>
-                        @endif
-
-                        {{-- EXPIRED DATE --}}
-                        @if ($isInputProductExpiredDate)
-                            <td>
-                                <label class='fw-bold'>Tanggal Expired</label>
-                                <input type="date"
-                                    class="form-control @error('purchaseOrderProducts.{{ $index }}.expired_date') is-invalid @enderror"
-                                    wire:model="purchaseOrderProducts.{{ $index }}.expired_date"
-                                    {{ $isShow ? 'disabled' : '' }} />
-                                @error('purchaseOrderProducts.{{ $index }}.expired_date')
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </td>
-                        @endif
-                    </tr>
-                @endif
 
                 @if ($isInputProductAttachment)
                     <tr>

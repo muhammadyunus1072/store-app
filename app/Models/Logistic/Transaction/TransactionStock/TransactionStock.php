@@ -20,6 +20,8 @@ class TransactionStock extends Model
     const TYPE_ADD = "add";
     const TYPE_TRANSFER = "transfer";
     const TYPE_SUBSTRACT = "substract";
+    const TYPE_OPNAME = "opname";
+    const TYPE_SALES = "sales";
 
     const STATUS_NOT_PROCESSED = "Not Processed";
     const STATUS_REPROCESSED = "Reprocess";
@@ -61,6 +63,10 @@ class TransactionStock extends Model
                 StockHandler::add($data);
             } else if ($this->transaction_type == self::TYPE_TRANSFER) {
                 StockHandler::transfer($data);
+            } else if ($this->transaction_type == self::TYPE_OPNAME) {
+                StockHandler::opname($data);
+            } else if ($this->transaction_type == self::TYPE_SALES) {
+                StockHandler::sales($data);
             } else {
                 StockHandler::substract($data);
             }

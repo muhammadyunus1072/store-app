@@ -43,7 +43,7 @@ class UnitDetailRepository extends MasterDataRepository
         foreach ($data as $index => $item) {
             $data[$index]['id'] = Crypt::encrypt($item['id']);
             $data[$index]['value'] = $item['value'];
-            $data[$index]['value_info'] = $item['is_main'] ? "" : $item['value'] . " $mainName";
+            $data[$index]['value_info'] = $item['is_main'] ? "" : number_format($item['value']) . " $mainName";
         }
 
         return $data;

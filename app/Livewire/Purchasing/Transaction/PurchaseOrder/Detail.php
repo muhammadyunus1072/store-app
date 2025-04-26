@@ -54,10 +54,7 @@ class Detail extends Component
 
     // Helpers
     public $isMultipleCompany = false;
-    public $isInputProductCode;
-    public $isInputProductExpiredDate;
     public $isInputProductAttachment;
-    public $isInputProductBatch;
     public $taxPpnId;
     public $taxPpnName;
     public $taxPpnValue;
@@ -82,8 +79,6 @@ class Detail extends Component
             $purchaseOrder = PurchaseOrderRepository::find(Crypt::decrypt($this->objId));
             $this->number = $purchaseOrder->number;
             $this->transactionDate = Carbon::parse($purchaseOrder->transaction_date)->format("Y-m-d");
-            $this->supplierInvoiceNumber = $purchaseOrder->supplier_invoice_number;
-            $this->no_spk = $purchaseOrder->no_spk;
             $this->note = $purchaseOrder->note;
 
             $this->supplierId = Crypt::encrypt($purchaseOrder->supplier_id);
@@ -157,10 +152,7 @@ class Detail extends Component
     {
         $this->isMultipleCompany = SettingCore::get(SettingCore::MULTIPLE_COMPANY);
 
-        $this->isInputProductCode = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_CODE);
-        $this->isInputProductExpiredDate = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_EXPIRED_DATE);
         $this->isInputProductAttachment = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_ATTACHMENT);
-        $this->isInputProductBatch = SettingPurchasing::get(SettingPurchasing::PURCHASE_ORDER_PRODUCT_BATCH);
 
         $taxPpn = TaxRepository::find(SettingPurchasing::get(SettingPurchasing::TAX_PPN_ID));
         $this->taxPpnId = Crypt::encrypt($taxPpn->id);
@@ -183,27 +175,19 @@ class Detail extends Component
         }
     }
 
-    public function updated($property, $value)
-    {
-        if (str_contains($property, 'purchaseOrderProducts')) {
-            if (str_contains($property, 'files') && $value) {
-                $this->addFile($property);
-            }
-        }
-    }
+    // public function updated($property, $value)
+    // {
+    //     if (str_contains($property, 'purchaseOrderProducts')) {
+    //         if (str_contains($property, 'files') && $value) {
+    //             $this->addFile($property);
+    //         }
+    //     }
+    // }
 
     public function store()
     {
         if (!$this->supplierId) {
             Alert::fail($this, "Gagal", "Supplier Belum Diinput");
-            return;
-        }
-        if (!$this->companyId) {
-            Alert::fail($this, "Gagal", "Perusahaan Belum Diinput");
-            return;
-        }
-        if (!$this->warehouseId) {
-            Alert::fail($this, "Gagal", "Gudang Belum Diinput");
             return;
         }
         if (count($this->purchaseOrderProducts) == 0) {
@@ -218,9 +202,7 @@ class Detail extends Component
             'company_id' => Crypt::decrypt($this->companyId),
             'warehouse_id' => Crypt::decrypt($this->warehouseId),
             'transaction_date' => $this->transactionDate,
-            'no_spk' => $this->no_spk,
             'note' => $this->note,
-            'supplier_invoice_number' => $this->supplierInvoiceNumber,
         ];
 
         try {
@@ -250,9 +232,6 @@ class Detail extends Component
                     'unit_detail_id' => Crypt::decrypt($item['unit_detail_id']),
                     'quantity' => NumberFormatter::imaskToValue($item['quantity']),
                     'price' => NumberFormatter::imaskToValue($item['price']),
-                    'code' => $item['code'],
-                    'batch' => $item['batch'],
-                    'expired_date' => $item['expired_date']
                 ];
 
                 if ($item['id']) {

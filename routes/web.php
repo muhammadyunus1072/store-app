@@ -31,9 +31,13 @@ Route::group([], __DIR__ . '/web/Logistic/Master.php');
 Route::group([], __DIR__ . '/web/Logistic/Transaction.php');
 Route::group([], __DIR__ . '/web/Logistic/ReportAll.php');
 Route::group([], __DIR__ . '/web/Logistic/ReportWarehouse.php');
+Route::group([], __DIR__ . '/web/Logistic/ReportDisplayRack.php');
 Route::group([], __DIR__ . '/web/Logistic/Import.php');
 
 Route::group([], __DIR__ . '/web/Finance/Master.php');
 
 Route::group([], __DIR__ . '/web/Document/Master.php');
 Route::group([], __DIR__ . '/web/Document/Transaction.php');
+
+Route::group([], __DIR__ . '/web/Sales/Master.php');
+Route::group([], __DIR__ . '/web/Sales/Transaction.php');

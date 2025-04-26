@@ -80,14 +80,14 @@ class Detail extends Component
             $this->transactionDate = Carbon::parse($stockRequest->transaction_date)->format("Y-m-d");
             $this->note = $stockRequest->note;
 
-            $this->destinationCompanyId = Crypt::encrypt($stockRequest->destination_company_id);
+            $this->destinationCompanyId = $stockRequest->destination_company_id;
             $this->destinationCompanyText = $stockRequest->destination_company_name;
-            $this->destinationWarehouseId = Crypt::encrypt($stockRequest->destination_warehouse_id);
+            $this->destinationWarehouseId = $stockRequest->destination_warehouse_id;
             $this->destinationWarehouseText = $stockRequest->destination_warehouse_name;
 
-            $this->sourceCompanyId = Crypt::encrypt($stockRequest->source_company_id);
+            $this->sourceCompanyId = $stockRequest->source_company_id;
             $this->sourceCompanyText = $stockRequest->source_company_name;
-            $this->sourceWarehouseId = Crypt::encrypt($stockRequest->source_warehouse_id);
+            $this->sourceWarehouseId = $stockRequest->source_warehouse_id;
             $this->sourceWarehouseText = $stockRequest->source_warehouse_name;
 
             $this->oldSourceCompanyId = $this->sourceCompanyId;
@@ -139,15 +139,16 @@ class Detail extends Component
         } else {
             $this->destinationCompanyId = $userState['company_id'];
             $this->sourceCompanyId = $userState['company_id'];
+            $this->sourceWarehouseId = $userState['warehouse_id'];
             $this->destinationWarehouses = $userState['warehouses'];
             $this->destinationWarehouseId = $userState['warehouse_id'];
-            $this->destinationDisplayRacks = DisplayRackRepository::all()->map(function ($item) {
-                return [
-                    'id' => Crypt::encrypt($item->id),
-                    'name' => $item->name,
-                ];
-            })->toArray();
-            $this->destinationDisplayRackId = $this->destinationDisplayRacks[0]['id'];
+            // $this->destinationDisplayRacks = DisplayRackRepository::all()->map(function ($item) {
+            //     return [
+            //         'id' => Crypt::encrypt($item->id),
+            //         'name' => $item->name,
+            //     ];
+            // })->toArray();
+            $this->destinationDisplayRackId = Crypt::encrypt(DisplayRackRepository::first()->id);
         }
     }
 
@@ -186,22 +187,6 @@ class Detail extends Component
 
     public function store()
     {
-        if (!$this->destinationCompanyId) {
-            Alert::fail($this, "Gagal", "Perusahaan Peminta Belum Diinput");
-            return;
-        }
-        if (!$this->destinationDisplayRackId) {
-            Alert::fail($this, "Gagal", "Gudang Peminta Belum Diinput");
-            return;
-        }
-        if (!$this->sourceCompanyId) {
-            Alert::fail($this, "Gagal", "Perusahaan Diminta Belum Diinput");
-            return;
-        }
-        if (!$this->sourceWarehouseId) {
-            Alert::fail($this, "Gagal", "Gudang Diminta Belum Diinput");
-            return;
-        }
         if (count($this->stockRequestProducts) == 0) {
             Alert::fail($this, "Gagal", "Barang-barang diminta belum diinput");
             return;

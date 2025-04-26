@@ -2,7 +2,7 @@
     <div class='row'>
         <div class="col-md-4 mb-4">
             <label>Nama Produk</label>
-            <input type="text" class="form-control @error('name') is-invalid @enderror" wire:model.blur="name" />
+            <input type="text" placeholder="Nama Produk" class="form-control @error('name') is-invalid @enderror" wire:model.blur="name" />
 
             @error('name')
                 <div class="invalid-feedback">
@@ -25,6 +25,42 @@
                 </div>
             @enderror
         </div>
+
+        <div class="col-md-12 mb-4">
+            <div class="w-100" wire:ignore>
+                <label>Kategori Produk</label>
+
+                <select id="select2-category_products" class="form-select" multiple>
+                    @foreach ($category_products as $item)
+                        <option value="{{ $item['id'] }}" selected>{{ $item['text'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <label>Stok Minimal</label>
+            <input type="text" placeholder="Stok Minimal" class="form-control currency @error('min_stock') is-invalid @enderror" wire:model.blur="min_stock" />
+
+            @error('min_stock')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+        <div class="col-md-4 mb-4">
+            <label>Stok Maksimal</label>
+            <input type="text" placeholder="Stok Maksimal" class="form-control currency @error('max_stock') is-invalid @enderror" wire:model.blur="max_stock" />
+
+            @error('max_stock')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-4 mb-4">
             <div class="w-100" wire:ignore>
                 <label>Satuan </label>
@@ -42,17 +78,53 @@
                 </div>
             @enderror
         </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive">
+            <table class='table table-bordered text-nowrap w-100 h-100'>
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="fs-6 p-2">Satuan</div>
+                        </th>
+                        <th>
+                            <div class="fs-6 p-2">Barcode</div>
+                        </th>
+                        <th>
+                            <div class="fs-6 p-2">Harga Jual</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($productUnits as $index => $product_unit)
+                    
+                        <tr>
 
-        <div class="col-md-12 mb-4">
-            <div class="w-100" wire:ignore>
-                <label>Kategori Produk</label>
-
-                <select id="select2-category_products" class="form-select" multiple>
-                    @foreach ($category_products as $item)
-                        <option value="{{ $item['id'] }}" selected>{{ $item['text'] }}</option>
+                            {{-- NAME --}}
+                            <td>
+                                {{ $product_unit['text'] }}
+                            </td>
+    
+                            {{-- CURRENT STOCK --}}
+                            
+                                <td>
+                                    <div class="input-group" style="width:170px;">
+                                        <input type="text" class="form-control" style="width:100%;"
+                                            wire:model="productUnits.{{ $index }}.code" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="input-group" style="width:170px;">
+                                        <input type="text" class="form-control currency" style="width:100%;"
+                                            wire:model="productUnits.{{ $index }}.selling_price" />
+                                    </div>
+                                </td>
+                            
+    
+                        </tr>
                     @endforeach
-                </select>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
 

@@ -66,97 +66,101 @@
         {{-- PRODUCTS --}}
         <label>Barang-barang detail</label>
         <div class="row d-flex">
-            <div class="col-md-10 mb-4 {{ $isShow ? 'd-none' : '' }}" wire:ignore>
+            <div class="col-8 col-md-10 mb-4 {{ $isShow ? 'd-none' : '' }}" wire:ignore>
                 <select id="select2-product" class="form-select w-100">
                 </select>
             </div>
-            <div class="col-md-auto {{ $isShow ? 'd-none' : '' }}">
+            <div class="col-auto {{ $isShow ? 'd-none' : '' }}">
                 <button type="button" class="btn btn-danger" onclick="closeSelect2()">
                     <i class="ki-solid ki-abstract-11"></i>
                 </button>
             </div>
         </div>
-
-        <table class='table gy-1 gx-2'>
-            @foreach ($stockOpnameDetails as $index => $item)
-            
-                <tr class="{{ $item['row_color_class'] }}">
-                    {{-- ACTION --}}
-                    <td style="width: 2%" class='align-bottom'>
-                        @if (!$isShow)
-                            <label class='fw-bold'>Aksi</label>
+        <div class="table-responsive">
+            <table class='table table-bordered text-nowrap w-100 h-100'>
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="fs-6 p-2">Aksi</div>
+                        </th>
+                        <th>
+                            <div class="fs-6 p-2">Produk</div>
+                        </th>
+                        <th>
+                            <div class="fs-6 p-2">Stok Sistem</div>
+                        </th>
+                        <th>
+                            <div class="fs-6 p-2">Stok Nyata</div>
+                        </th>
+                        <th>
+                            <div class="fs-6 p-2">Selisih</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($stockOpnameDetails as $index => $item)
+                    
+                        <tr class="{{ $item['row_color_class'] }}">
+                            {{-- ACTION --}}
+                            <td class='align-bottom'>
+                                @if (!$isShow)
+                                    
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-danger "
+                                            wire:click="removeDetail({{ $index }})">
+                                            <i class="ki-solid ki-abstract-11"></i>
+                                        </button>
+                                    </div>
+                                @endif
+                            </td>
+    
+                            {{-- NAME --}}
+                            <td>
+                                {{ $item['product_text'] }}
+                            </td>
+    
+                            {{-- CURRENT STOCK --}}
                             
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-danger "
-                                    wire:click="removeDetail({{ $index }})">
-                                    <i class="ki-solid ki-abstract-11"></i>
-                                </button>
-                            </div>
-                        @endif
-                    </td>
-
-                    {{-- NAME --}}
-                    <td style="width: 25%;">
-                        <label class='fw-bold'>Produk</label>
-                        <input class='form-control' value="{{ $item['product_text'] }}" disabled>
-                    </td>
-
-                    {{-- CURRENT STOCK --}}
-                    
-                        <td style="width: 25%">
-                            <label class='fw-bold'>Stok Sistem</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control"
-                                    wire:model="stockOpnameDetails.{{ $index }}.system_stock" disabled />
-                                <input type="text" class="form-control"
-                                    wire:model="stockOpnameDetails.{{ $index }}.system_unit_name"
-                                    disabled />
-                            </div>
-                        </td>
-                    
-                    {{-- QUANTITY & UNIT --}}
-                    <td style="width: 25%">
-                        <label class='fw-bold'>Stok Nyata</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control currency"
-                                wire:model.live="stockOpnameDetails.{{ $index }}.real_stock"
-                                {{ $isShow ? 'disabled' : '' }} />
-
-                            <select class="form-select @error('type') is-invalid @enderror"
-                                wire:model="stockOpnameDetails.{{ $index }}.system_unit_name"
-                                {{ $isShow ? 'disabled' : '' }} disabled>
-                                @foreach ($item['unit_detail_choice'] as $unit)
-                                    <option value="{{ $unit['id'] }}">
-                                        {{ $unit['name'] }}
-                                        {{ $unit['value_info'] ? "({$unit['value_info']})" : '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </td>
-
-                    {{-- CURRENT STOCK --}}
-                    
-                        <td style="width: 25%">
-                            <label class='fw-bold'>Selisih</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control"
-                                    wire:model="stockOpnameDetails.{{ $index }}.difference" disabled />
-                                <input type="text" class="form-control"
-                                    wire:model="stockOpnameDetails.{{ $index }}.system_unit_name"
-                                    disabled />
-                            </div>
-                        </td>
-                    
-
-                </tr>
-
-                {{-- LINE SEPARATOR --}}
-                <tr class='border-top'>
-                    <td></td>
-                </tr>
-            @endforeach
-        </table>
+                                <td>
+                                    <div class="input-group" style="width:170px;">
+                                        <input type="text" class="form-control" style="width:60%;"
+                                            wire:model="stockOpnameDetails.{{ $index }}.system_stock" disabled />
+                                        <input type="text" class="form-control"
+                                            wire:model="stockOpnameDetails.{{ $index }}.system_unit_name"
+                                            disabled />
+                                    </div>
+                                </td>
+                            
+                            {{-- QUANTITY & UNIT --}}
+                            <td>
+                                <div class="input-group" style="width:170px;">
+                                    <input type="text" class="form-control currency" style="width:60%;"
+                                        wire:model.live="stockOpnameDetails.{{ $index }}.real_stock"
+                                        {{ $isShow ? 'disabled' : '' }} />
+                                    <input type="text" class="form-control"
+                                        wire:model="stockOpnameDetails.{{ $index }}.system_unit_name"
+                                        disabled />
+                                </div>
+                            </td>
+    
+                            {{-- CURRENT STOCK --}}
+                            
+                                <td>
+                                    <div class="input-group" style="width:170px;">
+                                        <input type="text" class="form-control" style="width:60%;"
+                                            wire:model="stockOpnameDetails.{{ $index }}.difference" disabled />
+                                        <input type="text" class="form-control"
+                                            wire:model="stockOpnameDetails.{{ $index }}.system_unit_name"
+                                            disabled />
+                                    </div>
+                                </td>
+                            
+    
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
         @if (!$isShow)
             <button type="submit" class="btn btn-success mt-3">

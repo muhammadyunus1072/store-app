@@ -46,11 +46,11 @@ return [
             'route' => 'stock_request.index',
             'icon' => 'ki-duotone ki-arrow-right',
         ],
-        [
-            'text' => 'Pengeluaran',
-            'route' => 'stock_expense.index',
-            'icon' => 'ki-duotone ki-arrow-right',
-        ],
+        // [
+        //     'text' => 'Pengeluaran',
+        //     'route' => 'stock_expense.index',
+        //     'icon' => 'ki-duotone ki-arrow-right',
+        // ],
         [
             'text' => 'Stok Opname',
             'route' => 'stock_opname.index',
@@ -76,11 +76,11 @@ return [
             'text' => 'Master Data',
             'icon' => 'ki-duotone ki-category',
             'submenu' => [
-                [
-                    'text' => 'Gudang',
-                    'route'  => 'warehouse.index',
-                    'icon' => 'ki-duotone ki-element-11',
-                ],
+                // [
+                //     'text' => 'Gudang',
+                //     'route'  => 'warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
                 [
                     'text' => 'Produk',
                     'route'  => 'product.index',
@@ -138,12 +138,60 @@ return [
         ],
         [
             'id' => 'menu_r_logistic_warehouse',
-            'text' => 'Laporan Per Gudang',
+            'text' => 'Laporan Gudang',
             'icon' => 'ki-duotone ki-chart-simple',
             'submenu' => [
                 [
                     'text' => 'Stok Akhir',
                     'route'  => 'r_current_stock_warehouse.index',
+                    'icon' => 'ki-duotone ki-element-11',
+                ],
+                // [
+                //     'text' => 'Stok Akhir Detail',
+                //     'route'  => 'r_current_stock_detail_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Kartu Stok',
+                //     'route'  => 'r_history_stock_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Kartu Stok Detail',
+                //     'route'  => 'r_history_stock_detail_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Pengeluaran',
+                //     'route'  => 'r_stock_expense_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Permintaan Masuk',
+                //     'route'  => 'r_stock_request_in_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'text' => 'Permintaan Keluar',
+                //     'route'  => 'r_stock_request_out_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+                // [
+                //     'id' => 'submenu_r_stock_expired_warehouse',
+                //     'text' => 'Stok Expired',
+                //     'route'  => 'r_stock_expired_warehouse.index',
+                //     'icon' => 'ki-duotone ki-element-11',
+                // ],
+            ],
+        ],
+        [
+            'id' => 'menu_r_logistic_display_rack',
+            'text' => 'Laporan Display Rak',
+            'icon' => 'ki-duotone ki-chart-simple',
+            'submenu' => [
+                [
+                    'text' => 'Stok Akhir',
+                    'route'  => 'r_current_stock_display_rack.index',
                     'icon' => 'ki-duotone ki-element-11',
                 ],
                 // [
@@ -299,6 +347,42 @@ return [
                 [
                     'text' => 'Pajak',
                     'route' => 'tax.index',
+                ],
+                // [
+                //     'text' => 'Table Editor - Pajak',
+                //     'route' => 'tax_editor.index',
+                // ],
+            ],
+        ],
+
+        /*
+        | ======================================
+        | =============== SALES ================
+        | ======================================
+        */
+        [
+            // 'id' => 'menu_admin'
+            'header' => 'Penjualan',
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Master Data',
+            'icon' => 'ki-duotone ki-category',
+            'submenu' => [
+                [
+                    'text' => 'Metode Pembayaran',
+                    'route' => 'payment_method.index',
+                ],
+            ],
+        ],
+        [
+            // 'id' => 'menu_admin'
+            'text' => 'Transaksi',
+            'icon' => 'ki-duotone ki-category',
+            'submenu' => [
+                [
+                    'text' => 'Kasir',
+                    'route' => 'cashier_transaction.index',
                 ],
                 // [
                 //     'text' => 'Table Editor - Pajak',

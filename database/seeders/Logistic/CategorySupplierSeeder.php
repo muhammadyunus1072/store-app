@@ -13,10 +13,13 @@ class CategorySupplierSeeder extends Seeder
     public function run(): void
     {
         CategorySupplier::create([
-            'name' => 'ATK',
+            'name' => 'MAKANAN',
         ]);
         CategorySupplier::create([
-            'name' => 'Furniture',
+            'name' => 'MINUMAN',
+        ]);
+        CategorySupplier::create([
+            'name' => 'ROKOK',
         ]);
     }
 }

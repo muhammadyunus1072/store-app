@@ -42,7 +42,7 @@
             </div>
 
             {{-- SELECT DISPLAY RACK REQUESTER --}}
-            <div class="col-md-6 mb-3">
+            {{-- <div class="col-md-6 mb-3">
                 <label>Display Rak Peminta</label>
                 <select class="form-select w-100" wire:model='destinationDisplayRackId' {{ $isShow ? 'disabled' : '' }}>
                     @php $isFound = false; @endphp
@@ -57,7 +57,7 @@
                         </option>
                     @endif
                 </select>
-            </div>
+            </div> --}}
             {{-- SELECT WAREHOUSE REQUESTER --}}
             {{-- <div class="col-md-6 mb-3">
                 <label>Gudang Peminta</label>
@@ -77,24 +77,24 @@
             </div> --}}
 
             {{-- SELECT COMPANY REQUESTED --}}
-            <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}" wire:ignore>
+            {{-- <div class="col-md-6 mb-3 {{ $isMultipleCompany ? '' : 'd-none' }}" wire:ignore>
                 <label>Perusahaan Diminta</label>
                 <select class="form-select w-100" id="select2-company-source" {{ $isShow ? 'disabled' : '' }}>
                     @if (!empty($sourceCompanyId))
                         <option value="{{ $sourceCompanyId }}" selected>{{ $sourceCompanyText }}</option>
                     @endif
                 </select>
-            </div>
+            </div> --}}
 
             {{-- SELECT WAREHOUSE REQUESTED --}}
-            <div class="col-md-6 mb-3" wire:ignore>
+            {{-- <div class="col-md-6 mb-3" wire:ignore>
                 <label>Gudang Diminta</label>
                 <select class="form-select w-100" id="select2-warehouse-source" {{ $isShow ? 'disabled' : '' }}>
                     @if (!empty($sourceWarehouseId))
                         <option value="{{ $sourceWarehouseId }}" selected>{{ $sourceWarehouseText }}</option>
                     @endif
                 </select>
-            </div>
+            </div> --}}
 
             {{-- NOTE --}}
             <div class="col-md-12 mb-4">

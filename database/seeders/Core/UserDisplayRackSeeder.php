@@ -17,9 +17,5 @@ class UserDisplayRackSeeder extends Seeder
             'user_id' => 1,
             'display_rack_id' => 1,
         ]);
-        UserDisplayRackRepository::create([
-            'user_id' => 1,
-            'display_rack_id' => 2,
-        ]);
     }
 }

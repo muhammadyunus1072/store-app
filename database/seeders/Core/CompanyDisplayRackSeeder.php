@@ -17,9 +17,5 @@ class CompanyDisplayRackSeeder extends Seeder
             'company_id' => 1,
             'display_rack_id' => 1,
         ]);
-        CompanyDisplayRack::create([
-            'company_id' => 2,
-            'display_rack_id' => 2,
-        ]);
     }
 }

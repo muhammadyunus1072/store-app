@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Logistic\Report\Warehouse\CurrentStock;
+namespace App\Livewire\Logistic\Report\DisplayRack\CurrentStock;
 
 use App\Exports\LivewireDatatableExport;
 use Carbon\Carbon;
@@ -9,12 +9,13 @@ use App\Traits\Livewire\WithDatatable;
 use App\Traits\Livewire\WithDatatableExport;
 use App\Helpers\Core\UserStateHandler;
 use App\Helpers\General\NumberFormatter;
+use App\Models\Logistic\Master\DisplayRack\DisplayRack;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Logistic\Master\Product\ProductRepository;
-use App\Repositories\Logistic\Master\Warehouse\WarehouseRepository;
+use App\Repositories\Logistic\Master\DisplayRack\DisplayRackRepository;
 use App\Repositories\Logistic\Master\CategoryProduct\CategoryProductRepository;
-use App\Repositories\Logistic\Report\Warehouse\CurrentStock\CurrentStockRepository;
+use App\Repositories\Logistic\Report\DisplayRack\CurrentStock\CurrentStockRepository;
 
 class Datatable extends Component
 {
@@ -365,7 +366,7 @@ class Datatable extends Component
         })->toArray();
         $categoryProductNames = CategoryProductRepository::getBy(whereClause: [['id', $categoryProductIds]], orderByClause: [['name', 'ASC']])->pluck('name')->implode(', ');
 
-        $warehouseName = $this->warehouseId ? WarehouseRepository::find(Crypt::decrypt($this->warehouseId))->name : null;
+        $warehouseName = $this->warehouseId ? DisplayRackRepository::find(Crypt::decrypt($this->warehouseId))->name : null;
 
         return [
             'Tanggal Mulai' => $this->dateStart,

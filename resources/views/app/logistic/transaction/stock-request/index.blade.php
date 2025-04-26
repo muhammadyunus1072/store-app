@@ -39,9 +39,8 @@
             <livewire:logistic.filter
             :filterDateStart="true" 
             :filterDateEnd="true"
-            :filterCompany="true"
-            :filterDisplayRack="true"
-            :filterLocationType="App\Models\Logistic\Master\DisplayRack\DisplayRack::class"
+            {{-- :filterLocationType="App\Models\Logistic\Master\DisplayRack\DisplayRack::class" --}}
+            :locationType="App\Models\Logistic\Master\DisplayRack\DisplayRack::class"
             :filterWarehouse="false"
             :dateStart="Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')"
             :dateEnd="Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')">

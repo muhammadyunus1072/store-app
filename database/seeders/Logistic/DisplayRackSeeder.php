@@ -15,8 +15,5 @@ class DisplayRackSeeder extends Seeder
         DisplayRack::create([
             'name' => 'Display 1',
         ]);
-        DisplayRack::create([
-            'name' => 'Display 2',
-        ]);
     }
 }

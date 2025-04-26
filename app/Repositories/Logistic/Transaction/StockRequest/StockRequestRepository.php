@@ -24,5 +24,6 @@ class StockRequestRepository extends MasterDataRepository
                 $query->where('destination_company_id', $companyId);
             })
             ->whereBetween('transaction_date', ["$dateStart 00:00:00", "$dateEnd 23:59:59"]);
+        
     }
 }

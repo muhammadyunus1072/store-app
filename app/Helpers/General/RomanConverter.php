@@ -4,6 +4,29 @@ namespace App\Helpers\General;
 
 class RomanConverter
 {
+    private static array $map = [
+        1000 => 'M', 900 => 'CM', 500 => 'D', 400 => 'CD',
+        100 => 'C', 90 => 'XC', 50 => 'L', 40 => 'XL',
+        10 => 'X', 9 => 'IX', 5 => 'V', 4 => 'IV',
+        1 => 'I'
+    ];
+
+    public static function toRoman(int $number): string
+    {
+        if ($number < 1 || $number > 3999) {
+            throw new \InvalidArgumentException("Number must be between 1 and 3999.");
+        }
+
+        $roman = '';
+        foreach (self::$map as $value => $symbol) {
+            $count = intdiv($number, $value);
+            $roman .= str_repeat($symbol, $count);
+            $number %= $value;
+        }
+
+        return $roman;
+    }
+    
     public static function number2Roman($number)
     {
         if ($number == 1) {

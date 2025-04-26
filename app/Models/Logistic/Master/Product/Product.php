@@ -18,8 +18,11 @@ class Product extends Model
 
     protected $fillable = [
         'unit_id',
+        'plu',
         'name',
         'type',
+        'min_stock',
+        'max_stock',
     ];
 
     protected $guarded = ['id'];
@@ -47,6 +50,7 @@ class Product extends Model
 
     public function saveInfo($object, $prefix = "product")
     {
+        // $object[$prefix . "_plu"] = $this->plu;
         $object[$prefix . "_name"] = $this->name;
         $object[$prefix . "_type"] = $this->type;
 
@@ -85,5 +89,10 @@ class Product extends Model
     public function productCategories()
     {
         return $this->hasMany(ProductCategory::class, 'product_id', 'id');
+    }
+
+    public function productUnits()
+    {
+        return $this->hasMany(ProductUnit::class, 'product_id', 'id');
     }
 }

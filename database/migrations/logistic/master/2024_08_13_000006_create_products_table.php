@@ -38,6 +38,7 @@ return new class extends Migration
             $table->index('type', 'products_type_idx');
         }
 
+        $table->string('plu')->comment('PLU Produk');
         $table->bigInteger("unit_id")->unsigned()->comment('Unit ID');
         $table->string('name')->comment('Nama Produk');
         $table->string('type')->comment('Tipe Produk');

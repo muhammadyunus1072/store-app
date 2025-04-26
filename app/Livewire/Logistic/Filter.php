@@ -79,7 +79,7 @@ class Filter extends Component
                 Warehouse::class => 'Gudang',
                 DisplayRack::class => 'Rak Display',
             ];
-            $this->locationType = Warehouse::class;
+            $this->locationType ?? Warehouse::class;
         }
     }
 

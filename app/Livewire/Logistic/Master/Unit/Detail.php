@@ -37,7 +37,7 @@ class Detail extends Component
             {
                 $this->unitDetails[] = [
                     'id' => Crypt::encrypt($unit_detail->id),
-                    'is_main' => false,
+                    'is_main' => $unit_detail->is_main ? true : false,
                     'key' => Str::random(30),
                     "name" => $unit_detail->name,
                     "value" => NumberFormatter::valueToImask($unit_detail->value),

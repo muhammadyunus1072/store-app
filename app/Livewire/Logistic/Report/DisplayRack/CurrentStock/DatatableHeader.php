@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire\Logistic\Report\Warehouse\CurrentStock;
+namespace App\Livewire\Logistic\Report\DisplayRack\CurrentStock;
 
 use Carbon\Carbon;
 use Livewire\Component;
 use Illuminate\Support\Facades\Crypt;
 use App\Helpers\Core\UserStateHandler;
 use App\Traits\Livewire\WithDatatableHeader;
-use App\Repositories\Logistic\Report\Warehouse\CurrentStock\CurrentStockRepository;
+use App\Repositories\Logistic\Report\DisplayRack\CurrentStock\CurrentStockRepository;
 
 class DatatableHeader extends Component
 {

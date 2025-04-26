@@ -15,6 +15,7 @@ use App\Helpers\Core\UserStateHandler;
 use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Core\User\UserRepository;
+use App\Models\Logistic\Master\Warehouse\Warehouse;
 use App\Models\Logistic\Master\DisplayRack\DisplayRack;
 use App\Repositories\Logistic\Master\DisplayRack\DisplayRackRepository;
 use App\Repositories\Logistic\Transaction\StockRequest\StockRequestRepository;
@@ -60,6 +61,8 @@ class Datatable extends Component
 
         $displayRack = DisplayRackRepository::first();
         $this->displayRackId = $displayRack ? Crypt::encrypt($displayRack->id) : null;
+
+        $this->locationType = DisplayRack::class;
     }
 
     public function getColumns(): array

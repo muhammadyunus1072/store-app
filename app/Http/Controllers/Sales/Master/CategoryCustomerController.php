@@ -26,6 +26,6 @@ class CategoryCustomerController extends Controller
     // CategoryCustomer
     public function search(Request $request)
     {
-        return CategoryCustomerRepository::search($request->search);
+        // return CategoryCustomerRepository::search($request->search);
     }
 }

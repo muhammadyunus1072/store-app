@@ -21,12 +21,20 @@ class UnitDetail extends Model
 
     protected $guarded = ['id'];
 
-    public function saveInfo($object, $prefix = "unit_detail")
+    public function saveInfo($object, $prefix = "unit_detail", $data = null)
     {
-        $object[$prefix . "_unit_id"] = $this->unit_id;
-        $object[$prefix . "_is_main"] = $this->is_main;
-        $object[$prefix . "_name"] = $this->name;
-        $object[$prefix . "_value"] = $this->value;
+        if($data)
+        {
+            foreach($data as $item)
+            {
+                $object[$prefix . "".$item] = $this->$item;
+            }
+        }else{
+            $object[$prefix . "_unit_id"] = $this->unit_id;
+            $object[$prefix . "_is_main"] = $this->is_main;
+            $object[$prefix . "_name"] = $this->name;
+            $object[$prefix . "_value"] = $this->value;
+        }
 
         return $object;
     }

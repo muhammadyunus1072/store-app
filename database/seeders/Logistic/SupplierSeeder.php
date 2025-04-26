@@ -14,7 +14,7 @@ class SupplierSeeder extends Seeder
     public function run(): void
     {
         $supplier = Supplier::create([
-            'name' => 'Kertas Jaya',
+            'name' => 'Minuman Lengkap',
         ]);
         SupplierCategory::create([
             'supplier_id' => $supplier->id,
@@ -22,7 +22,7 @@ class SupplierSeeder extends Seeder
         ]);
 
         $supplier = Supplier::create([
-            'name' => 'Meja Kursi Sukses',
+            'name' => 'Rokok United',
         ]);
         SupplierCategory::create([
             'supplier_id' => $supplier->id,

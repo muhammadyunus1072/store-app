@@ -15,47 +15,35 @@ class UnitSeeder extends Seeder
     {
         $data = [
             [
-                'title' => 'Berat',
+                'title' => 'Pcs',
                 'details' => [
                     [
                         'unit_id' => 1,
                         'is_main' => 1,
-                        'name' => 'Kg',
+                        'name' => 'Pcs',
                         'value' => 1,
-                    ],
-                    [
-                        'unit_id' => 1,
-                        'is_main' => 0,
-                        'name' => 'g',
-                        'value' => 0.001,
                     ],
                 ],
             ],
             [
-                'title' => 'Panjang',
+                'title' => 'Pack (10)',
                 'details' => [
                     [
                         'unit_id' => 2,
                         'is_main' => 1,
-                        'name' => 'm',
+                        'name' => 'Pcs',
                         'value' => 1,
                     ],
                     [
                         'unit_id' => 2,
                         'is_main' => 0,
-                        'name' => 'cm',
-                        'value' => 0.01,
+                        'name' => 'Pack',
+                        'value' => 10,
                     ],
-                    [
-                        'unit_id' => 2,
-                        'is_main' => 0,
-                        'name' => 'mm',
-                        'value' => 0.001,
-                    ]
                 ],
             ],
             [
-                'title' => 'Box (12)',
+                'title' => 'Box (48)',
                 'details' => [
                     [
                         'unit_id' => 3,
@@ -67,18 +55,7 @@ class UnitSeeder extends Seeder
                         'unit_id' => 3,
                         'is_main' => 0,
                         'name' => 'Box',
-                        'value' => 12,
-                    ],
-                ],
-            ],
-            [
-                'title' => 'Jasa',
-                'details' => [
-                    [
-                        'unit_id' => 4,
-                        'is_main' => 1,
-                        'name' => 'Layanan',
-                        'value' => 1,
+                        'value' => 48,
                     ],
                 ],
             ],

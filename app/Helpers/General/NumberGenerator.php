@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class NumberGenerator
 {
-    const COMPANY_CODE = "RSMH";
+    const COMPANY_CODE = "TOKO";
     const RESET_TYPE_YEARLY = 1;
     const RESET_TYPE_MONTHLY = 2;
     const SEPARATOR = "/";
@@ -19,6 +19,7 @@ class NumberGenerator
         $resetType = self::RESET_TYPE_YEARLY,
     ) {
         $dateTime = Carbon::now();
+        $day_now = $dateTime->day;
         $month_now = $dateTime->month;
         $year_now = $dateTime->year;
 
@@ -43,12 +44,14 @@ class NumberGenerator
         $currentNumber = strval($lastNumber + 1);
         $currentNumber = str_pad($currentNumber, $zeroPad, "0", STR_PAD_LEFT);
 
+        // Roman Day
+        $roman_day = RomanConverter::number2Roman($day_now);
         // Roman Month
         $roman_month = RomanConverter::number2Roman($month_now);
 
         // Generate Format Number
         if ($companyCode == null) {
-            $formattedNumber = "$currentNumber/$code/$roman_month/$year_now";
+            $formattedNumber = "$code/$currentNumber/$roman_day/$roman_month/$year_now";
         } else {
             $formattedNumber = "$currentNumber/$code/$companyCode/$roman_month/$year_now";
         }

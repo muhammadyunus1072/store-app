@@ -17,9 +17,5 @@ class CompanyWarehouseSeeder extends Seeder
             'company_id' => 1,
             'warehouse_id' => 1,
         ]);
-        CompanyWarehouse::create([
-            'company_id' => 2,
-            'warehouse_id' => 2,
-        ]);
     }
 }

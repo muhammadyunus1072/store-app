@@ -100,7 +100,7 @@ class StockOpname extends Model
     {
         $data = [
             'transaction_date' => $this->transaction_date,
-            'transaction_type' => TransactionStock::TYPE_SUBSTRACT,
+            'transaction_type' => TransactionStock::TYPE_OPNAME,
             'transaction_date' => $this->stock_opname_date,
             'source_company_id' => $this->company_id,
             'source_warehouse_id' => $this->location_id,
@@ -119,7 +119,7 @@ class StockOpname extends Model
 
             $data['products'][] = [
                 'product_id' => $stockOpnameDetail->product_id,
-                'quantity' => $stockOpnameDetail->difference * -1,
+                'quantity' => $stockOpnameDetail->difference,
                 'unit_detail_id' => $stockOpnameDetail->main_unit_detail_id,
                 'remarks_id' => $stockOpnameDetail->id,
                 'remarks_type' => get_class($stockOpnameDetail)

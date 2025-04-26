@@ -3,7 +3,9 @@
 namespace App\Helpers\Logistic\Stock;
 
 use App\Helpers\General\NumberFormatter;
+use App\Models\Logistic\Master\DisplayRack\DisplayRack;
 use App\Models\Logistic\Master\Warehouse\Warehouse;
+use App\Repositories\Logistic\Master\Product\ProductUnitRepository;
 use App\Repositories\Logistic\Master\Unit\UnitDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailRepository;
 use App\Repositories\Logistic\Transaction\ProductDetail\ProductDetailHistoryRepository;
@@ -144,6 +146,108 @@ class StockHandler
         return $createdHistories;
     }
 
+    public static function sales($data)
+    {
+        if (count($data) == 0) {
+            return;
+        }
+
+        $createdHistories = [];
+
+        foreach ($data as $index => $item) {
+            $resultConvert = self::convertUnitPrice($item['quantity'], 0, $item['unit_detail_id']);
+            $substractQty = $resultConvert['quantity'];
+
+            // Substract Stock Process
+            $productDetails = ProductDetailRepository::getBySubstractMethod(
+                productId: $item['product_id'],
+                companyId: $item['source_company_id'],
+                locationId: $item['source_warehouse_id'],
+                locationType: DisplayRack::class,
+                substractStockMethod: SettingLogistic::get(SettingLogistic::SUBSTRACT_STOCK_METHOD)
+            );
+
+            logger('sub p');
+            logger($productDetails);
+
+            foreach ($productDetails as $productDetail) {
+                $usedQty = min($productDetail->last_stock, $substractQty) * -1;
+
+                $createdHistories[$index][] = ProductDetailHistoryRepository::create([
+                    'product_detail_id' => $productDetail->id,
+                    'transaction_date' => $item['transaction_date'],
+                    'quantity' => $usedQty,
+                    'remarks_id' => $item['remarks_id'],
+                    'remarks_type' => $item['remarks_type'],
+                ]);
+
+                $substractQty += $usedQty;
+
+                if ($substractQty == 0) {
+                    break;
+                }
+            }
+
+            // HANDLE: NOT ENOUGH STOCK
+            if ($substractQty > 0) {
+                $productName = $item['product_name'];
+                $unitName = $resultConvert['unit_detail_name'];
+                $strStock = NumberFormatter::format($resultConvert['quantity'] - $substractQty);
+                $strQty = NumberFormatter::format($resultConvert['quantity']);
+
+                throw new \Exception("Stock {$productName} Tidak Mencukupi. Tersedia {$strStock} {$unitName} dan yang dibutuhkan {$strQty} {$unitName}.");
+            }
+        }
+
+        return $createdHistories;
+    }
+
+    public static function opname($data)
+    {
+        if (count($data) == 0) {
+            return;
+        }
+
+        $createdHistories = [];
+
+        foreach ($data as $index => $item) {
+            $resultConvert = self::convertUnitPrice($item['quantity'], 0, $item['unit_detail_id']);
+            $substractQty = $resultConvert['quantity'];
+
+            // Substract Stock Process
+            $productDetails = ProductDetailRepository::getBySubstractMethod(
+                productId: $item['product_id'],
+                companyId: $item['source_company_id'],
+                locationId: $item['source_warehouse_id'],
+                locationType: Warehouse::class,
+                substractStockMethod: SettingLogistic::get(SettingLogistic::SUBSTRACT_STOCK_METHOD)
+            );
+
+            logger('sub opname');
+            logger($productDetails);
+
+            foreach ($productDetails as $productDetail) {
+                $usedQty = min($productDetail->last_stock, $substractQty);
+
+                $createdHistories[$index][] = ProductDetailHistoryRepository::create([
+                    'product_detail_id' => $productDetail->id,
+                    'transaction_date' => $item['transaction_date'],
+                    'quantity' => $usedQty,
+                    'remarks_id' => $item['remarks_id'],
+                    'remarks_type' => $item['remarks_type'],
+                ]);
+
+                $substractQty += $usedQty;
+
+                if ($substractQty == 0) {
+                    break;
+                }
+            }
+        }
+
+        return $createdHistories;
+    }
+
     public static function transfer($data)
     {
         if (count($data) == 0) {
@@ -232,6 +336,28 @@ class StockHandler
             $histories = ProductDetailHistoryRepository::getLastHistories($productId, $transactionDate, $companyId, $warehouseId);
             return $histories->sum('last_stock');
         }
+    }
+
+    public static function convertProductUnitPrice(
+        $quantity,
+        $price,
+        $fromUnitDetailId,
+        $targetUnitDetailId = null,
+    ) {
+        $fromUnitDetail = ProductUnitRepository::find($fromUnitDetailId);
+
+        if (!$targetUnitDetailId) {
+            $targetUnitDetail = ProductUnitRepository::findMainUnit($fromUnitDetail->unit_id);
+        } else {
+            $targetUnitDetail = ProductUnitRepository::find($targetUnitDetailId);
+        }
+
+        return [
+            'quantity' => $quantity * $fromUnitDetail->unit_detail_value / $targetUnitDetail->unit_detail_value,
+            'price' => $price * $targetUnitDetail->unit_detail_value / $fromUnitDetail->unit_detail_value,
+            'product_unit_detail_id' => $targetUnitDetail->product_unit_detail_id,
+            'product_unit_detail_name' => $targetUnitDetail->product_unit_detail_name,
+        ];
     }
 
     public static function convertUnitPrice(
